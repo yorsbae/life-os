@@ -6,6 +6,10 @@ Dibangun dengan **React + Vite + TypeScript + Tailwind**, dibungkus **Capacitor*
 
 > Visi dan keputusan desain: [`docs/VISION.md`](docs/VISION.md). Skema Supabase lama (arsip): `docs/legacy-supabase-schema.sql`.
 
+## Tampilan (revamp UI/UX)
+
+Tema hijau gelap (Background `#151815`, Surface `#202520`, Primary `#7DC7A0`, font Inter, ikon Lucide). Navigasi bawah 5 tab: **Home, Money, Plan, Body, Insights**; modul lain (Habit, Kalender, Focus, Goals, Learning, Journal, Notes, Creative Brain, Projects, Achievements, Profil) lewat ikon hamburger di header. Alur pertama kali: Splash → 3 slide onboarding → pengaturan singkat. Token desain ada di `src/index.css`, komponen bersama di `src/components/ui/`.
+
 ## Fitur
 
 Dashboard, Money (expense, income, budget, recurring, wishlist), Body (log latihan, jadwal, coaching), Mind & Growth (learning, reading, journal, weekly review), Creative Brain, Notes, Project Tracker, Social Accounts, Goals, Achievements, Calendar, Analytics, Focus Mode, Profile, Quick-Add, pencarian global, dark mode.

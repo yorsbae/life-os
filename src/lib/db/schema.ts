@@ -178,7 +178,43 @@ const v1: string[] = [
   `CREATE INDEX idx_sa_earnings_account ON social_account_earnings(account_id)`,
 ];
 
-export const MIGRATIONS: string[][] = [v1];
+// v2 — Revamp UI: modul Plan (kegiatan/tugas), Habit, dan riwayat Focus.
+const v2: string[] = [
+  `CREATE TABLE tasks (
+    ${ID}, ${UID}, judul TEXT NOT NULL, deskripsi TEXT,
+    prioritas TEXT NOT NULL DEFAULT 'P2',
+    status TEXT NOT NULL DEFAULT 'Todo',
+    tanggal_mulai TEXT, tanggal_selesai TEXT,
+    jam_mulai TEXT, jam_selesai TEXT,
+    kategori TEXT, selesai_pada TEXT, ${CREATED}
+  )`,
+  `CREATE TABLE task_subtasks (
+    ${ID}, task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    ${UID}, judul TEXT NOT NULL, is_done INTEGER DEFAULT 0, urutan INTEGER DEFAULT 0,
+    ${CREATED}
+  )`,
+  `CREATE TABLE habits (
+    ${ID}, ${UID}, nama TEXT NOT NULL, ikon TEXT DEFAULT 'check',
+    target_harian REAL NOT NULL DEFAULT 1, satuan TEXT DEFAULT 'kali',
+    aktif INTEGER DEFAULT 1, ${CREATED}
+  )`,
+  `CREATE TABLE habit_logs (
+    ${ID}, habit_id TEXT NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
+    ${UID}, tanggal TEXT NOT NULL, nilai REAL NOT NULL DEFAULT 0, ${CREATED},
+    UNIQUE (habit_id, tanggal)
+  )`,
+  `CREATE TABLE focus_sessions (
+    ${ID}, ${UID}, task_id TEXT, mode TEXT NOT NULL DEFAULT 'Pomodoro',
+    durasi_target INTEGER NOT NULL, durasi_aktual INTEGER NOT NULL DEFAULT 0,
+    selesai INTEGER DEFAULT 0, tanggal TEXT NOT NULL, ${CREATED}
+  )`,
+  `CREATE INDEX idx_tasks_tanggal ON tasks(tanggal_mulai)`,
+  `CREATE INDEX idx_subtasks_task ON task_subtasks(task_id)`,
+  `CREATE INDEX idx_habit_logs_habit ON habit_logs(habit_id)`,
+  `CREATE INDEX idx_focus_tanggal ON focus_sessions(tanggal)`,
+];
+
+export const MIGRATIONS: string[][] = [v1, v2];
 
 export function migrationStatements(index: number): SqlStatement[] {
   return [
@@ -225,6 +261,11 @@ export const TABLE_META: Record<string, TableMeta> = {
   social_account_metrics: { bool: [], json: [] },
   social_account_earnings: { bool: [], json: [] },
   activities: { bool: [], json: [] },
+  tasks: { bool: [], json: [] },
+  task_subtasks: { bool: ["is_done"], json: [] },
+  habits: { bool: ["aktif"], json: [] },
+  habit_logs: { bool: [], json: [] },
+  focus_sessions: { bool: ["selesai"], json: [] },
 };
 
 // Tabel dengan primary key bernama "id" yang dibuatkan UUID otomatis saat insert.
@@ -261,6 +302,11 @@ export const BACKUP_TABLES = [
   "social_account_metrics",
   "social_account_earnings",
   "activities",
+  "tasks",
+  "task_subtasks",
+  "habits",
+  "habit_logs",
+  "focus_sessions",
 ] as const;
 
 export const BACKUP_FORMAT = "lifeos-backup";

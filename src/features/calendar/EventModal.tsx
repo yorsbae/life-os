@@ -22,7 +22,7 @@ function toLocalInputValue(date: Date) {
 }
 
 const inputClass =
-  "w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
+  "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
 
 export default function EventModal({
   isOpen,
@@ -93,10 +93,10 @@ export default function EventModal({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-md space-y-4"
+        className="bg-surface rounded-xl p-5 w-full max-w-md space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-semibold text-gray-900 dark:text-white">
+        <h2 className="font-semibold text-gray-50">
           {editingEvent ? "Edit Jadwal" : "Tambah Jadwal"}
         </h2>
 
@@ -180,7 +180,7 @@ export default function EventModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
+              className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
             >
               {isSubmitting
                 ? "Menyimpan..."
@@ -200,7 +200,7 @@ export default function EventModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
               Batal
             </button>

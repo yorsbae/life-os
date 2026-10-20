@@ -41,11 +41,11 @@ export default function WeeklyReviewTab() {
   };
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
+    "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
+      <div className="flex items-center justify-between bg-surface rounded-xl border border-surface-light px-3 py-2">
         <button
           onClick={() => setWeekOffset((w) => w - 1)}
           className="text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1"
@@ -53,7 +53,7 @@ export default function WeeklyReviewTab() {
           ←
         </button>
         <div className="text-center">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <p className="text-sm font-medium text-gray-50">
             {weekOffset === 0
               ? "Minggu Ini"
               : weekOffset === -1
@@ -76,7 +76,7 @@ export default function WeeklyReviewTab() {
       {loading ? (
         <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
+        <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               ✅ Apa yang berhasil minggu ini?
@@ -119,7 +119,7 @@ export default function WeeklyReviewTab() {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
+            className="w-full bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
           >
             {isSaving ? "Menyimpan..." : "Simpan Review"}
           </button>

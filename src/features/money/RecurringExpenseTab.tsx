@@ -71,7 +71,7 @@ export default function RecurringExpenseTab() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="font-semibold text-gray-900 dark:text-white">
+          <h2 className="font-semibold text-gray-50">
             Recurring Expense
           </h2>
           <p className="text-xs text-gray-400">
@@ -83,7 +83,7 @@ export default function RecurringExpenseTab() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="text-sm bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-3 py-1.5 rounded-lg"
+          className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
         >
           + Tambah
         </button>
@@ -92,7 +92,7 @@ export default function RecurringExpenseTab() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-3"
+          className="bg-surface p-5 rounded-xl border border-surface-light space-y-3"
         >
           <input
             type="text"
@@ -100,14 +100,14 @@ export default function RecurringExpenseTab() {
             placeholder="Nama (misal: Netflix)"
             value={form.nama}
             onChange={(e) => setForm({ ...form, nama: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
           />
           <div className="grid grid-cols-2 gap-3">
             <CurrencyInput
               value={form.nominal || null}
               onChange={(v) => setForm({ ...form, nominal: v ?? 0 })}
               placeholder="Nominal/bulan"
-              className="px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm"
+              className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
             />
             <input
               type="number"
@@ -121,13 +121,13 @@ export default function RecurringExpenseTab() {
                   tanggal_jatuh_tempo: Number(e.target.value),
                 })
               }
-              className="px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm"
+              className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
             />
           </div>
           <select
             value={form.kategori ?? ""}
             onChange={(e) => setForm({ ...form, kategori: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
           >
             {KATEGORI_EXPENSE.map((k) => (
               <option key={k} value={k}>
@@ -139,14 +139,14 @@ export default function RecurringExpenseTab() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg text-sm font-medium"
+              className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
             >
               {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
             </button>
             <button
               type="button"
               onClick={cancelForm}
-              className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm"
+              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 text-sm"
             >
               Batal
             </button>
@@ -165,11 +165,11 @@ export default function RecurringExpenseTab() {
           {items.map((i) => (
             <div
               key={i.id}
-              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between"
+              className="bg-surface rounded-xl border border-surface-light p-4 flex items-center justify-between"
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <span className="font-medium text-gray-50">
                     {i.nama}
                   </span>
                   {!i.aktif && (

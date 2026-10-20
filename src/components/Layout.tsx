@@ -1,14 +1,19 @@
 import type { ReactNode } from "react";
-import Navbar from "./Navbar";
-import QuickAddButton from "./QuickAdd/QuickAddButton";
+import BottomNav from "./BottomNav";
+import MoreSheet from "./MoreSheet";
+import GlobalSearchModal from "./Search/GlobalSearchModal";
+import { useShell } from "../context/ShellContext";
 
 export default function Layout({ children }: { children: ReactNode }) {
+  const { searchOpen, closeSearch } = useShell();
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <Navbar />
-      {/* pb-20 di mobile supaya konten paling bawah tidak ketutupan BottomNav (~64px + safe area) */}
-      <div className="pb-20 md:pb-0">{children}</div>
-      <QuickAddButton />
+    <div className="min-h-screen bg-bg text-text">
+      <div className="max-w-2xl mx-auto pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
+        {children}
+      </div>
+      <BottomNav />
+      <MoreSheet />
+      {searchOpen && <GlobalSearchModal onClose={closeSearch} />}
     </div>
   );
 }

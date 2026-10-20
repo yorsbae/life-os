@@ -42,7 +42,7 @@ describe("migrasi", () => {
     const t = await driver.all(
       "SELECT count(*) AS n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
     );
-    expect(Number(t[0].n)).toBe(29); // 27 tabel data + _meta + app_settings
+    expect(Number(t[0].n)).toBe(34); // 32 tabel data + _meta + app_settings
   });
 
   it("menolak database yang lebih baru dari aplikasi", async () => {

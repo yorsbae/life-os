@@ -1,3 +1,4 @@
+import PageHeader from "../../components/ui/PageHeader";
 import { useState, useMemo, useCallback } from "react";
 import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -215,8 +216,9 @@ export default function CalendarPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-4">
+      <PageHeader title="Kalender" className="-mx-4 -mt-4" />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+        <h1 className="sr-only">
           Calendar
         </h1>
         <button
@@ -225,7 +227,7 @@ export default function CalendarPage() {
             setSlotRange({ start: new Date(), end: new Date() });
             setIsEventModalOpen(true);
           }}
-          className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
+          className="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
         >
           + Tambah Jadwal
         </button>
@@ -237,7 +239,7 @@ export default function CalendarPage() {
       </p>
 
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4"
+        className="bg-surface rounded-xl border border-surface-light p-4"
         style={{ height: "680px" }}
       >
         <Calendar

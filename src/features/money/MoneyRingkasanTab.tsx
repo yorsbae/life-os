@@ -89,7 +89,7 @@ export default function MoneyRingkasanTab() {
   return (
     <div className="space-y-4">
       {/* Month Picker */}
-      <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
+      <div className="flex items-center justify-between bg-surface rounded-xl border border-surface-light px-3 py-2">
         <button
           onClick={goToPreviousMonth}
           className="text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1"
@@ -97,7 +97,7 @@ export default function MoneyRingkasanTab() {
           ←
         </button>
         <div className="text-center">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <p className="text-sm font-medium text-gray-50">
             {formatBulan(selectedMonth)}
           </p>
           {!isCurrentMonth && (
@@ -119,22 +119,22 @@ export default function MoneyRingkasanTab() {
 
       {/* Angka utama */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400 mb-1">Pemasukan</p>
           <p className="font-semibold text-green-600 dark:text-green-400 text-sm">
             {formatRupiah(totalIncome)}
           </p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400 mb-1">Pengeluaran</p>
           <p className="font-semibold text-red-600 dark:text-red-400 text-sm">
             {formatRupiah(totalExpense)}
           </p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400 mb-1">Saldo</p>
           <p
-            className={`font-semibold text-sm ${saldo >= 0 ? "text-gray-900 dark:text-white" : "text-red-600 dark:text-red-400"}`}
+            className={`font-semibold text-sm ${saldo >= 0 ? "text-gray-50" : "text-red-600 dark:text-red-400"}`}
           >
             {formatRupiah(saldo)}
           </p>
@@ -174,9 +174,9 @@ export default function MoneyRingkasanTab() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div className="bg-surface rounded-xl border border-surface-light p-5">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-gray-900 dark:text-white">
+          <h3 className="font-semibold text-gray-50">
             Target Nabung — {formatBulan(selectedMonth)}
           </h3>
           {targetSaving && (
@@ -195,11 +195,11 @@ export default function MoneyRingkasanTab() {
               value={savingInput}
               onChange={setSavingInput}
               placeholder="Target nabung"
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+              className="flex-1 px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
             />
             <button
               onClick={() => savingInput && handleSetTarget(savingInput)}
-              className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-4 py-2 rounded-lg text-sm"
+              className="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm"
             >
               Simpan
             </button>
@@ -220,8 +220,8 @@ export default function MoneyRingkasanTab() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+      <div className="bg-surface rounded-xl border border-surface-light p-5">
+        <h3 className="font-semibold text-gray-50 mb-3">
           Breakdown Pengeluaran per Kategori
         </h3>
         <CategoryPieChart data={expensePerKategori} />
@@ -229,8 +229,8 @@ export default function MoneyRingkasanTab() {
 
       {target?.budget_kategori &&
         Object.keys(target.budget_kategori).length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+          <div className="bg-surface rounded-xl border border-surface-light p-5">
+            <h3 className="font-semibold text-gray-50 mb-3">
               Budget per Kategori
             </h3>
             <div className="space-y-3">

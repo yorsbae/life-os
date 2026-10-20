@@ -1,3 +1,4 @@
+import PageHeader from "../../components/ui/PageHeader";
 import { useState, useEffect } from "react";
 import { useProfile, type ProfileInput } from "./useProfile";
 import {
@@ -14,7 +15,6 @@ import {
 } from "../../utils/exportData";
 import WeatherSettings from "./WeatherSettings";
 import NotificationSettings from "./NotificationSettings";
-import CustomizeMenuSettings from "../../components/CustomizeMenuSettings";
 import WeightHistorySection from "./WeightHistorySection";
 import { useWeightLogs } from "./useWeightLogs";
 
@@ -130,17 +130,18 @@ export default function ProfilePage() {
     return <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>;
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm";
+    "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm";
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+      <PageHeader title="Profil & Pengaturan" className="-mx-4 -mt-4" />
+      <h1 className="sr-only">
         Profile
       </h1>
 
       {/* Data Diri */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-3">
-        <h2 className="font-semibold text-gray-900 dark:text-white">
+      <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-3">
+        <h2 className="font-semibold text-gray-50">
           Data Diri
         </h2>
 
@@ -233,7 +234,7 @@ export default function ProfilePage() {
         <button
           onClick={handleSaveProfile}
           disabled={isSaving}
-          className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg text-sm font-medium"
+          className="w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
         >
           {isSaving ? "Menyimpan..." : "Simpan Data Diri"}
         </button>
@@ -245,8 +246,8 @@ export default function ProfilePage() {
       <WeightHistorySection />
 
       {/* BMI/BMR/TDEE */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-        <h2 className="font-semibold text-gray-900 dark:text-white mb-3">
+      <div className="bg-surface rounded-xl border border-surface-light p-5">
+        <h2 className="font-semibold text-gray-50 mb-3">
           Body Metrics
         </h2>
         {!canCalculate ? (
@@ -267,14 +268,14 @@ export default function ProfilePage() {
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-1">BMR</p>
-              <p className="font-semibold text-lg text-gray-900 dark:text-white">
+              <p className="font-semibold text-lg text-gray-50">
                 {Math.round(bmr!)}
               </p>
               <p className="text-xs text-gray-400">kal/hari</p>
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-1">TDEE</p>
-              <p className="font-semibold text-lg text-gray-900 dark:text-white">
+              <p className="font-semibold text-lg text-gray-50">
                 {Math.round(tdee!)}
               </p>
               <p className="text-xs text-gray-400">kal/hari</p>
@@ -283,15 +284,14 @@ export default function ProfilePage() {
         )}
       </div>
 
-      <CustomizeMenuSettings />
 
       <NotificationSettings />
 
       <WeatherSettings />
 
       {/* Export Data */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-2">
-        <h2 className="font-semibold text-gray-900 dark:text-white">
+      <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-2">
+        <h2 className="font-semibold text-gray-50">
           Backup & Pulihkan
         </h2>
         <p className="text-xs text-gray-400">
@@ -304,13 +304,13 @@ export default function ProfilePage() {
         <button
           onClick={handleExport}
           disabled={isExporting}
-          className="w-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="w-full border border-surface-light text-gray-700 dark:text-gray-300 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           {isExporting ? "Menyiapkan file..." : "⬇ Buat Backup"}
         </button>
 
         <label
-          className={`block w-full text-center border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 ${isImporting ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}
+          className={`block w-full text-center border border-surface-light text-gray-700 dark:text-gray-300 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 ${isImporting ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}
         >
           {isImporting ? "Memproses..." : "⬆ Pulihkan dari Backup"}
           <input

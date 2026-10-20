@@ -72,7 +72,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   );
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm";
+    "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm";
 
   return (
     <div
@@ -80,7 +80,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-lg space-y-5 my-8"
+        className="bg-surface rounded-xl p-5 w-full max-w-lg space-y-5 my-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header + status */}
@@ -91,7 +91,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 key={s.key}
                 className={`text-xs px-2 py-1 rounded-full ${
                   i === currentIndex
-                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium"
+                    ? "bg-primary text-on-primary font-medium"
                     : i < currentIndex
                       ? "bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-300"
                       : "bg-gray-100 dark:bg-gray-700 text-gray-400"
@@ -105,7 +105,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             type="text"
             value={form.judul}
             onChange={(e) => setForm({ ...form, judul: e.target.value })}
-            className="w-full text-lg font-semibold px-0 py-1 border-none focus:outline-none bg-transparent text-gray-900 dark:text-white"
+            className="w-full text-lg font-semibold px-0 py-1 border-none focus:outline-none bg-transparent text-gray-50"
           />
         </div>
 
@@ -367,17 +367,17 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
+          className="w-full bg-gray-100 dark:bg-gray-700 text-gray-50 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
         >
           {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
         </button>
 
         {/* Kontrol perpindahan tahap */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+        <div className="border-t border-surface-light pt-4 space-y-2">
           {nextStage && (
             <button
               onClick={handleNext}
-              className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg text-sm font-medium"
+              className="w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
             >
               Lanjut ke {nextStage.icon} {nextStage.label} →
             </button>
@@ -389,7 +389,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 <button
                   key={s.key}
                   onClick={() => handleBack(s.key)}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-surface-light text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   ← Kembali ke {s.label}
                 </button>
@@ -400,7 +400,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           <div className="flex gap-2 pt-2">
             <button
               onClick={handleArchive}
-              className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               📦 Arsipkan
             </button>
@@ -412,7 +412,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             </button>
             <button
               onClick={onClose}
-              className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Tutup
             </button>

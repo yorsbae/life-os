@@ -1,3 +1,4 @@
+import PageHeader from "../../components/ui/PageHeader";
 import { useState, useMemo, type FormEvent } from "react";
 import { useNotes } from "./useNotes";
 import { NOTE_KATEGORI_DEFAULT, type Note, type NoteInput } from "../../types";
@@ -93,13 +94,14 @@ export default function NotesPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
+      <PageHeader title="Notes" className="-mx-4 -mt-4" />
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <h1 className="sr-only">
           Notes
         </h1>
         <button
           onClick={() => setShowForm(true)}
-          className="text-sm bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-3 py-1.5 rounded-lg"
+          className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
         >
           + Tambah
         </button>
@@ -111,7 +113,7 @@ export default function NotesPage() {
         placeholder="Cari judul, isi, atau tag..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm"
+        className="w-full px-3 py-2 border border-surface-light dark:bg-gray-800 dark:text-white rounded-lg text-sm"
       />
 
       {/* Filter kategori */}
@@ -120,8 +122,8 @@ export default function NotesPage() {
           onClick={() => setActiveKategori(null)}
           className={`text-xs px-3 py-1.5 rounded-full border ${
             !activeKategori
-              ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-              : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400"
+              ? "bg-primary text-on-primary border-primary"
+              : "border-surface-light text-gray-500 dark:text-gray-400"
           }`}
         >
           Semua
@@ -132,8 +134,8 @@ export default function NotesPage() {
             onClick={() => setActiveKategori(k)}
             className={`text-xs px-3 py-1.5 rounded-full border ${
               activeKategori === k
-                ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-                : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400"
+                ? "bg-primary text-on-primary border-primary"
+                : "border-surface-light text-gray-500 dark:text-gray-400"
             }`}
           >
             {k}
@@ -144,7 +146,7 @@ export default function NotesPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-3"
+          className="bg-surface p-5 rounded-xl border border-surface-light space-y-3"
         >
           <input
             type="text"
@@ -152,7 +154,7 @@ export default function NotesPage() {
             placeholder="Judul"
             value={form.judul}
             onChange={(e) => setForm({ ...form, judul: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
           />
 
           {!showCustomKategori ? (
@@ -166,7 +168,7 @@ export default function NotesPage() {
                   setForm({ ...form, kategori: e.target.value });
                 }
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+              className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
             >
               {NOTE_KATEGORI_DEFAULT.map((k) => (
                 <option key={k} value={k}>
@@ -184,7 +186,7 @@ export default function NotesPage() {
                 placeholder="Nama kategori baru"
                 value={form.kategori}
                 onChange={(e) => setForm({ ...form, kategori: e.target.value })}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                className="flex-1 px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
               />
               <button
                 type="button"
@@ -204,7 +206,7 @@ export default function NotesPage() {
             value={form.konten ?? ""}
             onChange={(e) => setForm({ ...form, konten: e.target.value })}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
           />
 
           <input
@@ -212,21 +214,21 @@ export default function NotesPage() {
             placeholder="Tags, pisah pakai koma (misal: golden-hour, budgeting)"
             value={tagsText}
             onChange={(e) => setTagsText(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
           />
 
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg text-sm font-medium"
+              className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
             >
               {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
             </button>
             <button
               type="button"
               onClick={cancelForm}
-              className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 dark:text-gray-300 text-sm"
+              className="px-4 py-2.5 rounded-lg border border-surface-light dark:text-gray-300 text-sm"
             >
               Batal
             </button>
@@ -245,13 +247,13 @@ export default function NotesPage() {
           {filteredNotes.map((note) => (
             <div
               key={note.id}
-              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4"
+              className="bg-surface rounded-xl border border-surface-light p-4"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     {note.is_pinned && <span title="Pinned">📌</span>}
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="font-medium text-gray-50">
                       {note.judul}
                     </span>
                   </div>

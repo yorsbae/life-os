@@ -89,9 +89,9 @@ export default function JournalPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4"
+        className="bg-surface p-5 rounded-xl border border-surface-light space-y-4"
       >
-        <h2 className="font-semibold text-gray-900 dark:text-white">
+        <h2 className="font-semibold text-gray-50">
           {editing ? "Edit Journal" : "Tulis Journal Hari Ini"}
         </h2>
 
@@ -115,8 +115,8 @@ export default function JournalPage() {
                 }
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   form.mood === m
-                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-                    : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300"
+                    ? "bg-primary text-on-primary border-primary"
+                    : "border-surface-light text-gray-600 dark:text-gray-300"
                 }`}
               >
                 {m}
@@ -134,7 +134,7 @@ export default function JournalPage() {
             value={form.konten}
             onChange={(e) => setForm({ ...form, konten: e.target.value })}
             rows={5}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
             placeholder="Bagaimana hari ini? Apa yang kamu pelajari atau rasakan?"
           />
         </div>
@@ -148,7 +148,7 @@ export default function JournalPage() {
             required
             value={form.tanggal}
             onChange={(e) => setForm({ ...form, tanggal: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
           />
         </div>
 
@@ -156,7 +156,7 @@ export default function JournalPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
+            className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
           >
             {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
           </button>
@@ -164,7 +164,7 @@ export default function JournalPage() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 dark:text-gray-300"
+              className="px-4 py-2.5 rounded-lg border border-surface-light dark:text-gray-300"
             >
               Batal
             </button>
@@ -183,7 +183,7 @@ export default function JournalPage() {
           {journals.map((j) => (
             <div
               key={j.id}
-              className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700"
+              className="bg-surface p-4 rounded-xl border border-surface-light"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">

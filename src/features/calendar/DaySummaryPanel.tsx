@@ -196,12 +196,12 @@ export default function DaySummaryPanel({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 w-full max-w-sm h-full overflow-y-auto p-5 space-y-4"
+        className="bg-surface w-full max-w-sm h-full overflow-y-auto p-5 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-semibold text-gray-900 dark:text-white">
+            <h2 className="font-semibold text-gray-50">
               {date.toLocaleDateString("id-ID", {
                 weekday: "long",
                 day: "numeric",
@@ -222,7 +222,7 @@ export default function DaySummaryPanel({
 
         <button
           onClick={onAddEvent}
-          className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2 rounded-lg text-sm font-medium"
+          className="w-full bg-primary text-on-primary py-2 rounded-lg text-sm font-medium"
         >
           + Tambah Jadwal di Hari Ini
         </button>
@@ -237,7 +237,7 @@ export default function DaySummaryPanel({
               <div
                 key={item.id}
                 onClick={item.onClick}
-                className={`flex items-center gap-3 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg border border-gray-100 dark:border-gray-700 ${
+                className={`flex items-center gap-3 bg-bg p-3 rounded-lg border border-surface-light ${
                   item.onClick
                     ? "cursor-pointer hover:border-gray-300 dark:hover:border-gray-500"
                     : ""
@@ -248,7 +248,7 @@ export default function DaySummaryPanel({
                   style={{ backgroundColor: item.color }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 dark:text-white truncate">
+                  <p className="text-sm text-gray-50 truncate">
                     {item.detail}
                   </p>
                   <p className="text-xs text-gray-400">{item.label}</p>

@@ -1,52 +1,53 @@
-import { useState, useEffect } from "react";
+import {
+  Home,
+  Wallet,
+  CalendarCheck,
+  Dumbbell,
+  BarChart3,
+  Repeat,
+  CalendarDays,
+  Timer,
+  Target,
+  GraduationCap,
+  BookOpen,
+  StickyNote,
+  Lightbulb,
+  FolderKanban,
+  Trophy,
+  Users,
+  User,
+  type LucideIcon,
+} from "lucide-react";
 
 export interface MenuOption {
   path: string;
   label: string;
-  icon: string;
+  icon: LucideIcon;
 }
 
-export const ALL_MENU_OPTIONS: MenuOption[] = [
-  { path: "/", label: "Home", icon: "🏠" },
-  { path: "/money", label: "Money", icon: "💰" },
-  { path: "/exercises", label: "Body", icon: "💪" },
-  { path: "/mind-growth", label: "Mind & Growth", icon: "🧠" },
-  { path: "/creative", label: "Creative", icon: "🎬" },
-  { path: "/notes", label: "Notes", icon: "📝" },
-  { path: "/projects", label: "Projects", icon: "🛠️" },
-  { path: "/social-accounts", label: "Social Accounts", icon: "📱" },
-  { path: "/goals", label: "Goals", icon: "🎯" },
-  { path: "/achievements", label: "Achievements", icon: "🏆" },
-  { path: "/calendar", label: "Calendar", icon: "🗓" },
-  { path: "/analytics", label: "Analytics", icon: "📊" },
+/** Lima tab tetap di navigasi bawah (sesuai desain). */
+export const TAB_MENU: MenuOption[] = [
+  { path: "/", label: "Home", icon: Home },
+  { path: "/money", label: "Money", icon: Wallet },
+  { path: "/plan", label: "Plan", icon: CalendarCheck },
+  { path: "/exercises", label: "Body", icon: Dumbbell },
+  { path: "/analytics", label: "Insights", icon: BarChart3 },
 ];
 
-const DEFAULT_PRIMARY_PATHS = ["/", "/money", "/calendar", "/creative"];
-const STORAGE_KEY = "primary-menu-paths";
+/** Modul lain, tampil di drawer (ikon hamburger). */
+export const MODULE_MENU: MenuOption[] = [
+  { path: "/habits", label: "Habit", icon: Repeat },
+  { path: "/calendar", label: "Kalender", icon: CalendarDays },
+  { path: "/focus", label: "Focus", icon: Timer },
+  { path: "/goals", label: "Goals", icon: Target },
+  { path: "/learning", label: "Learning", icon: GraduationCap },
+  { path: "/journal", label: "Journal", icon: BookOpen },
+  { path: "/notes", label: "Notes", icon: StickyNote },
+  { path: "/creative", label: "Creative Brain", icon: Lightbulb },
+  { path: "/projects", label: "Projects", icon: FolderKanban },
+  { path: "/social-accounts", label: "Social Accounts", icon: Users },
+  { path: "/achievements", label: "Achievements", icon: Trophy },
+  { path: "/profile", label: "Profil & Pengaturan", icon: User },
+];
 
-// Preferensi ini murni UI (bukan data pribadi penting), jadi cukup disimpan
-// di HP masing-masing (localStorage) - tidak perlu ribet sinkron ke server.
-export function usePrimaryMenu() {
-  const [primaryPaths, setPrimaryPaths] = useState<string[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : DEFAULT_PRIMARY_PATHS;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(primaryPaths));
-  }, [primaryPaths]);
-
-  const togglePath = (path: string) => {
-    setPrimaryPaths((prev) => {
-      if (prev.includes(path)) return prev.filter((p) => p !== path);
-      if (prev.length >= 4) return prev; // maksimal 4 slot di bottom nav
-      return [...prev, path];
-    });
-  };
-
-  const primaryMenu = ALL_MENU_OPTIONS.filter((m) =>
-    primaryPaths.includes(m.path),
-  );
-
-  return { primaryPaths, primaryMenu, togglePath };
-}
+export const ALL_MENU_OPTIONS: MenuOption[] = [...TAB_MENU, ...MODULE_MENU];

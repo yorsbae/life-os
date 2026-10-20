@@ -17,7 +17,7 @@ const initialForm: IncomeInput = {
 };
 
 const inputClass =
-  "w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
+  "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
 
 export default function IncomeForm({
   onSubmit,
@@ -55,9 +55,9 @@ export default function IncomeForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4"
+      className="bg-surface p-5 rounded-xl border border-surface-light space-y-4"
     >
-      <h2 className="font-semibold text-gray-900 dark:text-white">
+      <h2 className="font-semibold text-gray-50">
         {editingIncome ? "Edit Pemasukan" : "Tambah Pemasukan"}
       </h2>
 
@@ -142,7 +142,7 @@ export default function IncomeForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
+          className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
         >
           {isSubmitting ? "Menyimpan..." : editingIncome ? "Update" : "Simpan"}
         </button>
@@ -150,7 +150,7 @@ export default function IncomeForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+            className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
           >
             Batal
           </button>

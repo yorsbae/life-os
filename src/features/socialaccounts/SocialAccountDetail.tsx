@@ -81,7 +81,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
   };
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm";
+    "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm";
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
@@ -93,7 +93,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
       </button>
 
       <div>
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white break-words">
+        <h1 className="text-xl font-semibold text-gray-50 break-words">
           @{account.username}
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -102,13 +102,13 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400">Followers Terakhir</p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+          <p className="text-lg font-semibold text-gray-50">
             {latestFollowers?.toLocaleString("id-ID") ?? "-"}
           </p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400">Total Earnings</p>
           <p className="text-lg font-semibold text-green-600 dark:text-green-400">
             {formatRupiah(totalEarnings)}
@@ -116,12 +116,12 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
         </div>
       </div>
 
-      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="flex gap-1 border-b border-surface-light overflow-x-auto">
         {(["info", "metrics", "earnings"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${tab === t ? "border-gray-900 dark:border-white text-gray-900 dark:text-white" : "border-transparent text-gray-400"}`}
+            className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${tab === t ? "border-primary text-gray-50" : "border-transparent text-gray-400"}`}
           >
             {t === "info"
               ? "Info & Password"
@@ -133,13 +133,13 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
       </div>
 
       {tab === "info" && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-3">
-          <h3 className="font-semibold text-gray-900 dark:text-white">
+        <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-3">
+          <h3 className="font-semibold text-gray-50">
             🔒 Password (Terenkripsi)
           </h3>
           {decryptedPassword ? (
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-lg text-sm text-gray-900 dark:text-white">
+              <code className="flex-1 bg-bg px-3 py-2 rounded-lg text-sm text-gray-50">
                 {decryptedPassword}
               </code>
               <button
@@ -153,7 +153,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
             <button
               onClick={handleViewPassword}
               disabled={!account.password_encrypted}
-              className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg disabled:opacity-40"
+              className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-50 px-3 py-2 rounded-lg disabled:opacity-40"
             >
               {account.password_encrypted
                 ? "👁 Lihat Password (butuh PIN)"
@@ -161,7 +161,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
             </button>
           )}
 
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
+          <div className="border-t border-surface-light pt-3 space-y-2">
             <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
               {account.password_encrypted
                 ? "Ganti Password"
@@ -178,7 +178,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
               <button
                 onClick={handleSetPassword}
                 disabled={!newPasswordInput}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-4 rounded-lg text-sm disabled:opacity-50"
+                className="bg-primary text-on-primary px-4 rounded-lg text-sm disabled:opacity-50"
               >
                 Simpan
               </button>
@@ -193,7 +193,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
 
       {tab === "metrics" && (
         <div className="space-y-3">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-2">
+          <div className="bg-surface rounded-xl border border-surface-light p-4 space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="number"
@@ -220,7 +220,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                 setFollowers("");
                 setInsightNote("");
               }}
-              className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2 rounded-lg text-sm"
+              className="w-full bg-primary text-on-primary py-2 rounded-lg text-sm"
             >
               + Catat Metrics Hari Ini
             </button>
@@ -231,10 +231,10 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
             metrics.map((m) => (
               <div
                 key={m.id}
-                className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center"
+                className="bg-surface p-3 rounded-lg border border-surface-light flex justify-between items-center"
               >
                 <div>
-                  <p className="text-sm text-gray-900 dark:text-white">
+                  <p className="text-sm text-gray-50">
                     {m.followers?.toLocaleString("id-ID") ?? "-"} followers
                   </p>
                   <p className="text-xs text-gray-400">
@@ -259,7 +259,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
 
       {tab === "earnings" && (
         <div className="space-y-3">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-2">
+          <div className="bg-surface rounded-xl border border-surface-light p-4 space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
@@ -301,7 +301,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                   setEarningNominal("");
                 }
               }}
-              className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2 rounded-lg text-sm"
+              className="w-full bg-primary text-on-primary py-2 rounded-lg text-sm"
             >
               + Catat Earnings
             </button>
@@ -312,10 +312,10 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
             earnings.map((e) => (
               <div
                 key={e.id}
-                className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center"
+                className="bg-surface p-3 rounded-lg border border-surface-light flex justify-between items-center"
               >
                 <div>
-                  <p className="text-sm text-gray-900 dark:text-white">
+                  <p className="text-sm text-gray-50">
                     {e.sumber}{" "}
                     <span className="text-xs text-gray-400">({e.tipe})</span>
                   </p>

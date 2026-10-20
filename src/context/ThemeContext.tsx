@@ -19,7 +19,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Baca preferensi tersimpan di HP (localStorage), default 'light' kalau belum pernah diset
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem("theme");
-    return (saved as Theme) || "light";
+    void saved; return "dark" as Theme;
   });
 
   // Setiap kali theme berubah: tambah/hapus class "dark" di <html>, dan simpan preferensi

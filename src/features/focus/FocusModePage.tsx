@@ -1,167 +1,116 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { db } from "../../lib/db";
-import { useAuth } from "../../context/AuthContext";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import PageHeader from "../../components/ui/PageHeader";
+import Segmented from "../../components/ui/Segmented";
+import { Card, PrimaryButton, GhostButton } from "../../components/ui/Controls";
+import { Ring } from "../../components/ui/Progress";
+import { useTasks } from "../plan/useTasks";
+import { useFocusSessions } from "./useFocusSessions";
 
-const DURATION_OPTIONS = [15, 25, 45, 60]; // menit
+type Mode = "pomodoro" | "50/10" | "timer";
+const MODE_MIN: Record<Mode, number> = { pomodoro: 25, "50/10": 50, timer: 15 };
+const MODE_LABEL: Record<Mode, string> = { pomodoro: "Pomodoro", "50/10": "50/10", timer: "Timer" };
+
+const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 export default function FocusModePage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { tasks } = useTasks();
+  const { todays, todayMinutes, logSession } = useFocusSessions();
 
-  const [durationMinutes, setDurationMinutes] = useState<number | null>(null);
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const startTimeRef = useRef<number>(0);
+  const [mode, setMode] = useState<Mode>("pomodoro");
+  const [minutes, setMinutes] = useState(25);
+  const [taskId, setTaskId] = useState<string>((location.state as { taskId?: string } | null)?.taskId ?? "");
+  const [secondsLeft, setSecondsLeft] = useState(25 * 60);
+  const [running, setRunning] = useState(false);
+  const startedAt = useRef(0);
+  const finished = useRef(false);
 
+  const total = minutes * 60;
+
+  const changeMode = (m: Mode) => {
+    if (running) return;
+    setMode(m);
+    setMinutes(MODE_MIN[m]);
+    setSecondsLeft(MODE_MIN[m] * 60);
+  };
+
+  // Timer berbasis waktu dinding (bukan hitung tick) supaya akurat saat layar mati / tab di-background.
   useEffect(() => {
-    if (!isRunning) return;
-    const interval = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(interval);
-          handleComplete();
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isRunning]);
+    if (!running) return;
+    const end = startedAt.current + total * 1000;
+    const tick = () => {
+      const left = Math.max(0, Math.round((end - Date.now()) / 1000));
+      setSecondsLeft(left);
+      if (left === 0 && !finished.current) {
+        finished.current = true;
+        setRunning(false);
+        logSession({ task_id: taskId || null, mode: MODE_LABEL[mode], durasi_target: minutes, durasi_aktual: minutes, selesai: true });
+        navigator.vibrate?.(400);
+      }
+    };
+    const i = setInterval(tick, 500);
+    return () => clearInterval(i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running]);
 
-  const startSession = (minutes: number) => {
-    setDurationMinutes(minutes);
-    setSecondsLeft(minutes * 60);
-    setIsRunning(true);
-    startTimeRef.current = Date.now();
-    // Coba masuk fullscreen (kalau browser support & user gesture memungkinkan)
-    document.documentElement.requestFullscreen?.().catch(() => {});
+  const start = () => {
+    finished.current = false;
+    startedAt.current = Date.now() - (total - secondsLeft) * 1000;
+    setRunning(true);
   };
 
-  const logSession = async (completed: boolean, actualMinutes: number) => {
-    if (!user) return;
-    await db.from("learnings").insert({
-      user_id: user.id,
-      topik: `Sesi Fokus${completed ? "" : " (berhenti lebih awal)"}`,
-      materi: null,
-      catatan: `Durasi target: ${durationMinutes} menit`,
-      durasi: actualMinutes,
-      tanggal: new Date().toISOString().split("T")[0],
-    });
+  const stop = async () => {
+    const elapsed = Math.round((total - secondsLeft) / 60);
+    setRunning(false);
+    if (elapsed >= 1)
+      await logSession({ task_id: taskId || null, mode: MODE_LABEL[mode], durasi_target: minutes, durasi_aktual: elapsed, selesai: false });
+    setSecondsLeft(total);
   };
 
-  const handleComplete = async () => {
-    setIsRunning(false);
-    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-    await logSession(true, durationMinutes ?? 0);
-    alert("🎉 Sesi fokus selesai! Kerja bagus.");
-    navigate("/");
-  };
+  const open = tasks.filter((t) => t.status !== "Selesai");
 
-  const handleExitClick = () => {
-    setShowExitConfirm(true);
-  };
+  return (
+    <div className="min-h-screen bg-bg pb-10">
+      <PageHeader title="Focus Mode" left="back" search={false} onBack={() => (running ? undefined : navigate(-1))} />
+      <div className="px-4 space-y-5 max-w-md mx-auto">
+        <Segmented
+          options={(Object.keys(MODE_LABEL) as Mode[]).map((k) => ({ key: k, label: MODE_LABEL[k] }))}
+          value={mode}
+          onChange={changeMode}
+        />
 
-  const handleConfirmExit = async () => {
-    const elapsedMinutes = Math.round(
-      (Date.now() - startTimeRef.current) / 60000,
-    );
-    setIsRunning(false);
-    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-    await logSession(false, elapsedMinutes);
-    navigate("/");
-  };
+        <div className="flex justify-center py-4">
+          <Ring value={total - secondsLeft} max={total} size={240} stroke={10}>
+            <span className="text-5xl font-bold text-gray-50 tabular-nums">{fmt(secondsLeft)}</span>
+            <span className="text-xs text-gray-400 mt-1">Fokus</span>
+          </Ring>
+        </div>
 
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
-  };
-
-  // ===== Layar pilih durasi =====
-  if (!isRunning) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-        <div className="text-center space-y-6 max-w-sm">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              🎯 Focus Mode
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Layar akan fullscreen distraction-free. Kamu tetap bisa keluar
-              kapan saja, tapi akan ada konfirmasi dulu.
-            </p>
+        {mode === "timer" && !running && (
+          <div className="flex items-center justify-center gap-4">
+            <button className="w-9 h-9 rounded-full bg-surface-light text-gray-200" onClick={() => { const m = Math.max(5, minutes - 5); setMinutes(m); setSecondsLeft(m * 60); }}>−</button>
+            <span className="text-sm text-gray-200 w-20 text-center">{minutes} menit</span>
+            <button className="w-9 h-9 rounded-full bg-surface-light text-gray-200" onClick={() => { const m = Math.min(180, minutes + 5); setMinutes(m); setSecondsLeft(m * 60); }}>+</button>
           </div>
+        )}
 
-          <div className="grid grid-cols-2 gap-3">
-            {DURATION_OPTIONS.map((min) => (
-              <button
-                key={min}
-                onClick={() => startSession(min)}
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl py-4 text-gray-900 dark:text-white font-medium hover:border-gray-900 dark:hover:border-white transition"
-              >
-                {min} menit
-              </button>
-            ))}
-          </div>
+        <label className="block space-y-1.5">
+          <span className="text-xs text-gray-400">Tugas</span>
+          <select className="input-field" value={taskId} onChange={(e) => setTaskId(e.target.value)} disabled={running}>
+            <option value="">Tanpa tugas</option>
+            {open.map((t) => <option key={t.id} value={t.id}>{t.judul}</option>)}
+          </select>
+        </label>
 
-          <button
-            onClick={() => navigate("/")}
-            className="text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >
-            Batal, kembali ke Dashboard
-          </button>
+        {running ? <GhostButton onClick={stop}>Berhenti</GhostButton> : <PrimaryButton onClick={start}>Mulai</PrimaryButton>}
+
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="text-center"><p className="text-xs text-gray-400">Hari ini</p><p className="text-lg font-semibold text-gray-50">{todays.length} sesi</p></Card>
+          <Card className="text-center"><p className="text-xs text-gray-400">Total</p><p className="text-lg font-semibold text-gray-50">{Math.floor(todayMinutes / 60)} jam {todayMinutes % 60} mnt</p></Card>
         </div>
       </div>
-    );
-  }
-
-  // ===== Layar sesi berjalan (fullscreen distraction-free) =====
-  return (
-    <div className="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50">
-      <p className="text-gray-400 text-sm mb-4">
-        Sesi fokus sedang berjalan...
-      </p>
-      <p className="text-white text-7xl font-bold font-mono tabular-nums">
-        {formatTime(secondsLeft)}
-      </p>
-      <p className="text-gray-500 text-xs mt-2">
-        dari target {durationMinutes} menit
-      </p>
-
-      <button
-        onClick={handleExitClick}
-        className="mt-12 text-gray-500 hover:text-gray-300 text-sm border border-gray-700 px-4 py-2 rounded-lg"
-      >
-        Keluar dari sesi
-      </button>
-
-      {showExitConfirm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full text-center space-y-4">
-            <p className="text-gray-900 dark:text-white font-medium">
-              Yakin mau keluar? Baru{" "}
-              {Math.round((Date.now() - startTimeRef.current) / 60000)} dari{" "}
-              {durationMinutes} menit.
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowExitConfirm(false)}
-                className="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2 rounded-lg text-sm"
-              >
-                Lanjutkan Fokus
-              </button>
-              <button
-                onClick={handleConfirmExit}
-                className="flex-1 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm"
-              >
-                Ya, Keluar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

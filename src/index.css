@@ -1,80 +1,154 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
 
-/* Aktifkan dark mode berbasis class (bukan otomatis ikut sistem OS).
-   Elemen dengan prefix dark: akan aktif kalau ada class "dark" di elemen induk (biasanya <html>) */
+/* ===== Design system Life OS (hijau gelap) =====
+   Palet dari desain: Background #151815, Surface #202520, Surface Light #2E3A33,
+   Primary #7DC7A0, Text #D7DCD6, Secondary #8B8F93.
+   Skala "gray" Tailwind dipetakan ulang ke palet ini sehingga seluruh halaman lama
+   otomatis ikut tema baru. Aplikasi hanya punya satu tema (gelap). */
+@theme {
+  --font-sans: "Inter Variable", Inter, system-ui, sans-serif;
+
+  --color-bg: #151815;
+  --color-surface: #202520;
+  --color-surface-light: #2e3a33;
+  --color-primary: #7dc7a0;
+  --color-primary-dim: #4f9a78;
+  --color-on-primary: #0f1a14;
+  --color-text: #d7dcd6;
+  --color-secondary: #8b8f93;
+
+  --color-gray-50: #f1f4f0;
+  --color-gray-100: #e6eae5;
+  --color-gray-200: #d7dcd6;
+  --color-gray-300: #b6bcb6;
+  --color-gray-400: #8b8f93;
+  --color-gray-500: #7a7f7c;
+  --color-gray-600: #4a5a50;
+  --color-gray-700: #2e3a33;
+  --color-gray-800: #202520;
+  --color-gray-900: #151815;
+  --color-gray-950: #0e100e;
+
+  /* Aksen: biru/hijau/emerald/teal -> mint primary supaya konsisten */
+  --color-blue-50: #e8f5ee;
+  --color-blue-100: #d3ecdf;
+  --color-blue-200: #b3dfc7;
+  --color-blue-300: #94d1b0;
+  --color-blue-400: #7dc7a0;
+  --color-blue-500: #7dc7a0;
+  --color-blue-600: #5fb088;
+  --color-blue-700: #4f9a78;
+  --color-blue-800: #2e5a46;
+  --color-blue-900: #24473a;
+  --color-blue-950: #1b2e26;
+
+  --color-green-50: #e8f5ee;
+  --color-green-200: #b3dfc7;
+  --color-green-300: #94d1b0;
+  --color-green-400: #7dc7a0;
+  --color-green-500: #7dc7a0;
+  --color-green-600: #5fb088;
+  --color-green-800: #2e5a46;
+  --color-green-950: #1b2e26;
+
+  --color-red-400: #f08a8a;
+  --color-red-500: #e57373;
+  --color-red-600: #d65c5c;
+  --color-red-700: #b84848;
+}
+
+/* Aplikasi dark-only */
+:root {
+  color-scheme: dark;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* PENTING: kasih tahu browser skema warna aktual yang kita pakai, supaya browser
-   TIDAK mencoba "membantu" dengan auto-invert/auto-darken warna sendiri
-   (fitur seperti Force Dark di Chrome Android yang bisa bikin warna jadi salah/pudar
-   kalau website tidak menyatakan color-scheme secara eksplisit). */
-:root {
-  color-scheme: light;
-}
-.dark {
-  color-scheme: dark;
-}
-
-/* Pengaman global: apapun yang overflow horizontal di dalam halaman manapun,
-   tidak akan bisa bikin SELURUH HALAMAN ikut geser ke samping.
-   Ini jaring pengaman terakhir - komponen yang overflow tetap perlu diperbaiki
-   sendiri-sendiri, tapi ini mencegah efek "seluruh app bocor ke kanan". */
 html,
 body {
   overflow-x: hidden;
   max-width: 100vw;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Komponen bersama */
+.card {
+  background: var(--color-surface);
+  border: 1px solid rgb(46 58 51 / 0.7);
+  border-radius: 1rem;
+}
+.input-field {
+  width: 100%;
+  background: var(--color-bg);
+  border: 1px solid var(--color-surface-light);
+  color: var(--color-text);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+}
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 
 /* ===== Override react-big-calendar supaya ikut dark mode =====
    Library ini punya CSS sendiri (class rbc-*) yang tidak otomatis
    merespon Tailwind dark mode, jadi ditimpa manual di sini. */
 .dark .rbc-calendar {
-  color: #e5e7eb;
+  color: #d7dcd6;
 }
 .dark .rbc-off-range-bg {
-  background: #1f2937;
+  background: #202520;
 }
 .dark .rbc-off-range {
-  color: #6b7280;
+  color: #8b8f93;
 }
 .dark .rbc-today {
-  background: #1e3a5f;
+  background: #2e3a33;
 }
 .dark .rbc-header {
-  background: #111827;
-  color: #e5e7eb;
-  border-color: #374151;
+  background: #151815;
+  color: #d7dcd6;
+  border-color: #2e3a33;
 }
 .dark .rbc-month-view,
 .dark .rbc-time-view {
-  border-color: #374151;
+  border-color: #2e3a33;
 }
 .dark .rbc-day-bg + .rbc-day-bg,
 .dark .rbc-month-row + .rbc-month-row {
-  border-color: #374151;
+  border-color: #2e3a33;
 }
 .dark .rbc-button-link {
-  color: #e5e7eb;
+  color: #d7dcd6;
 }
 .dark .rbc-toolbar button {
-  color: #e5e7eb;
-  border-color: #4b5563;
-  background: #1f2937;
+  color: #d7dcd6;
+  border-color: #4a5a50;
+  background: #202520;
 }
 .dark .rbc-toolbar button:hover {
-  background: #374151;
+  background: #2e3a33;
 }
 .dark .rbc-toolbar button.rbc-active {
-  background: #4b5563;
+  background: #4a5a50;
   color: #fff;
 }
 .dark .rbc-agenda-view table.rbc-agenda-table {
-  color: #e5e7eb;
-  border-color: #374151;
+  color: #d7dcd6;
+  border-color: #2e3a33;
 }
 .dark .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
-  border-color: #374151;
+  border-color: #2e3a33;
 }
 .dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
-  border-color: #374151;
+  border-color: #2e3a33;
 }

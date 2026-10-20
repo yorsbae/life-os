@@ -15,8 +15,8 @@ export default function WeatherSettings() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-2">
-      <h2 className="font-semibold text-gray-900 dark:text-white">
+    <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-2">
+      <h2 className="font-semibold text-gray-50">
         ☀️ Cuaca di Dashboard
       </h2>
       <p className="text-xs text-gray-400">
@@ -33,7 +33,7 @@ export default function WeatherSettings() {
           className={
             enabled
               ? "text-sm text-red-500 border border-red-200 dark:border-red-900 px-3 py-1.5 rounded-lg"
-              : "text-sm bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-3 py-1.5 rounded-lg"
+              : "text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
           }
         >
           {enabled ? "Matikan" : "Aktifkan"}

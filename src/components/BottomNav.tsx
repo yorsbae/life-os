@@ -1,41 +1,25 @@
-import { Link, useLocation } from "react-router-dom";
-import { usePrimaryMenu } from "../hooks/usePrimaryMenu";
+import { NavLink } from "react-router-dom";
+import { TAB_MENU } from "../hooks/usePrimaryMenu";
 
-interface BottomNavProps {
-  onOpenMore: () => void;
-}
-
-export default function BottomNav({ onOpenMore }: BottomNavProps) {
-  const location = useLocation();
-  const { primaryMenu } = usePrimaryMenu();
-
+export default function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-30 pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around">
-        {primaryMenu.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex flex-col items-center gap-0.5 py-2 px-3 flex-1 ${
-                isActive
-                  ? "text-gray-900 dark:text-white"
-                  : "text-gray-400 dark:text-gray-500"
-              }`}
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
-        <button
-          onClick={onOpenMore}
-          className="flex flex-col items-center gap-0.5 py-2 px-3 flex-1 text-gray-400 dark:text-gray-500"
-        >
-          <span className="text-lg">⋯</span>
-          <span className="text-[10px] font-medium">More</span>
-        </button>
+    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-surface/95 backdrop-blur border-t border-surface-light pb-[env(safe-area-inset-bottom)]">
+      <div className="max-w-2xl mx-auto flex items-stretch justify-around">
+        {TAB_MENU.map(({ path, label, icon: Icon }) => (
+          <NavLink
+            key={path}
+            to={path}
+            end={path === "/"}
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-0.5 py-2 flex-1 text-[10px] font-medium transition ${
+                isActive ? "text-primary" : "text-gray-400"
+              }`
+            }
+          >
+            <Icon size={20} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
       </div>
     </nav>
   );

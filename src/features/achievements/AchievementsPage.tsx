@@ -1,3 +1,4 @@
+import PageHeader from "../../components/ui/PageHeader";
 import { useMemo } from "react";
 import { useReadings } from "../reading/useReadings";
 import { useCreativeProjects } from "../creative/useCreativeProjects";
@@ -72,8 +73,9 @@ export default function AchievementsPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
+      <PageHeader title="Achievements" className="-mx-4 -mt-4" />
       <div>
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <h1 className="sr-only">
           🏆 Achievements
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">

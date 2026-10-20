@@ -1,3 +1,4 @@
+import PageHeader from "../../components/ui/PageHeader";
 import { useState, type FormEvent } from "react";
 import { useExercises } from "./useExercises";
 import ExerciseScheduleTab from "./ExerciseScheduleTab";
@@ -129,26 +130,27 @@ export default function ExercisePage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6">
-      <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+      <PageHeader title="Body" className="-mx-4 -mt-4" />
+      <h1 className="sr-only">
         Latihan
       </h1>
 
-      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="flex gap-1 border-b border-surface-light overflow-x-auto">
         <button
           onClick={() => setPageTab("log")}
-          className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${pageTab === "log" ? "border-gray-900 dark:border-white text-gray-900 dark:text-white" : "border-transparent text-gray-400"}`}
+          className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${pageTab === "log" ? "border-primary text-gray-50" : "border-transparent text-gray-400"}`}
         >
           Log Latihan
         </button>
         <button
           onClick={() => setPageTab("jadwal")}
-          className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${pageTab === "jadwal" ? "border-gray-900 dark:border-white text-gray-900 dark:text-white" : "border-transparent text-gray-400"}`}
+          className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${pageTab === "jadwal" ? "border-primary text-gray-50" : "border-transparent text-gray-400"}`}
         >
           Jadwal Mingguan
         </button>
         <button
           onClick={() => setPageTab("coaching")}
-          className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${pageTab === "coaching" ? "border-gray-900 dark:border-white text-gray-900 dark:text-white" : "border-transparent text-gray-400"}`}
+          className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${pageTab === "coaching" ? "border-primary text-gray-50" : "border-transparent text-gray-400"}`}
         >
           Coaching
         </button>
@@ -162,9 +164,9 @@ export default function ExercisePage() {
         <>
           <form
             onSubmit={handleSubmit}
-            className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4"
+            className="bg-surface p-5 rounded-xl border border-surface-light space-y-4"
           >
-            <h2 className="font-semibold text-gray-900 dark:text-white">
+            <h2 className="font-semibold text-gray-50">
               {editing ? "Edit Latihan" : "Tambah Latihan"}
             </h2>
 
@@ -184,7 +186,7 @@ export default function ExercisePage() {
                   <select
                     value={isPresetTipe ? form.tipe : CUSTOM_VALUE}
                     onChange={(e) => handleTipeSelectChange(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                    className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
                   >
                     {EXERCISE_TIPE_PRESETS.map((t) => (
                       <option key={t} value={t}>
@@ -212,7 +214,7 @@ export default function ExercisePage() {
                             : null,
                         })
                       }
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                      className="flex-1 px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
                     />
                     <button
                       type="button"
@@ -239,7 +241,7 @@ export default function ExercisePage() {
                     onChange={(e) =>
                       handleSubKategoriSelectChange(e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                    className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
                   >
                     {subKategoriPresets.map((s) => (
                       <option key={s} value={s}>
@@ -257,7 +259,7 @@ export default function ExercisePage() {
                     onChange={(e) =>
                       setForm({ ...form, sub_kategori: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                    className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
                   />
                 )}
               </div>
@@ -278,7 +280,7 @@ export default function ExercisePage() {
                         jarak: e.target.value ? Number(e.target.value) : null,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                    className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
                     placeholder="5.0"
                   />
                 </div>
@@ -298,7 +300,7 @@ export default function ExercisePage() {
                       durasi: e.target.value ? Number(e.target.value) : null,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                  className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
                   placeholder="30"
                 />
               </div>
@@ -314,7 +316,7 @@ export default function ExercisePage() {
                   onChange={(e) =>
                     setForm({ ...form, tanggal: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                  className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
                 />
               </div>
             </div>
@@ -327,7 +329,7 @@ export default function ExercisePage() {
                 value={form.catatan ?? ""}
                 onChange={(e) => setForm({ ...form, catatan: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg"
+                className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
               />
             </div>
 
@@ -335,7 +337,7 @@ export default function ExercisePage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
+                className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
               >
                 {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
               </button>
@@ -343,7 +345,7 @@ export default function ExercisePage() {
                 <button
                   type="button"
                   onClick={cancelEdit}
-                  className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 dark:text-gray-300"
+                  className="px-4 py-2.5 rounded-lg border border-surface-light dark:text-gray-300"
                 >
                   Batal
                 </button>
@@ -364,11 +366,11 @@ export default function ExercisePage() {
               {exercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700"
+                  className="flex items-center justify-between bg-surface p-4 rounded-xl border border-surface-light"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="font-medium text-gray-50">
                         {ex.sub_kategori}
                       </span>
                       <span className="text-xs text-gray-400">

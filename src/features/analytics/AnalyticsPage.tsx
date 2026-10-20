@@ -1,3 +1,4 @@
+import PageHeader from "../../components/ui/PageHeader";
 import { useState, useMemo } from "react";
 import { useExpenses } from "../expense/useExpenses";
 import { useExercises } from "../exercise/useExercises";
@@ -119,7 +120,8 @@ export default function AnalyticsPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+      <PageHeader title="Insights" className="-mx-4 -mt-4" />
+      <h1 className="sr-only">
         Analytics
       </h1>
 
@@ -130,8 +132,8 @@ export default function AnalyticsPage() {
             onClick={() => setGranularity(g.key)}
             className={`text-sm px-3 py-1.5 rounded-lg border ${
               granularity === g.key
-                ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-                : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300"
+                ? "bg-primary text-on-primary border-primary"
+                : "border-surface-light text-gray-600 dark:text-gray-300"
             }`}
           >
             {g.label}
@@ -194,8 +196,8 @@ export default function AnalyticsPage() {
         insight={generateInsight(readingSeries, "", "Aktivitas membaca")}
       />
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-3">
-        <h3 className="font-semibold text-gray-900 dark:text-white">
+      <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-3">
+        <h3 className="font-semibold text-gray-50">
           ⚖️ Tren Berat Badan
         </h3>
         <WeightTrendChart logs={weightLogs} />

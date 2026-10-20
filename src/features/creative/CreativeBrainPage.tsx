@@ -1,3 +1,4 @@
+import PageHeader from "../../components/ui/PageHeader";
 import { useState, type FormEvent } from "react";
 import { useCreativeProjects } from "./useCreativeProjects";
 import ProjectModal from "./ProjectModal";
@@ -54,8 +55,9 @@ export default function CreativeBrainPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
+      <PageHeader title="Creative Brain" className="-mx-4 -mt-4" />
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <h1 className="sr-only">
           Creative Brain
         </h1>
         <div className="flex gap-2">
@@ -63,8 +65,8 @@ export default function CreativeBrainPage() {
             onClick={() => setShowArchived(!showArchived)}
             className={`text-sm px-3 py-1.5 rounded-lg border ${
               showArchived
-                ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-                : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300"
+                ? "bg-primary text-on-primary border-primary"
+                : "border-surface-light text-gray-600 dark:text-gray-300"
             }`}
           >
             📦 {showArchived ? "Lihat Aktif" : "Diarsipkan"}
@@ -72,7 +74,7 @@ export default function CreativeBrainPage() {
           {!showArchived && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="text-sm bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-3 py-1.5 rounded-lg"
+              className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
             >
               + Ide Baru
             </button>
@@ -83,7 +85,7 @@ export default function CreativeBrainPage() {
       {showAddForm && (
         <form
           onSubmit={handleAddIdea}
-          className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-wrap gap-2"
+          className="bg-surface p-4 rounded-xl border border-surface-light flex flex-wrap gap-2"
         >
           <input
             type="text"
@@ -92,12 +94,12 @@ export default function CreativeBrainPage() {
             placeholder="Judul ide (misal: Morning Routine)"
             value={newJudul}
             onChange={(e) => setNewJudul(e.target.value)}
-            className="flex-1 min-w-200px px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm"
+            className="flex-1 min-w-200px px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
           />
           <select
             value={newKategori}
             onChange={(e) => setNewKategori(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg text-sm"
+            className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
           >
             {CREATIVE_KATEGORI.map((k) => (
               <option key={k} value={k}>
@@ -108,7 +110,7 @@ export default function CreativeBrainPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-4 py-2 rounded-lg text-sm"
+            className="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm"
           >
             Simpan
           </button>
@@ -139,9 +141,9 @@ export default function CreativeBrainPage() {
                   <button
                     key={p.id}
                     onClick={() => setSelectedProject(p)}
-                    className="w-full text-left bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition"
+                    className="w-full text-left bg-surface p-3 rounded-lg border border-surface-light hover:border-gray-400 dark:hover:border-gray-500 transition"
                   >
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <p className="text-sm font-medium text-gray-50 truncate">
                       {p.judul}
                     </p>
                     {p.kategori && (

@@ -58,11 +58,11 @@ export default function CoachingTab() {
               onClick={() => setSelectedTipe(tipe)}
               className={`w-full text-left p-4 rounded-xl border transition ${
                 selectedTipe === tipe
-                  ? "border-gray-900 dark:border-white bg-gray-50 dark:bg-gray-700"
-                  : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                  ? "border-primary bg-gray-50 dark:bg-gray-700"
+                  : "border-surface-light bg-surface"
               }`}
             >
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="font-medium text-gray-50">
                 {PLAN_LABELS[tipe].label}
               </p>
               <p className="text-xs text-gray-400 mt-1">
@@ -85,8 +85,8 @@ export default function CoachingTab() {
                 onClick={() => setHariIstirahat(preset.hari)}
                 className={`text-xs px-3 py-1.5 rounded-full border ${
                   JSON.stringify(hariIstirahat) === JSON.stringify(preset.hari)
-                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-                    : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300"
+                    ? "bg-primary text-on-primary border-primary"
+                    : "border-surface-light text-gray-600 dark:text-gray-300"
                 }`}
               >
                 {preset.label}
@@ -105,7 +105,7 @@ export default function CoachingTab() {
                 className={`px-3 py-2 rounded-lg text-sm border ${
                   hariIstirahat.includes(hari)
                     ? "bg-orange-50 dark:bg-orange-950 border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-300"
-                    : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+                    : "border-surface-light text-gray-700 dark:text-gray-300"
                 }`}
               >
                 {hariIstirahat.includes(hari) ? "😴 " : ""}
@@ -123,7 +123,7 @@ export default function CoachingTab() {
         <button
           onClick={handleStart}
           disabled={isStarting}
-          className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
+          className="w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
         >
           {isStarting ? "Menyiapkan program..." : "Mulai Program Ini"}
         </button>
@@ -137,10 +137,10 @@ export default function CoachingTab() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div className="bg-surface rounded-xl border border-surface-light p-5">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <p className="font-semibold text-gray-900 dark:text-white">
+            <p className="font-semibold text-gray-50">
               {plan.judul}
             </p>
             <p className="text-xs text-gray-400">
@@ -186,7 +186,7 @@ export default function CoachingTab() {
               return (
                 <div
                   key={s.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+                  className="flex items-center gap-3 p-3 rounded-lg border border-surface-light bg-bg/50"
                 >
                   <span>😴</span>
                   <div className="flex-1">
@@ -208,11 +208,11 @@ export default function CoachingTab() {
             return (
               <div
                 key={s.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border ${done ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950" : "border-gray-200 dark:border-gray-700"}`}
+                className={`flex items-center gap-3 p-3 rounded-lg border ${done ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950" : "border-surface-light"}`}
               >
                 <span>{done ? "✅" : "⬜"}</span>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-900 dark:text-white">
+                  <p className="text-sm text-gray-50">
                     {s.sub_kategori}
                   </p>
                   <p className="text-xs text-gray-400">
