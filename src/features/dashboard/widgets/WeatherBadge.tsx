@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { getSetting } from "../../../utils/appSettings";
+import { t } from "../../../lib/i18n";
 
 interface WeatherData {
   suhu: number;
   kode: number;
 }
 
-// Mapping kode cuaca WMO (standar yang dipakai Open-Meteo) ke emoji + label sederhana
+// Mapping kode cuaca WMO (standar Open-Meteo) ke label sederhana (diterjemahkan saat render)
 function interpretWeatherCode(code: number): { icon: string; label: string } {
   if (code === 0) return { icon: "☀️", label: "Cerah" };
   if (code <= 3) return { icon: "⛅", label: "Berawan" };
@@ -14,9 +15,9 @@ function interpretWeatherCode(code: number): { icon: string; label: string } {
   if (code <= 57) return { icon: "🌦️", label: "Gerimis" };
   if (code <= 67) return { icon: "🌧️", label: "Hujan" };
   if (code <= 77) return { icon: "🌨️", label: "Salju" };
-  if (code <= 82) return { icon: "🌧️", label: "Hujan Deras" };
-  if (code <= 99) return { icon: "⛈️", label: "Badai Petir" };
-  return { icon: "🌤️", label: "Cerah Berawan" };
+  if (code <= 82) return { icon: "🌧️", label: "Hujan deras" };
+  if (code <= 99) return { icon: "⛈️", label: "Badai petir" };
+  return { icon: "🌤️", label: "Cerah berawan" };
 }
 
 export default function WeatherBadge() {
@@ -71,15 +72,15 @@ export default function WeatherBadge() {
   }, []);
 
   if (status === "loading")
-    return <span className="text-xs text-gray-400">Memuat cuaca...</span>;
+    return <span className="text-xs text-gray-400">{t("Memuat cuaca...")}</span>;
   if (status === "off" || status === "denied" || status === "error" || !weather)
     return null; // diam saja, tidak ganggu UI kalau gagal
 
   const { icon, label } = interpretWeatherCode(weather.kode);
 
   return (
-    <span className="text-xs text-gray-500 dark:text-gray-400 inline-flex items-center gap-1">
-      {icon} {weather.suhu}°C, {label}
+    <span className="text-xs text-gray-400 inline-flex items-center gap-1">
+      {icon} {weather.suhu}°C, {t(label)}
     </span>
   );
 }

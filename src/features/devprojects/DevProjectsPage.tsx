@@ -1,151 +1,125 @@
-import PageHeader from "../../components/ui/PageHeader";
 import { useState, type FormEvent } from "react";
+import { Archive, ArchiveRestore, FolderKanban, Trash2 } from "lucide-react";
+import PageHeader from "../../components/ui/PageHeader";
+import Segmented from "../../components/ui/Segmented";
+import { ProgressBar } from "../../components/ui/Progress";
+import { Card, EmptyState, Sheet, PrimaryButton, GhostButton } from "../../components/ui/Controls";
 import { useDevProjects, type DevProject } from "./useDevProjects";
 import DevProjectDetail from "./DevProjectDetail";
+import { t, tx } from "../../lib/i18n";
+
+type Tab = "aktif" | "arsip";
 
 export default function DevProjectsPage() {
-  const { projects, loading, addProject, updateProject, deleteProject } =
-    useDevProjects();
+  const { projects, progress, loading, addProject, updateProject, deleteProject, refetch } = useDevProjects();
+  const [tab, setTab] = useState<Tab>("aktif");
   const [showForm, setShowForm] = useState(false);
   const [nama, setNama] = useState("");
   const [riset, setRiset] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [openProject, setOpenProject] = useState<DevProject | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const openProject = projects.find((p) => p.id === openId) ?? null;
+
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    await addProject(nama, riset);
+    setSaving(true);
+    await addProject(nama.trim(), riset.trim());
     setNama("");
     setRiset("");
     setShowForm(false);
-    setIsSubmitting(false);
-  };
-
-  const handleDelete = (id: string) => {
-    if (
-      confirm(
-        "Hapus project ini? Semua log/todo/issue di dalamnya ikut terhapus.",
-      )
-    )
-      deleteProject(id);
+    setSaving(false);
   };
 
   if (openProject) {
     return (
       <DevProjectDetail
         project={openProject}
-        onBack={() => setOpenProject(null)}
-        onUpdateStatus={updateProject}
+        onBack={() => {
+          setOpenId(null);
+          refetch();
+        }}
+        onUpdate={updateProject}
       />
     );
   }
 
-  const statusColor: Record<string, string> = {
-    Aktif: "bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-300",
-    Selesai: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300",
-    Ditunda: "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400",
+  // Tab Aktif = status Aktif; Arsip = Selesai / Ditunda / Arsip.
+  const visible = projects.filter((p) => (tab === "aktif" ? p.status === "Aktif" : p.status !== "Aktif"));
+
+  const card = (p: DevProject) => {
+    const pr = progress[p.id] ?? { done: 0, total: 0 };
+    const pct = pr.total ? Math.round((pr.done / pr.total) * 100) : 0;
+    return (
+      <Card key={p.id} className="space-y-2.5">
+        <div className="flex items-start gap-3">
+          <button onClick={() => setOpenId(p.id)} className="flex-1 min-w-0 text-left">
+            <p className="text-sm font-semibold text-gray-50 truncate">{p.nama}</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">
+              {t("Progres")} {pct}%
+              {p.status !== "Aktif" && <> · {tx(p.status)}</>}
+            </p>
+          </button>
+          <button
+            aria-label={p.status === "Aktif" ? t("Arsipkan") : t("Aktifkan lagi")}
+            className="text-gray-400 p-0.5"
+            onClick={() => updateProject(p.id, { status: p.status === "Aktif" ? "Arsip" : "Aktif" })}
+          >
+            {p.status === "Aktif" ? <Archive size={16} /> : <ArchiveRestore size={16} />}
+          </button>
+          <button
+            aria-label={t("Hapus")}
+            className="text-gray-500 p-0.5"
+            onClick={() => confirm(t("Hapus project ini? Semua log/todo/issue di dalamnya ikut terhapus.")) && deleteProject(p.id)}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+        <ProgressBar value={pr.done} max={pr.total || 1} />
+        {pr.total > 0 && (
+          <p className="text-[11px] text-gray-500">{t("{0} dari {1} to-do selesai", [pr.done, pr.total])}</p>
+        )}
+      </Card>
+    );
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <PageHeader title="Projects" className="-mx-4 -mt-4" />
-      <div className="flex justify-between items-center">
-        <h1 className="sr-only">
-          Project Tracker
-        </h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
-        >
-          + Project Baru
-        </button>
+    <div className="pb-28">
+      <PageHeader title={t("Projects")} />
+      <div className="px-4 space-y-4">
+        <Segmented
+          options={[
+            { key: "aktif", label: t("Aktif") },
+            { key: "arsip", label: t("Arsip") },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
+        {loading ? (
+          <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>
+        ) : visible.length === 0 ? (
+          <EmptyState icon={FolderKanban} title={tab === "aktif" ? t("Belum ada project aktif") : t("Arsip kosong")} />
+        ) : (
+          <div className="space-y-3">{visible.map(card)}</div>
+        )}
+        <PrimaryButton onClick={() => setShowForm(true)}>{t("Tambah Project")}</PrimaryButton>
       </div>
 
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-surface p-5 rounded-xl border border-surface-light space-y-3"
-        >
-          <input
-            type="text"
-            required
-            autoFocus
-            placeholder="Nama project (misal: App Tracker Pribadi)"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
-          />
-          <textarea
-            placeholder="Riset / kebutuhan awal (opsional)"
-            value={riset}
-            onChange={(e) => setRiset(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
-          />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
-            >
-              {isSubmitting ? "Menyimpan..." : "Simpan"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 text-sm"
-            >
-              Batal
-            </button>
-          </div>
-        </form>
-      )}
-
-      {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>
-      ) : projects.length === 0 ? (
-        <p className="text-gray-400 text-sm py-8 text-center">
-          Belum ada project.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {projects.map((p) => (
-            <div
-              key={p.id}
-              className="bg-surface rounded-xl border border-surface-light p-4"
-            >
-              <div className="flex justify-between items-start">
-                <button
-                  onClick={() => setOpenProject(p)}
-                  className="text-left flex-1"
-                >
-                  <span className="font-medium text-gray-50">
-                    {p.nama}
-                  </span>
-                  <div className="mt-1">
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${statusColor[p.status]}`}
-                    >
-                      {p.status}
-                    </span>
-                  </div>
-                  {p.riset_kebutuhan && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
-                      {p.riset_kebutuhan}
-                    </p>
-                  )}
-                </button>
-                <button
-                  onClick={() => handleDelete(p.id)}
-                  className="text-xs text-red-500 hover:text-red-700 shrink-0 ml-2"
-                >
-                  Hapus
-                </button>
-              </div>
+        <Sheet title={t("Project Baru")} onClose={() => setShowForm(false)}>
+          <form onSubmit={submit} className="space-y-3">
+            <input required autoFocus className="input-field" placeholder={t("Nama project (mis. Aplikasi Tracker)")} value={nama} onChange={(e) => setNama(e.target.value)} />
+            <textarea className="input-field min-h-24" placeholder={t("Riset / kebutuhan awal (opsional)")} value={riset} onChange={(e) => setRiset(e.target.value)} />
+            <div className="flex gap-2">
+              <GhostButton type="button" className="flex-1" onClick={() => setShowForm(false)}>
+                {t("Batal")}
+              </GhostButton>
+              <PrimaryButton type="submit" className="flex-1" disabled={saving || !nama.trim()}>
+                {saving ? t("Menyimpan...") : t("Simpan")}
+              </PrimaryButton>
             </div>
-          ))}
-        </div>
+          </form>
+        </Sheet>
       )}
     </div>
   );

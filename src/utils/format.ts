@@ -1,7 +1,9 @@
 import { format as dfFormat } from "date-fns";
 import { dateLocale, intlLocale } from "../lib/i18n";
+import { hideAmounts } from "../lib/privacy";
 
 export function rupiah(n: number): string {
+  if (hideAmounts()) return "Rp ••••••";
   return "Rp " + new Intl.NumberFormat(intlLocale(), { maximumFractionDigits: 0 }).format(Math.round(n));
 }
 

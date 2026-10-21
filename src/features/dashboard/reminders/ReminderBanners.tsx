@@ -1,28 +1,29 @@
 import { Link } from "react-router-dom";
-import { useReminders } from "./useReminders";
+import { ChevronRight } from "lucide-react";
+import type { Reminder } from "./useReminders";
 
-export default function ReminderBanners() {
-  const reminders = useReminders();
-
+export default function ReminderBanners({ reminders }: { reminders: Reminder[] }) {
   if (reminders.length === 0) return null;
-
   return (
     <div className="space-y-2">
-      {reminders.map((r) => (
-        <Link
-          key={r.id}
-          to={r.link}
-          className={`flex items-center gap-2 p-3 rounded-xl text-sm transition hover:opacity-80 ${
-            r.severity === "warning"
-              ? "bg-yellow-50 dark:bg-yellow-950 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800"
-              : "bg-blue-50 dark:bg-blue-950 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800"
-          }`}
-        >
-          <span>{r.icon}</span>
-          <span className="flex-1">{r.message}</span>
-          <span className="text-xs opacity-60">→</span>
-        </Link>
-      ))}
+      {reminders.slice(0, 4).map((r) => {
+        const Icon = r.icon;
+        return (
+          <Link
+            key={r.id}
+            to={r.link}
+            className={`flex items-center gap-3 p-3 rounded-2xl text-sm border ${
+              r.severity === "warning"
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-200"
+                : "bg-primary/10 border-primary/30 text-gray-100"
+            }`}
+          >
+            <Icon size={18} className={r.severity === "warning" ? "text-amber-300 shrink-0" : "text-primary shrink-0"} />
+            <span className="flex-1 min-w-0 break-words">{r.message}</span>
+            <ChevronRight size={16} className="opacity-60 shrink-0" />
+          </Link>
+        );
+      })}
     </div>
   );
 }

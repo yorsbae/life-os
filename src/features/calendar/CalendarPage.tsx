@@ -1,295 +1,232 @@
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { addDays, addMonths, endOfMonth, endOfWeek, startOfMonth, startOfWeek, isSameMonth } from "date-fns";
+import { Bell, Briefcase, ChevronLeft, ChevronRight, Dumbbell, GraduationCap, ListChecks, User, type LucideIcon } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
-import { useState, useMemo, useCallback } from "react";
-import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
-import { id } from "date-fns/locale";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-
+import Segmented from "../../components/ui/Segmented";
+import { Card, EmptyState, Fab } from "../../components/ui/Controls";
 import { useEvents } from "./useEvents";
+import { useTasks } from "../plan/useTasks";
 import { useExpenses } from "../expense/useExpenses";
 import { useIncomes } from "../income/useIncomes";
 import { useExercises } from "../exercise/useExercises";
-import { useExerciseSchedule } from "../exercise/useExerciseSchedule";
-import { useTrainingPlan } from "../exercise/useTrainingPlan";
 import EventModal from "./EventModal";
-import DaySummaryPanel from "./DaySummaryPanel";
-import {
-  EVENT_TIPE_COLOR,
-  type CalendarEvent,
-  type CalendarEventInput,
-} from "../../types";
+import { EVENT_TIPE_COLOR, EVENT_TIPE_LABEL, type CalendarEvent, type CalendarEventInput, type EventTipe } from "../../types";
+import { toDateStr } from "../../utils/dates";
+import { fmtDate, rupiah } from "../../utils/format";
+import { t, tx } from "../../lib/i18n";
 
-const locales = { id };
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { locale: id }),
-  getDay,
-  locales,
-});
+type View = "bulan" | "minggu" | "hari";
 
-interface CalendarDisplayEvent {
-  id: string;
+const TIPE_ICON: Record<EventTipe, LucideIcon> = {
+  latihan: Dumbbell,
+  belajar: GraduationCap,
+  kerja: Briefcase,
+  pengingat: Bell,
+  pribadi: User,
+};
+const TASK_COLOR = "#7dc7a0";
+
+interface DayItem {
+  key: string;
   title: string;
-  start: Date;
-  end: Date;
-  resource: CalendarEvent;
+  sort: string;
+  range: string;
+  color: string;
+  icon: LucideIcon;
+  done?: boolean;
+  event?: CalendarEvent;
+  taskId?: string;
 }
 
-interface DayIndicator {
-  expense: number;
-  income: number;
-  runningKm: number;
-  otherExerciseCount: number;
-}
-
-function formatRupiahSingkat(n: number): string {
-  if (n >= 1_000_000)
-    return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}jt`;
-  if (n >= 1_000) return `${Math.round(n / 1000)}rb`;
-  return `${n}`;
-}
-
-function dateKey(d: Date) {
-  return d.toDateString();
-}
+const hm = (iso: string) => fmtDate(new Date(iso), "HH:mm");
+const dayOf = (iso: string) => toDateStr(new Date(iso));
 
 export default function CalendarPage() {
+  const navigate = useNavigate();
   const { events, addEvent, updateEvent, deleteEvent } = useEvents();
+  const { tasks } = useTasks();
   const { expenses } = useExpenses();
   const { incomes } = useIncomes();
   const { exercises } = useExercises();
-  const { getScheduleForDate } = useExerciseSchedule();
-  const { getSessionForDate: getPlanSessionForDate } = useTrainingPlan();
 
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
-  const [slotRange, setSlotRange] = useState<{ start: Date; end: Date } | null>(
-    null,
-  );
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [view, setView] = useState<View>("month");
-  const [date, setDate] = useState(new Date());
+  const [view, setView] = useState<View>("bulan");
+  const [selected, setSelected] = useState(() => toDateStr());
+  const [modal, setModal] = useState<{ event: CalendarEvent | null } | null>(null);
+  const today = toDateStr();
+  const selDate = new Date(selected + "T00:00:00");
 
-  const displayEvents: CalendarDisplayEvent[] = useMemo(
-    () =>
-      events.map((e) => ({
-        id: e.id,
+  // Semua item per tanggal: event + tugas
+  const byDay = useMemo(() => {
+    const map = new Map<string, DayItem[]>();
+    const push = (d: string, it: DayItem) => map.set(d, [...(map.get(d) ?? []), it]);
+    for (const e of events) {
+      push(dayOf(e.tanggal_mulai), {
+        key: "e" + e.id,
         title: e.judul,
-        start: new Date(e.tanggal_mulai),
-        end: e.tanggal_selesai
-          ? new Date(e.tanggal_selesai)
-          : new Date(e.tanggal_mulai),
-        resource: e,
-      })),
-    [events],
-  );
-
-  // Gabungkan expense+income+exercise jadi 1 peta indikator per tanggal
-  const indicatorByDate = useMemo(() => {
-    const map: Record<string, DayIndicator> = {};
-    const ensure = (key: string) => {
-      if (!map[key])
-        map[key] = {
-          expense: 0,
-          income: 0,
-          runningKm: 0,
-          otherExerciseCount: 0,
-        };
-      return map[key];
-    };
-
-    for (const e of expenses)
-      ensure(dateKey(new Date(e.tanggal))).expense += e.nominal;
-    for (const i of incomes)
-      ensure(dateKey(new Date(i.tanggal))).income += i.nominal;
-    for (const ex of exercises) {
-      const entry = ensure(dateKey(new Date(ex.tanggal)));
-      if (ex.tipe === "Running" && ex.jarak) entry.runningKm += ex.jarak;
-      else if (ex.tipe !== "Running") entry.otherExerciseCount += 1;
+        sort: hm(e.tanggal_mulai),
+        range: e.tanggal_selesai ? `${hm(e.tanggal_mulai)} - ${hm(e.tanggal_selesai)}` : hm(e.tanggal_mulai),
+        color: EVENT_TIPE_COLOR[e.tipe],
+        icon: TIPE_ICON[e.tipe] ?? User,
+        event: e,
+      });
     }
-
+    for (const x of tasks) {
+      if (!x.tanggal_mulai) continue;
+      push(x.tanggal_mulai, {
+        key: "t" + x.id,
+        title: x.judul,
+        sort: x.jam_mulai ?? "99:99",
+        range: x.jam_mulai ? (x.jam_selesai ? `${x.jam_mulai} - ${x.jam_selesai}` : x.jam_mulai) : t("Sepanjang hari"),
+        color: TASK_COLOR,
+        icon: ListChecks,
+        done: x.status === "Selesai",
+        taskId: x.id,
+      });
+    }
+    for (const list of map.values()) list.sort((a, b) => a.sort.localeCompare(b.sort));
     return map;
-  }, [expenses, incomes, exercises]);
+  }, [events, tasks]);
 
-  const handleSelectSlot = useCallback((slotInfo: { start: Date }) => {
-    setSelectedDate(slotInfo.start);
-  }, []);
+  const dayItems = byDay.get(selected) ?? [];
+  const spent = expenses.filter((e) => e.tanggal === selected).reduce((s, e) => s + e.nominal, 0);
+  const earned = incomes.filter((i) => i.tanggal === selected).reduce((s, i) => s + i.nominal, 0);
+  const workouts = exercises.filter((e) => e.tanggal === selected).length;
 
-  const handleSelectEvent = useCallback((event: CalendarDisplayEvent) => {
-    setEditingEvent(event.resource);
-    setSlotRange(null);
-    setIsEventModalOpen(true);
-  }, []);
-
-  const handleAddEventFromPanel = () => {
-    if (!selectedDate) return;
-    setEditingEvent(null);
-    setSlotRange({ start: selectedDate, end: selectedDate });
-    setIsEventModalOpen(true);
+  // Navigasi panah mengikuti tampilan
+  const shift = (dir: number) => {
+    const base = selDate;
+    const next = view === "bulan" ? addMonths(base, dir) : addDays(base, dir * (view === "minggu" ? 7 : 1));
+    setSelected(toDateStr(next));
   };
+  const heading = view === "bulan" ? fmtDate(selDate, "MMMM yyyy") : view === "minggu" ? `${fmtDate(startOfWeek(selDate, { weekStartsOn: 1 }), "d MMM")} – ${fmtDate(endOfWeek(selDate, { weekStartsOn: 1 }), "d MMM yyyy")}` : fmtDate(selDate, "EEEE, d MMM yyyy");
 
-  const handleEditEventFromPanel = (eventId: string) => {
-    const found = events.find((e) => e.id === eventId);
-    if (found) {
-      setEditingEvent(found);
-      setSlotRange(null);
-      setIsEventModalOpen(true);
-    }
-  };
+  const gridStart = startOfWeek(view === "bulan" ? startOfMonth(selDate) : selDate, { weekStartsOn: 1 });
+  const gridEnd = view === "bulan" ? endOfWeek(endOfMonth(selDate), { weekStartsOn: 1 }) : endOfWeek(selDate, { weekStartsOn: 1 });
+  const cells: Date[] = [];
+  for (let d = gridStart; d <= gridEnd; d = addDays(d, 1)) cells.push(d);
+  const weekdayHeads = cells.slice(0, 7);
 
-  const handleSubmit = async (input: CalendarEventInput) => {
-    if (editingEvent) return updateEvent(editingEvent.id, input);
-    return addEvent(input);
-  };
+  const listTitle = selected === today ? t("Hari Ini, {0}", [fmtDate(selDate, "d MMM yyyy")]) : fmtDate(selDate, "EEEE, d MMM yyyy");
 
-  const handleDelete = async () => {
-    if (editingEvent && confirm("Yakin hapus jadwal ini?")) {
-      await deleteEvent(editingEvent.id);
-      setIsEventModalOpen(false);
-    }
-  };
-
-  const eventPropGetter = useCallback((event: CalendarDisplayEvent) => {
-    return {
-      style: {
-        backgroundColor: EVENT_TIPE_COLOR[event.resource.tipe],
-        borderRadius: "6px",
-        border: "none",
-      },
-    };
-  }, []);
-
-  // Custom header kotak tanggal: nomor tanggal + preview singkat semua jenis aktivitas hari itu
-  const CustomDateHeader = useCallback(
-    ({ date: cellDate, label }: { date: Date; label: string }) => {
-      const ind = indicatorByDate[dateKey(cellDate)];
-      const planSession = getPlanSessionForDate(cellDate);
-      const weeklyPlan = getScheduleForDate(cellDate);
-      const plan = planSession ?? weeklyPlan;
-      const isFromCoaching = !!planSession;
-      const showPlan =
-        plan &&
-        plan.tipe !== "Rest" &&
-        !ind?.runningKm &&
-        !ind?.otherExerciseCount;
-
-      return (
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedDate(cellDate);
-          }}
-          className="flex flex-col items-end px-1 pt-1 pb-1 gap-0.5 text-[10px] leading-tight cursor-pointer active:bg-gray-100 dark:active:bg-gray-700 rounded touch-manipulation"
-        >
-          <span className="text-xs">{label}</span>
-          {ind?.income > 0 && (
-            <span className="text-green-600 dark:text-green-400 font-medium">
-              +{formatRupiahSingkat(ind.income)}
-            </span>
-          )}
-          {ind?.expense > 0 && (
-            <span className="text-red-500 dark:text-red-400 font-medium">
-              -{formatRupiahSingkat(ind.expense)}
-            </span>
-          )}
-          {ind?.runningKm > 0 && (
-            <span className="text-orange-500 dark:text-orange-400 font-medium">
-              🏃{ind.runningKm}km
-            </span>
-          )}
-          {ind?.otherExerciseCount > 0 && (
-            <span className="text-orange-500 dark:text-orange-400 font-medium">
-              💪{ind.otherExerciseCount}x
-            </span>
-          )}
-          {showPlan && (
-            <span className="text-gray-400 dark:text-gray-500 italic">
-              {isFromCoaching ? "🎯 " : ""}rencana: {plan.tipe}
-            </span>
-          )}
-        </div>
-      );
-    },
-    [indicatorByDate, getScheduleForDate, getPlanSessionForDate],
-  );
+  const handleSubmit = async (input: CalendarEventInput) => (modal?.event ? updateEvent(modal.event.id, input) : addEvent(input));
 
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-4">
-      <PageHeader title="Kalender" className="-mx-4 -mt-4" />
-      <div className="flex items-center justify-between">
-        <h1 className="sr-only">
-          Calendar
-        </h1>
-        <button
-          onClick={() => {
-            setEditingEvent(null);
-            setSlotRange({ start: new Date(), end: new Date() });
-            setIsEventModalOpen(true);
-          }}
-          className="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
-        >
-          + Tambah Jadwal
-        </button>
+    <div className="pb-28">
+      <PageHeader title={t("Kalender")} />
+      <div className="px-4 space-y-4">
+        <Segmented
+          options={[
+            { key: "bulan", label: t("Bulan") },
+            { key: "minggu", label: t("Minggu") },
+            { key: "hari", label: t("Hari") },
+          ]}
+          value={view}
+          onChange={setView}
+        />
+
+        <div className="flex items-center gap-2">
+          <button aria-label={t("Sebelumnya")} onClick={() => shift(-1)} className="p-1.5 text-gray-300">
+            <ChevronLeft size={18} />
+          </button>
+          <p className="flex-1 text-center text-sm font-semibold text-gray-100 truncate">{heading}</p>
+          <button aria-label={t("Berikutnya")} onClick={() => shift(1)} className="p-1.5 text-gray-300">
+            <ChevronRight size={18} />
+          </button>
+        </div>
+
+        {view !== "hari" && (
+          <Card className="!p-3">
+            <div className="grid grid-cols-7 mb-1">
+              {weekdayHeads.map((d) => (
+                <span key={d.toISOString()} className="text-center text-[10px] text-gray-400 py-1">
+                  {fmtDate(d, "EEE")}
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-y-1">
+              {cells.map((d) => {
+                const key = toDateStr(d);
+                const active = key === selected;
+                const items = byDay.get(key) ?? [];
+                const muted = view === "bulan" && !isSameMonth(d, selDate);
+                return (
+                  <button key={key} onClick={() => setSelected(key)} aria-pressed={active} className="flex flex-col items-center gap-0.5 py-0.5">
+                    <span
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] ${
+                        active ? "bg-primary text-on-primary font-semibold" : key === today ? "ring-1 ring-primary text-primary" : muted ? "text-gray-600" : "text-gray-200"
+                      }`}
+                    >
+                      {d.getDate()}
+                    </span>
+                    <span className="flex gap-0.5 h-1.5">
+                      {items.slice(0, 3).map((it) => (
+                        <span key={it.key} className="w-1 h-1 rounded-full" style={{ background: it.color }} />
+                      ))}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-gray-100 px-1 capitalize">{listTitle}</p>
+          {(spent > 0 || earned > 0 || workouts > 0) && (
+            <div className="flex gap-2 flex-wrap px-1">
+              {spent > 0 && <span className="text-[11px] px-2.5 py-1 rounded-full bg-red-500/10 text-red-300">{t("Pengeluaran")} {rupiah(spent)}</span>}
+              {earned > 0 && <span className="text-[11px] px-2.5 py-1 rounded-full bg-primary/10 text-primary">{t("Pemasukan")} {rupiah(earned)}</span>}
+              {workouts > 0 && <span className="text-[11px] px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-300">{t("Olahraga")} ×{workouts}</span>}
+            </div>
+          )}
+          {dayItems.length === 0 ? (
+            <EmptyState title={t("Tidak ada jadwal")} hint={t("Tekan + untuk menambah jadwal.")} />
+          ) : (
+            dayItems.map((it) => {
+              const Icon = it.icon;
+              return (
+                <Card
+                  key={it.key}
+                  onClick={() => (it.taskId ? navigate(`/plan/${it.taskId}`) : setModal({ event: it.event! }))}
+                  className="!py-3 flex items-center gap-3"
+                >
+                  <span className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center" style={{ background: it.color + "26", color: it.color }}>
+                    <Icon size={18} />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className={`block text-sm truncate ${it.done ? "text-gray-500 line-through" : "text-gray-100"}`}>{it.title}</span>
+                    <span className="block text-[11px] text-gray-400 truncate">
+                      {it.range}
+                      {it.event ? ` · ${tx(EVENT_TIPE_LABEL[it.event.tipe])}` : ` · ${t("Tugas")}`}
+                    </span>
+                  </span>
+                  <ChevronRight size={16} className="text-gray-500 shrink-0" />
+                </Card>
+              );
+            })
+          )}
+        </div>
       </div>
 
-      <p className="text-xs text-gray-400 -mt-2">
-        💡 Klik tanggal untuk ringkasan lengkap. Pengeluaran/pemasukan/olahraga
-        sudah muncul preview di kotak tanggal.
-      </p>
-
-      <div
-        className="bg-surface rounded-xl border border-surface-light p-4"
-        style={{ height: "680px" }}
-      >
-        <Calendar
-          localizer={localizer}
-          events={displayEvents}
-          startAccessor="start"
-          endAccessor="end"
-          selectable
-          longPressThreshold={1}
-          views={["month"]}
-          view={view}
-          date={date}
-          onView={setView}
-          onNavigate={setDate}
-          onSelectSlot={handleSelectSlot}
-          onSelectEvent={handleSelectEvent}
-          eventPropGetter={eventPropGetter}
-          components={{ month: { dateHeader: CustomDateHeader } }}
-          culture="id"
-          messages={{
-            next: "Selanjutnya",
-            previous: "Sebelumnya",
-            today: "Hari ini",
-            month: "Bulan",
-            week: "Minggu",
-            day: "Hari",
-            agenda: "Agenda",
-            noEventsInRange: "Tidak ada jadwal di rentang ini.",
-          }}
-        />
-      </div>
-
-      {selectedDate && (
-        <DaySummaryPanel
-          date={selectedDate}
-          onClose={() => setSelectedDate(null)}
-          onAddEvent={handleAddEventFromPanel}
-          onEditEvent={handleEditEventFromPanel}
-        />
-      )}
-
-      {isEventModalOpen && (
+      <Fab onClick={() => setModal({ event: null })} label={t("Tambah jadwal")} />
+      {modal && (
         <EventModal
-          isOpen={isEventModalOpen}
-          onClose={() => setIsEventModalOpen(false)}
+          key={modal.event?.id ?? "new"}
+          editingEvent={modal.event}
+          defaultDate={selected}
+          onClose={() => setModal(null)}
           onSubmit={handleSubmit}
-          onDelete={editingEvent ? handleDelete : undefined}
-          editingEvent={editingEvent}
-          defaultStart={slotRange?.start}
-          defaultEnd={slotRange?.end}
+          onDelete={
+            modal.event
+              ? async () => {
+                  if (confirm(t("Yakin hapus jadwal ini?"))) {
+                    await deleteEvent(modal.event!.id);
+                    setModal(null);
+                  }
+                }
+              : undefined
+          }
         />
       )}
     </div>

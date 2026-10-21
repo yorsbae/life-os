@@ -1,242 +1,106 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
+import { NotebookPen } from "lucide-react";
+import PageHeader from "../../components/ui/PageHeader";
+import Field from "../../components/ui/Field";
+import { Card, EmptyState, GhostButton, PrimaryButton, Sheet } from "../../components/ui/Controls";
 import { useLearnings } from "./useLearnings";
 import type { Learning, LearningInput } from "../../types";
+import { t } from "../../lib/i18n";
+import { fmtDate } from "../../utils/format";
+import { toDateStr } from "../../utils/dates";
 
-const initialForm: LearningInput = {
-  topik: "",
-  materi: "",
-  catatan: "",
-  durasi: null,
-  tanggal: new Date().toISOString().split("T")[0],
-};
+const blank = (): LearningInput => ({ topik: "", materi: "", catatan: "", durasi: null, tanggal: toDateStr() });
 
-const inputClass =
-  "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
-
-interface LearningPageProps {
-  embedded?: boolean;
-}
-
-export default function LearningPage({ embedded = false }: LearningPageProps) {
-  const { learnings, loading, addLearning, updateLearning, deleteLearning } =
-    useLearnings();
-  const [editing, setEditing] = useState<Learning | null>(null);
-  const [form, setForm] = useState<LearningInput>(initialForm);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+function LogSheet({ editing, onClose }: { editing: Learning | null; onClose: () => void }) {
+  const { addLearning, updateLearning, deleteLearning } = useLearnings();
+  const [form, setForm] = useState<LearningInput>(
+    editing ? { topik: editing.topik, materi: editing.materi, catatan: editing.catatan, durasi: editing.durasi, tanggal: editing.tanggal } : blank(),
+  );
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const startEdit = (learning: Learning) => {
-    setEditing(learning);
-    setForm({
-      topik: learning.topik,
-      materi: learning.materi,
-      catatan: learning.catatan,
-      durasi: learning.durasi,
-      tanggal: learning.tanggal,
-    });
-  };
-  const cancelEdit = () => {
-    setEditing(null);
-    setForm(initialForm);
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
+    if (!form.topik.trim()) return setError(t("Topik wajib diisi"));
+    setSaving(true);
     setError("");
-    setIsSubmitting(true);
-    const result = editing
-      ? await updateLearning(editing.id, form)
-      : await addLearning(form);
-    if (result.error) {
-      setError(result.error);
-      setIsSubmitting(false);
-      return;
-    }
-    setEditing(null);
-    setForm(initialForm);
-    setIsSubmitting(false);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm("Yakin hapus data ini?")) deleteLearning(id);
+    const res = editing ? await updateLearning(editing.id, form) : await addLearning(form);
+    setSaving(false);
+    if (res.error) return setError(res.error);
+    onClose();
   };
 
   return (
-    <div className={embedded ? "space-y-6" : "max-w-2xl mx-auto p-4 space-y-6"}>
-      {!embedded && (
-        <h1 className="text-xl font-semibold text-gray-50">
-          Pembelajaran
-        </h1>
+    <Sheet title={editing ? t("Edit Catatan Belajar") : t("Tambah Catatan Belajar")} onClose={onClose}>
+      <Field label={t("Topik")}>
+        <input className="input-field" value={form.topik} onChange={(e) => setForm({ ...form, topik: e.target.value })} placeholder={t("Misal: React Hooks")} autoFocus />
+      </Field>
+      <Field label={t("Materi")}>
+        <textarea className="input-field min-h-20" value={form.materi ?? ""} onChange={(e) => setForm({ ...form, materi: e.target.value })} placeholder={t("Ringkasan apa yang dipelajari...")} />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("Tanggal")}>
+          <input type="date" className="input-field" value={form.tanggal} onChange={(e) => setForm({ ...form, tanggal: e.target.value })} />
+        </Field>
+        <Field label={t("Durasi (menit)")}>
+          <input className="input-field" inputMode="numeric" value={form.durasi ?? ""} onChange={(e) => setForm({ ...form, durasi: e.target.value ? Number(e.target.value) || null : null })} placeholder="45" />
+        </Field>
+      </div>
+      <Field label={t("Catatan")}>
+        <textarea className="input-field min-h-16" value={form.catatan ?? ""} onChange={(e) => setForm({ ...form, catatan: e.target.value })} placeholder={t("Opsional...")} />
+      </Field>
+      {error && <p className="text-sm text-red-400">{error}</p>}
+      <PrimaryButton onClick={submit} disabled={saving}>
+        {saving ? t("Menyimpan...") : t("Simpan")}
+      </PrimaryButton>
+      {editing && (
+        <GhostButton
+          className="!border-red-500/40 !text-red-400"
+          onClick={async () => {
+            if (!confirm(t("Yakin hapus data ini?"))) return;
+            await deleteLearning(editing.id);
+            onClose();
+          }}
+        >
+          {t("Hapus")}
+        </GhostButton>
       )}
+    </Sheet>
+  );
+}
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-surface p-5 rounded-xl border border-surface-light space-y-4"
-      >
-        <h2 className="font-semibold text-gray-50">
-          {editing ? "Edit Catatan Belajar" : "Tambah Catatan Belajar"}
-        </h2>
+/** Log catatan belajar (tabel learnings). Tab "Catatan" pada halaman Learning. */
+export default function LearningPage({ embedded = false }: { embedded?: boolean }) {
+  const { learnings, loading } = useLearnings();
+  const [sheet, setSheet] = useState<{ editing: Learning | null } | null>(null);
 
-        {error && (
-          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-            {error}
-          </div>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Topik
-          </label>
-          <input
-            type="text"
-            required
-            value={form.topik}
-            onChange={(e) => setForm({ ...form, topik: e.target.value })}
-            className={inputClass}
-            placeholder="Misal: React Hooks"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Materi
-          </label>
-          <textarea
-            value={form.materi ?? ""}
-            onChange={(e) => setForm({ ...form, materi: e.target.value })}
-            rows={3}
-            className={inputClass}
-            placeholder="Ringkasan apa yang dipelajari..."
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tanggal
-            </label>
-            <input
-              type="date"
-              required
-              value={form.tanggal}
-              onChange={(e) => setForm({ ...form, tanggal: e.target.value })}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Durasi (menit)
-            </label>
-            <input
-              type="number"
-              min={0}
-              value={form.durasi ?? ""}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  durasi: e.target.value ? Number(e.target.value) : null,
-                })
-              }
-              className={inputClass}
-              placeholder="45"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Catatan
-          </label>
-          <textarea
-            value={form.catatan ?? ""}
-            onChange={(e) => setForm({ ...form, catatan: e.target.value })}
-            rows={2}
-            className={inputClass}
-            placeholder="Opsional..."
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
-          >
-            {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
-          </button>
-          {editing && (
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              Batal
-            </button>
-          )}
-        </div>
-      </form>
-
+  const body = (
+    <div className="space-y-3">
       {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat data...</p>
+        <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat data...")}</p>
       ) : learnings.length === 0 ? (
-        <p className="text-gray-400 text-sm py-8 text-center">
-          Belum ada catatan belajar.
-        </p>
+        <EmptyState icon={NotebookPen} title={t("Belum ada catatan belajar.")} />
       ) : (
-        <div className="space-y-2">
-          {learnings.map((l) => (
-            <div
-              key={l.id}
-              className="bg-surface p-4 rounded-xl border border-surface-light"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-50">
-                      {l.topik}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {new Date(l.tanggal).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </span>
-                  </div>
-                  {l.materi && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {l.materi}
-                    </p>
-                  )}
-                  {l.durasi && (
-                    <span className="inline-block mt-1 text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
-                      {l.durasi} menit
-                    </span>
-                  )}
-                  {l.catatan && (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1 italic">
-                      {l.catatan}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-3 ml-4 shrink-0">
-                  <button
-                    onClick={() => startEdit(l)}
-                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(l.id)}
-                    className="text-sm text-red-500 hover:text-red-700"
-                  >
-                    Hapus
-                  </button>
-                </div>
-              </div>
+        learnings.map((l) => (
+          <Card key={l.id} onClick={() => setSheet({ editing: l })} className="space-y-1">
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-sm font-medium text-gray-50 truncate">{l.topik}</span>
+              <span className="text-[11px] text-gray-400 shrink-0">{fmtDate(l.tanggal, "d MMM")}</span>
             </div>
-          ))}
-        </div>
+            {l.materi && <p className="text-xs text-gray-300 line-clamp-2">{l.materi}</p>}
+            {l.durasi ? <span className="inline-block text-[11px] px-2 py-0.5 rounded-full bg-surface-light text-gray-300">{t("{0} menit", [l.durasi])}</span> : null}
+          </Card>
+        ))
       )}
+      <PrimaryButton onClick={() => setSheet({ editing: null })}>{t("Tambah Catatan")}</PrimaryButton>
+      {sheet && <LogSheet editing={sheet.editing} onClose={() => setSheet(null)} />}
+    </div>
+  );
+
+  if (embedded) return body;
+  return (
+    <div>
+      <PageHeader title={t("Catatan Belajar")} />
+      <div className="px-4">{body}</div>
     </div>
   );
 }

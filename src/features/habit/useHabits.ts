@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
+import { t } from "../../lib/i18n";
 import { toDateStr } from "../../utils/dates";
 
 export interface Habit {
@@ -71,7 +72,7 @@ export function useHabits() {
     setValue(h, isDone(h, tanggal) ? 0 : h.target_harian, tanggal);
 
   const addHabit = async (input: HabitInput) => {
-    if (!user) return { error: "Database belum siap" };
+    if (!user) return { error: t("Database belum siap") };
     const { error } = await db
       .from("habits")
       .insert({ ...input, user_id: user.id, aktif: true });

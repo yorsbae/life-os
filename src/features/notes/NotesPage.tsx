@@ -1,310 +1,131 @@
+import { useMemo, useState } from "react";
+import { ChevronRight, Pin, PinOff, Search, Trash2 } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
-import { useState, useMemo, type FormEvent } from "react";
+import Field from "../../components/ui/Field";
+import { Card, Chip, EmptyState, Fab, PrimaryButton, Sheet } from "../../components/ui/Controls";
 import { useNotes } from "./useNotes";
 import { NOTE_KATEGORI_DEFAULT, type Note, type NoteInput } from "../../types";
+import { t, tx } from "../../lib/i18n";
+import { fmtDate } from "../../utils/format";
 
-const CUSTOM_VALUE = "__custom__";
-
-const initialForm: NoteInput = {
-  judul: "",
-  kategori: NOTE_KATEGORI_DEFAULT[0],
-  konten: "",
-  tags: [],
-  is_pinned: false,
-};
+const emptyForm = (): NoteInput => ({ judul: "", kategori: NOTE_KATEGORI_DEFAULT[0], konten: "", tags: [], is_pinned: false });
 
 export default function NotesPage() {
-  const { notes, loading, addNote, updateNote, deleteNote, togglePin } =
-    useNotes();
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<Note | null>(null);
-  const [form, setForm] = useState<NoteInput>(initialForm);
-  const [tagsText, setTagsText] = useState("");
-  const [showCustomKategori, setShowCustomKategori] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { notes, addNote, updateNote, deleteNote, togglePin } = useNotes();
   const [search, setSearch] = useState("");
-  const [activeKategori, setActiveKategori] = useState<string | null>(null);
+  const [activeKat, setActiveKat] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<{ note: Note | null } | null>(null);
+  const [form, setForm] = useState<NoteInput>(emptyForm);
+  const [tagsText, setTagsText] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  // Kategori yang benar-benar dipakai user (default + custom yang pernah diinput)
-  const allKategori = useMemo(() => {
-    const fromNotes = notes.map((n) => n.kategori);
-    return Array.from(new Set([...NOTE_KATEGORI_DEFAULT, ...fromNotes]));
-  }, [notes]);
+  const kategori = useMemo(() => Array.from(new Set([...NOTE_KATEGORI_DEFAULT, ...notes.map((n) => n.kategori)])), [notes]);
 
-  const filteredNotes = useMemo(() => {
-    return notes.filter((n) => {
-      const matchKategori = !activeKategori || n.kategori === activeKategori;
-      const matchSearch =
-        !search ||
-        n.judul.toLowerCase().includes(search.toLowerCase()) ||
-        (n.konten ?? "").toLowerCase().includes(search.toLowerCase()) ||
-        (n.tags ?? []).some((t) =>
-          t.toLowerCase().includes(search.toLowerCase()),
-        );
-      return matchKategori && matchSearch;
-    });
-  }, [notes, activeKategori, search]);
-
-  const startEdit = (note: Note) => {
-    setEditing(note);
-    setForm({
-      judul: note.judul,
-      kategori: note.kategori,
-      konten: note.konten,
-      tags: note.tags,
-      is_pinned: note.is_pinned,
-    });
-    setTagsText((note.tags ?? []).join(", "));
-    setShowCustomKategori(
-      !NOTE_KATEGORI_DEFAULT.includes(note.kategori as any),
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return notes.filter(
+      (n) =>
+        (!activeKat || n.kategori === activeKat) &&
+        (!q || n.judul.toLowerCase().includes(q) || (n.konten ?? "").toLowerCase().includes(q) || (n.tags ?? []).some((x) => x.toLowerCase().includes(q))),
     );
-    setShowForm(true);
+  }, [notes, search, activeKat]);
+
+  const open = (note: Note | null) => {
+    setForm(note ? { judul: note.judul, kategori: note.kategori, konten: note.konten, tags: note.tags, is_pinned: note.is_pinned } : emptyForm());
+    setTagsText(note ? (note.tags ?? []).join(", ") : "");
+    setSheet({ note });
   };
 
-  const cancelForm = () => {
-    setShowForm(false);
-    setEditing(null);
-    setForm(initialForm);
-    setTagsText("");
-    setShowCustomKategori(false);
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const tags = tagsText
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    const payload = { ...form, tags };
-
-    if (editing) await updateNote(editing.id, payload);
+  const save = async () => {
+    if (!form.judul.trim()) return;
+    setSaving(true);
+    const payload = { ...form, judul: form.judul.trim(), tags: tagsText.split(",").map((x) => x.trim()).filter(Boolean) };
+    if (sheet?.note) await updateNote(sheet.note.id, payload);
     else await addNote(payload);
-
-    setIsSubmitting(false);
-    cancelForm();
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm("Yakin hapus note ini?")) deleteNote(id);
+    setSaving(false);
+    setSheet(null);
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <PageHeader title="Notes" className="-mx-4 -mt-4" />
-      <div className="flex justify-between items-center">
-        <h1 className="sr-only">
-          Notes
-        </h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
-        >
-          + Tambah
-        </button>
+    <div className="pb-28">
+      <PageHeader title={t("Catatan")} />
+      <div className="px-4 space-y-4">
+        <div className="relative">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+          <input className="input-field !pl-10" placeholder={t("Cari catatan...")} value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1">
+          <Chip active={!activeKat} onClick={() => setActiveKat(null)}>{t("Semua")}</Chip>
+          {kategori.map((k) => (
+            <Chip key={k} active={activeKat === k} onClick={() => setActiveKat(activeKat === k ? null : k)}>{tx(k)}</Chip>
+          ))}
+        </div>
+
+        {filtered.length === 0 ? (
+          <EmptyState title={t("Tidak ada catatan")} hint={t("Tekan + untuk membuat catatan.")} />
+        ) : (
+          <div className="space-y-2">
+            {filtered.map((n) => (
+              <Card key={n.id} onClick={() => open(n)} className="!py-3 flex items-center gap-3">
+                <span className="flex-1 min-w-0">
+                  <span className="flex items-center gap-1.5">
+                    {n.is_pinned && <Pin size={12} className="text-primary shrink-0" />}
+                    <span className="text-sm text-gray-50 truncate">{n.judul}</span>
+                  </span>
+                  <span className="block text-[11px] text-gray-400 truncate">
+                    {fmtDate(n.created_at, "d MMM yyyy")} · {tx(n.kategori)}
+                  </span>
+                </span>
+                <ChevronRight size={16} className="text-gray-500 shrink-0" />
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Cari judul, isi, atau tag..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full px-3 py-2 border border-surface-light dark:bg-gray-800 dark:text-white rounded-lg text-sm"
-      />
+      <Fab onClick={() => open(null)} label={t("Tambah catatan")} />
 
-      {/* Filter kategori */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setActiveKategori(null)}
-          className={`text-xs px-3 py-1.5 rounded-full border ${
-            !activeKategori
-              ? "bg-primary text-on-primary border-primary"
-              : "border-surface-light text-gray-500 dark:text-gray-400"
-          }`}
-        >
-          Semua
-        </button>
-        {allKategori.map((k) => (
-          <button
-            key={k}
-            onClick={() => setActiveKategori(k)}
-            className={`text-xs px-3 py-1.5 rounded-full border ${
-              activeKategori === k
-                ? "bg-primary text-on-primary border-primary"
-                : "border-surface-light text-gray-500 dark:text-gray-400"
-            }`}
-          >
-            {k}
-          </button>
-        ))}
-      </div>
-
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-surface p-5 rounded-xl border border-surface-light space-y-3"
-        >
-          <input
-            type="text"
-            required
-            placeholder="Judul"
-            value={form.judul}
-            onChange={(e) => setForm({ ...form, judul: e.target.value })}
-            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-          />
-
-          {!showCustomKategori ? (
-            <select
-              value={form.kategori}
-              onChange={(e) => {
-                if (e.target.value === CUSTOM_VALUE) {
-                  setShowCustomKategori(true);
-                  setForm({ ...form, kategori: "" });
-                } else {
-                  setForm({ ...form, kategori: e.target.value });
-                }
-              }}
-              className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-            >
-              {NOTE_KATEGORI_DEFAULT.map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-              <option value={CUSTOM_VALUE}>+ Kategori Baru...</option>
-            </select>
-          ) : (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                required
-                autoFocus
-                placeholder="Nama kategori baru"
-                value={form.kategori}
-                onChange={(e) => setForm({ ...form, kategori: e.target.value })}
-                className="flex-1 px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-              />
+      {sheet && (
+        <Sheet title={sheet.note ? t("Ubah Catatan") : t("Catatan Baru")} onClose={() => setSheet(null)}>
+          <Field label={t("Judul")}>
+            <input className="input-field" value={form.judul} onChange={(e) => setForm({ ...form, judul: e.target.value })} autoFocus />
+          </Field>
+          <Field label={t("Kategori")}>
+            <input className="input-field" list="note-kat" value={form.kategori} onChange={(e) => setForm({ ...form, kategori: e.target.value })} />
+            <datalist id="note-kat">{kategori.map((k) => <option key={k} value={k} />)}</datalist>
+          </Field>
+          <Field label={t("Isi")}>
+            <textarea className="input-field min-h-32" value={form.konten ?? ""} onChange={(e) => setForm({ ...form, konten: e.target.value })} />
+          </Field>
+          <Field label={t("Tag (pisahkan dengan koma)")}>
+            <input className="input-field" value={tagsText} onChange={(e) => setTagsText(e.target.value)} />
+          </Field>
+          <PrimaryButton onClick={save} disabled={saving || !form.judul.trim()}>{t("Simpan")}</PrimaryButton>
+          {sheet.note && (
+            <div className="grid grid-cols-2 gap-2">
               <button
-                type="button"
-                onClick={() => {
-                  setShowCustomKategori(false);
-                  setForm({ ...form, kategori: NOTE_KATEGORI_DEFAULT[0] });
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-surface-light text-sm text-gray-200"
+                onClick={async () => {
+                  await togglePin(sheet.note!);
+                  setSheet(null);
                 }}
-                className="px-3 text-sm text-gray-400"
               >
-                Batal
+                {sheet.note.is_pinned ? <PinOff size={15} /> : <Pin size={15} />}
+                {sheet.note.is_pinned ? t("Lepas sematan") : t("Sematkan")}
+              </button>
+              <button
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-500/40 text-sm text-red-400"
+                onClick={async () => {
+                  if (!confirm(t("Hapus catatan ini?"))) return;
+                  await deleteNote(sheet.note!.id);
+                  setSheet(null);
+                }}
+              >
+                <Trash2 size={15} /> {t("Hapus")}
               </button>
             </div>
           )}
-
-          <textarea
-            placeholder="Isi catatan..."
-            value={form.konten ?? ""}
-            onChange={(e) => setForm({ ...form, konten: e.target.value })}
-            rows={4}
-            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-          />
-
-          <input
-            type="text"
-            placeholder="Tags, pisah pakai koma (misal: golden-hour, budgeting)"
-            value={tagsText}
-            onChange={(e) => setTagsText(e.target.value)}
-            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-          />
-
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
-            >
-              {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
-            </button>
-            <button
-              type="button"
-              onClick={cancelForm}
-              className="px-4 py-2.5 rounded-lg border border-surface-light dark:text-gray-300 text-sm"
-            >
-              Batal
-            </button>
-          </div>
-        </form>
-      )}
-
-      {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>
-      ) : filteredNotes.length === 0 ? (
-        <p className="text-gray-400 text-sm py-8 text-center">
-          Tidak ada note ditemukan.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {filteredNotes.map((note) => (
-            <div
-              key={note.id}
-              className="bg-surface rounded-xl border border-surface-light p-4"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    {note.is_pinned && <span title="Pinned">📌</span>}
-                    <span className="font-medium text-gray-50">
-                      {note.judul}
-                    </span>
-                  </div>
-                  <span className="inline-block mt-1 text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
-                    {note.kategori}
-                  </span>
-                  {note.konten && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">
-                      {note.konten}
-                    </p>
-                  )}
-                  {note.tags && note.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {note.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs text-blue-500 dark:text-blue-300"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
-                  <button
-                    onClick={() => togglePin(note)}
-                    className="text-sm"
-                    title={note.is_pinned ? "Lepas pin" : "Pin note ini"}
-                  >
-                    {note.is_pinned ? "📌" : "📍"}
-                  </button>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => startEdit(note)}
-                      className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(note.id)}
-                      className="text-xs text-red-500 hover:text-red-700"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        </Sheet>
       )}
     </div>
   );

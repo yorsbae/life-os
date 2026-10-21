@@ -76,11 +76,11 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 overflow-y-auto"
+      className="fixed inset-0 bg-black/60 flex items-end justify-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-surface rounded-xl p-5 w-full max-w-lg space-y-5 my-8"
+        className="bg-surface rounded-t-3xl p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] w-full max-w-lg space-y-5 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header + status */}
@@ -93,11 +93,11 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   i === currentIndex
                     ? "bg-primary text-on-primary font-medium"
                     : i < currentIndex
-                      ? "bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-300"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-400"
+                      ? "bg-primary/15 text-primary"
+                      : "bg-surface-light text-gray-400"
                 }`}
               >
-                {s.icon} {s.label}
+                {s.label}
               </span>
             ))}
           </div>

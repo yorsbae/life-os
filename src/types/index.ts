@@ -9,6 +9,7 @@ export interface Expense {
     | "Makan"
     | "Transport"
     | "Belanja"
+    | "Kesehatan"
     | "Hiburan"
     | "Tagihan"
     | "Lainnya";
@@ -26,6 +27,7 @@ export const KATEGORI_EXPENSE = [
   "Makan",
   "Transport",
   "Belanja",
+  "Kesehatan",
   "Hiburan",
   "Tagihan",
   "Lainnya",
@@ -39,6 +41,7 @@ export interface Income {
   kategori: string | null;
   catatan: string | null;
   tanggal: string;
+  akun?: string | null; // nama akun tujuan (accounts.nama)
   created_at: string;
 }
 
@@ -149,8 +152,10 @@ export type LearningInput = Omit<Learning, "id" | "user_id" | "created_at">;
 export interface Journal {
   id: string;
   user_id: string;
+  judul: string | null;
   konten: string;
   mood: string | null;
+  tags: string[] | null;
   tanggal: string;
   created_at: string;
 }

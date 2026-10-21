@@ -82,7 +82,7 @@ export default function WeightHistorySection() {
                 })}
               </span>
               <span className="text-gray-50 font-medium">
-                {l.berat} kg
+                {Math.round(l.berat * 10) / 10} kg
               </span>
               <button
                 onClick={() => deleteLog(l.id)}

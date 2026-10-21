@@ -21,6 +21,7 @@ export interface Goal {
   tanggal_mulai: string;
   tanggal_target: string | null;
   status: "Aktif" | "Tercapai" | "Dibatalkan";
+  satuan: string | null;
 }
 export type GoalInput = Omit<Goal, "id" | "user_id">;
 

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { CalendarEvent, CalendarEventInput } from "../../types";
+import { t } from "../../lib/i18n";
 import { syncEventReminders } from "../../utils/reminders";
 
 export function useEvents() {
@@ -33,7 +34,7 @@ export function useEvents() {
   }, [fetchEvents]);
 
   const addEvent = async (input: CalendarEventInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Database belum siap") };
     const { error } = await db
       .from("events")
       .insert({ ...input, user_id: user.id });

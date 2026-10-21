@@ -1,19 +1,15 @@
-import { useState, useEffect, type FormEvent } from "react";
-import {
-  EVENT_TIPE_LABEL,
-  type CalendarEvent,
-  type CalendarEventInput,
-  type EventTipe,
-} from "../../types";
+import { useState, type FormEvent } from "react";
+import { Sheet, PrimaryButton, Chip } from "../../components/ui/Controls";
+import { EVENT_TIPE_LABEL, type CalendarEvent, type CalendarEventInput, type EventTipe } from "../../types";
+import { t, tx } from "../../lib/i18n";
 
 interface EventModalProps {
-  isOpen: boolean;
   onClose: () => void;
   onSubmit: (input: CalendarEventInput) => Promise<{ error: string | null }>;
   onDelete?: () => void;
   editingEvent?: CalendarEvent | null;
-  defaultStart?: Date;
-  defaultEnd?: Date;
+  /** Tanggal awal (YYYY-MM-DD) saat menambah jadwal baru */
+  defaultDate: string;
 }
 
 function toLocalInputValue(date: Date) {
@@ -21,192 +17,79 @@ function toLocalInputValue(date: Date) {
   return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
-const inputClass =
-  "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
-
-export default function EventModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  onDelete,
-  editingEvent,
-  defaultStart,
-  defaultEnd,
-}: EventModalProps) {
-  const [judul, setJudul] = useState("");
-  const [tipe, setTipe] = useState<EventTipe>("pribadi");
-  const [mulai, setMulai] = useState("");
-  const [selesai, setSelesai] = useState("");
-  const [catatan, setCatatan] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+/** Form tambah/edit jadwal dalam bottom sheet. Dipasang hanya saat dibuka (mount = buka). */
+export default function EventModal({ onClose, onSubmit, onDelete, editingEvent, defaultDate }: EventModalProps) {
+  const [judul, setJudul] = useState(editingEvent?.judul ?? "");
+  const [tipe, setTipe] = useState<EventTipe>(editingEvent?.tipe ?? "pribadi");
+  const [mulai, setMulai] = useState(
+    editingEvent ? toLocalInputValue(new Date(editingEvent.tanggal_mulai)) : `${defaultDate}T09:00`,
+  );
+  const [selesai, setSelesai] = useState(
+    editingEvent?.tanggal_selesai ? toLocalInputValue(new Date(editingEvent.tanggal_selesai)) : "",
+  );
+  const [catatan, setCatatan] = useState(editingEvent?.catatan ?? "");
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (editingEvent) {
-      setJudul(editingEvent.judul);
-      setTipe(editingEvent.tipe);
-      setMulai(toLocalInputValue(new Date(editingEvent.tanggal_mulai)));
-      setSelesai(
-        editingEvent.tanggal_selesai
-          ? toLocalInputValue(new Date(editingEvent.tanggal_selesai))
-          : "",
-      );
-      setCatatan(editingEvent.catatan ?? "");
-    } else {
-      setJudul("");
-      setTipe("pribadi");
-      setMulai(defaultStart ? toLocalInputValue(defaultStart) : "");
-      setSelesai(defaultEnd ? toLocalInputValue(defaultEnd) : "");
-      setCatatan("");
-    }
-    setError("");
-  }, [editingEvent, defaultStart, defaultEnd, isOpen]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsSubmitting(true);
-
+    if (selesai && selesai < mulai) {
+      setError(t("Waktu selesai harus setelah waktu mulai"));
+      return;
+    }
+    setSaving(true);
     const result = await onSubmit({
-      judul,
+      judul: judul.trim(),
       tipe,
       tanggal_mulai: new Date(mulai).toISOString(),
       tanggal_selesai: selesai ? new Date(selesai).toISOString() : null,
-      catatan: catatan || null,
+      catatan: catatan.trim() || null,
     });
-
-    if (result.error) {
-      setError(result.error);
-      setIsSubmitting(false);
-      return;
-    }
-
-    setIsSubmitting(false);
+    setSaving(false);
+    if (result.error) return setError(result.error);
     onClose();
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50"
-      onClick={onClose}
-    >
-      <div
-        className="bg-surface rounded-xl p-5 w-full max-w-md space-y-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="font-semibold text-gray-50">
-          {editingEvent ? "Edit Jadwal" : "Tambah Jadwal"}
-        </h2>
-
-        {error && (
-          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-            {error}
-          </div>
+    <Sheet title={editingEvent ? t("Edit Jadwal") : t("Tambah Jadwal")} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm">{error}</div>}
+        <input
+          className="input-field"
+          required
+          value={judul}
+          onChange={(e) => setJudul(e.target.value)}
+          placeholder={t("Judul jadwal")}
+          autoFocus={!editingEvent}
+        />
+        <div className="flex gap-2 flex-wrap">
+          {(Object.keys(EVENT_TIPE_LABEL) as EventTipe[]).map((k) => (
+            <Chip key={k} active={tipe === k} onClick={() => setTipe(k)}>
+              {tx(EVENT_TIPE_LABEL[k])}
+            </Chip>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-3">
+          <label className="space-y-1 block min-w-0">
+            <span className="text-xs text-gray-400">{t("Mulai")}</span>
+            <input type="datetime-local" required className="input-field" value={mulai} onChange={(e) => setMulai(e.target.value)} />
+          </label>
+          <label className="space-y-1 block min-w-0">
+            <span className="text-xs text-gray-400">{t("Selesai (opsional)")}</span>
+            <input type="datetime-local" className="input-field" value={selesai} onChange={(e) => setSelesai(e.target.value)} />
+          </label>
+        </div>
+        <textarea className="input-field min-h-16" value={catatan} onChange={(e) => setCatatan(e.target.value)} placeholder={t("Catatan (opsional)")} />
+        <PrimaryButton type="submit" disabled={saving || !judul.trim()}>
+          {saving ? t("Menyimpan...") : editingEvent ? t("Perbarui") : t("Simpan")}
+        </PrimaryButton>
+        {editingEvent && onDelete && (
+          <button type="button" onClick={onDelete} className="w-full py-3 rounded-xl border border-red-500/40 text-red-400 text-sm font-medium">
+            {t("Hapus")}
+          </button>
         )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Judul
-            </label>
-            <input
-              type="text"
-              required
-              value={judul}
-              onChange={(e) => setJudul(e.target.value)}
-              className={inputClass}
-              placeholder="Misal: Meeting tim, Long run 10K..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tipe
-            </label>
-            <select
-              value={tipe}
-              onChange={(e) => setTipe(e.target.value as EventTipe)}
-              className={inputClass}
-            >
-              {Object.entries(EVENT_TIPE_LABEL).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Mulai
-              </label>
-              <input
-                type="datetime-local"
-                required
-                value={mulai}
-                onChange={(e) => setMulai(e.target.value)}
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Selesai (opsional)
-              </label>
-              <input
-                type="datetime-local"
-                value={selesai}
-                onChange={(e) => setSelesai(e.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Catatan
-            </label>
-            <textarea
-              value={catatan}
-              onChange={(e) => setCatatan(e.target.value)}
-              rows={2}
-              className={inputClass}
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
-            >
-              {isSubmitting
-                ? "Menyimpan..."
-                : editingEvent
-                  ? "Update"
-                  : "Simpan"}
-            </button>
-            {editingEvent && onDelete && (
-              <button
-                type="button"
-                onClick={onDelete}
-                className="px-4 py-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition"
-              >
-                Hapus
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-            >
-              Batal
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Sheet>
   );
 }

@@ -1,245 +1,167 @@
 import { useState } from "react";
+import { Card, PrimaryButton, Chip, GhostButton } from "../../components/ui/Controls";
+import { ProgressBar } from "../../components/ui/Progress";
+import { Check, Circle, Moon, TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { t, tx } from "../../lib/i18n";
+import { fmtDate, num } from "../../utils/format";
 import { useTrainingPlan } from "./useTrainingPlan";
 import { PLAN_LABELS, type PlanTipe } from "./trainingTemplates";
-import { HARI_LABEL } from "./useExerciseSchedule";
+import { DAY_ORDER, dayName } from "./bodyUi";
 
 const PRESET_ISTIRAHAT: { label: string; hari: number[] }[] = [
-  { label: "7 Hari Full (0 Rest)", hari: [] },
-  { label: "6 Hari (1 Rest)", hari: [0] }, // default Minggu
-  { label: "5 Hari (2 Rest)", hari: [0, 3] }, // default Minggu + Rabu
+  { label: "7 hari latihan", hari: [] },
+  { label: "6 hari latihan (1 istirahat)", hari: [0] },
+  { label: "5 hari latihan (2 istirahat)", hari: [0, 3] },
 ];
 
+/** Program latihan terstruktur (intensitas naik/turun otomatis tiap minggu). */
 export default function CoachingTab() {
-  const { plan, sessions, loading, startPlan, cancelPlan, isSessionDone } =
-    useTrainingPlan();
+  const { plan, sessions, loading, startPlan, cancelPlan, isSessionDone } = useTrainingPlan();
   const [selectedTipe, setSelectedTipe] = useState<PlanTipe>("5k");
-  const [hariIstirahat, setHariIstirahat] = useState<number[]>([0]); // default: cuma Minggu Rest
+  const [hariIstirahat, setHariIstirahat] = useState<number[]>([0]);
   const [isStarting, setIsStarting] = useState(false);
 
-  const toggleHari = (hari: number) => {
-    setHariIstirahat((prev) =>
-      prev.includes(hari)
-        ? prev.filter((h) => h !== hari)
-        : [...prev, hari].sort(),
-    );
-  };
+  const toggleHari = (hari: number) =>
+    setHariIstirahat((prev) => (prev.includes(hari) ? prev.filter((h) => h !== hari) : [...prev, hari].sort()));
 
   const handleStart = async () => {
     setIsStarting(true);
-    await startPlan(
-      selectedTipe,
-      PLAN_LABELS[selectedTipe].defaultDurasi,
-      hariIstirahat,
-    );
+    await startPlan(selectedTipe, PLAN_LABELS[selectedTipe].defaultDurasi, hariIstirahat);
     setIsStarting(false);
   };
 
-  if (loading)
-    return <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>;
+  if (loading) return <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>;
 
   if (!plan) {
     return (
       <div className="space-y-4">
-        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-          <p className="text-sm text-blue-900 dark:text-blue-200">
-            💡 Coaching di sini bekerja kayak Garmin Coach — bukan AI, tapi
-            program terstruktur yang otomatis naik/turun intensitasnya tiap
-            minggu tergantung seberapa konsisten kamu jalanin.
+        <Card>
+          <p className="text-xs text-gray-300">
+            {t("Program latihan terstruktur yang otomatis naik atau turun intensitasnya tiap minggu, tergantung konsistensimu. Bukan AI, hanya aturan sederhana.")}
           </p>
-        </div>
+        </Card>
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            1. Pilih Program
-          </p>
+          <p className="text-sm font-medium text-gray-100">{t("1. Pilih program")}</p>
           {(Object.keys(PLAN_LABELS) as PlanTipe[]).map((tipe) => (
             <button
               key={tipe}
               onClick={() => setSelectedTipe(tipe)}
-              className={`w-full text-left p-4 rounded-xl border transition ${
-                selectedTipe === tipe
-                  ? "border-primary bg-gray-50 dark:bg-gray-700"
-                  : "border-surface-light bg-surface"
+              className={`w-full text-left p-4 rounded-2xl border transition ${
+                selectedTipe === tipe ? "border-primary bg-primary/10" : "border-surface-light bg-surface"
               }`}
             >
-              <p className="font-medium text-gray-50">
-                {PLAN_LABELS[tipe].label}
-              </p>
+              <p className="text-sm font-medium text-gray-50">{tx(PLAN_LABELS[tipe].label)}</p>
               <p className="text-xs text-gray-400 mt-1">
-                {PLAN_LABELS[tipe].deskripsi} ·{" "}
-                {PLAN_LABELS[tipe].defaultDurasi} minggu
+                {tx(PLAN_LABELS[tipe].deskripsi)} · {t("{0} minggu", [PLAN_LABELS[tipe].defaultDurasi])}
               </p>
             </button>
           ))}
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            2. Pilih Hari Latihan / Istirahat
-          </p>
-
+          <p className="text-sm font-medium text-gray-100">{t("2. Pilih hari latihan dan istirahat")}</p>
           <div className="flex flex-wrap gap-2">
-            {PRESET_ISTIRAHAT.map((preset) => (
-              <button
-                key={preset.label}
-                onClick={() => setHariIstirahat(preset.hari)}
-                className={`text-xs px-3 py-1.5 rounded-full border ${
-                  JSON.stringify(hariIstirahat) === JSON.stringify(preset.hari)
-                    ? "bg-primary text-on-primary border-primary"
-                    : "border-surface-light text-gray-600 dark:text-gray-300"
-                }`}
-              >
-                {preset.label}
-              </button>
+            {PRESET_ISTIRAHAT.map((p) => (
+              <Chip key={p.label} active={JSON.stringify(hariIstirahat) === JSON.stringify(p.hari)} onClick={() => setHariIstirahat(p.hari)}>
+                {t(p.label)}
+              </Chip>
             ))}
           </div>
-
-          <p className="text-xs text-gray-400 pt-1">
-            Atau atur manual, klik hari yang mau jadi Rest:
-          </p>
+          <p className="text-xs text-gray-400 pt-1">{t("Atau ketuk hari yang ingin dijadikan istirahat:")}</p>
           <div className="flex flex-wrap gap-2">
-            {HARI_LABEL.map((label, hari) => (
+            {DAY_ORDER.map((hari) => (
               <button
                 key={hari}
                 onClick={() => toggleHari(hari)}
-                className={`px-3 py-2 rounded-lg text-sm border ${
-                  hariIstirahat.includes(hari)
-                    ? "bg-orange-50 dark:bg-orange-950 border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-300"
-                    : "border-surface-light text-gray-700 dark:text-gray-300"
+                className={`px-3 py-1.5 rounded-xl text-xs border ${
+                  hariIstirahat.includes(hari) ? "border-primary bg-primary/15 text-primary" : "border-surface-light text-gray-300"
                 }`}
               >
-                {hariIstirahat.includes(hari) ? "😴 " : ""}
-                {label}
+                {dayName(hari, "EEE")}
               </button>
             ))}
           </div>
           <p className="text-xs text-gray-400">
             {hariIstirahat.length === 0
-              ? "Latihan 7 hari penuh, tanpa Rest."
-              : `${7 - hariIstirahat.length} hari latihan, ${hariIstirahat.length} hari Rest (${hariIstirahat.map((h) => HARI_LABEL[h]).join(", ")})`}
+              ? t("Latihan 7 hari penuh, tanpa istirahat.")
+              : t("{0} hari latihan, {1} hari istirahat", [7 - hariIstirahat.length, hariIstirahat.length])}
           </p>
         </div>
 
-        <button
-          onClick={handleStart}
-          disabled={isStarting}
-          className="w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
-        >
-          {isStarting ? "Menyiapkan program..." : "Mulai Program Ini"}
-        </button>
+        <PrimaryButton onClick={handleStart} disabled={isStarting}>
+          {isStarting ? t("Menyiapkan program...") : t("Mulai Program Ini")}
+        </PrimaryButton>
       </div>
     );
   }
 
   const mingguSekarang = Math.max(...sessions.map((s) => s.minggu_ke), 1);
   const sesiMingguIni = sessions.filter((s) => s.minggu_ke === mingguSekarang);
-  const currentMultiplier = sesiMingguIni[0]?.intensity_multiplier ?? 1.0;
+  const mult = sesiMingguIni[0]?.intensity_multiplier ?? 1;
+  const doneCount = sesiMingguIni.filter((s) => s.tipe !== "Rest" && isSessionDone(s)).length;
+  const totalCount = sesiMingguIni.filter((s) => s.tipe !== "Rest").length;
+  const MultIcon = mult > 1 ? TrendingUp : mult < 1 ? TrendingDown : Minus;
 
   return (
     <div className="space-y-4">
-      <div className="bg-surface rounded-xl border border-surface-light p-5">
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <p className="font-semibold text-gray-50">
-              {plan.judul}
-            </p>
-            <p className="text-xs text-gray-400">
-              Minggu {mingguSekarang} dari {plan.durasi_minggu} ·{" "}
-              {plan.hari_istirahat.length === 0
-                ? "7 hari latihan"
-                : `Rest: ${plan.hari_istirahat.map((h) => HARI_LABEL[h]).join(", ")}`}
-            </p>
-          </div>
-          <button
-            onClick={() => confirm("Batalkan program ini?") && cancelPlan()}
-            className="text-xs text-red-500"
-          >
-            Batalkan
-          </button>
+      <Card className="space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-gray-50 truncate">{tx(plan.judul)}</p>
+          <p className="text-xs text-gray-400">
+            {t("Minggu {0} dari {1}", [mingguSekarang, plan.durasi_minggu])} ·{" "}
+            {plan.hari_istirahat.length === 0
+              ? t("7 hari latihan")
+              : t("Istirahat: {0}", [plan.hari_istirahat.map((h) => dayName(h, "EEE")).join(", ")])}
+          </p>
         </div>
-
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            Level intensitas minggu ini:
-          </span>
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              currentMultiplier > 1
-                ? "bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-300"
-                : currentMultiplier < 1
-                  ? "bg-yellow-50 dark:bg-yellow-950 text-yellow-600 dark:text-yellow-300"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-            }`}
-          >
-            {currentMultiplier > 1
-              ? "📈 Naik"
-              : currentMultiplier < 1
-                ? "📉 Turun"
-                : "➡️ Normal"}{" "}
-            ({Math.round(currentMultiplier * 100)}%)
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-400">{t("Intensitas minggu ini")}</span>
+          <span className="flex items-center gap-1 text-primary font-medium">
+            <MultIcon size={14} /> {Math.round(mult * 100)}%
           </span>
         </div>
+        <ProgressBar value={doneCount} max={Math.max(totalCount, 1)} />
+        <p className="text-[11px] text-gray-400">{t("{0} dari {1} sesi selesai", [doneCount, totalCount])}</p>
+      </Card>
 
-        <div className="space-y-2">
-          {sesiMingguIni.map((s) => {
-            if (s.tipe === "Rest") {
-              return (
-                <div
-                  key={s.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-surface-light bg-bg/50"
-                >
-                  <span>😴</span>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Rest Day
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(s.tanggal).toLocaleDateString("id-ID", {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              );
-            }
-            const done = isSessionDone(s);
+      <div className="space-y-2">
+        {sesiMingguIni.map((s) => {
+          const dateLabel = fmtDate(s.tanggal, "EEEE, d MMM");
+          if (s.tipe === "Rest")
             return (
-              <div
-                key={s.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border ${done ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950" : "border-surface-light"}`}
-              >
-                <span>{done ? "✅" : "⬜"}</span>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-50">
-                    {s.sub_kategori}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(s.tanggal).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "short",
-                    })}
-                    {s.target_durasi && ` · ${s.target_durasi} menit`}
-                    {s.target_jarak && ` · ${s.target_jarak} km`}
-                  </p>
-                  {s.gerakan && (
-                    <p className="text-xs text-blue-500 dark:text-blue-300 mt-1">
-                      🏋️ {s.gerakan}
-                    </p>
-                  )}
+              <Card key={s.id} className="!py-3 flex items-center gap-3 opacity-80">
+                <Moon size={18} className="text-gray-400 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-300">{t("Hari istirahat")}</p>
+                  <p className="text-[11px] text-gray-500 truncate">{dateLabel}</p>
                 </div>
-              </div>
+              </Card>
             );
-          })}
-        </div>
+          const done = isSessionDone(s);
+          return (
+            <Card key={s.id} className={`!py-3 flex items-start gap-3 ${done ? "!border-primary/50" : ""}`}>
+              {done ? <Check size={18} className="text-primary shrink-0 mt-0.5" /> : <Circle size={18} className="text-gray-600 shrink-0 mt-0.5" />}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-gray-50 truncate">{tx(s.sub_kategori)}</p>
+                <p className="text-[11px] text-gray-400">
+                  {dateLabel}
+                  {s.target_durasi ? ` · ${t("{0} menit", [s.target_durasi])}` : ""}
+                  {s.target_jarak ? ` · ${t("{0} km", [num(s.target_jarak, 1)])}` : ""}
+                </p>
+                {s.gerakan && <p className="text-[11px] text-primary mt-1 break-words">{tx(s.gerakan)}</p>}
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
-      <p className="text-xs text-gray-400">
-        💡 Minggu depan intensitas naik otomatis kalau kamu selesaikan ≥90% sesi
-        minggu ini, turun kalau &lt;60%, atau tetap kalau di antaranya.
+      <p className="text-[11px] text-gray-400">
+        {t("Minggu depan intensitas naik otomatis jika kamu menyelesaikan 90% sesi atau lebih, turun jika kurang dari 60%, dan tetap jika di antaranya.")}
       </p>
+      <GhostButton className="!border-red-500/40 !text-red-400" onClick={() => confirm(t("Batalkan program ini?")) && cancelPlan()}>
+        {t("Batalkan Program")}
+      </GhostButton>
     </div>
   );
 }

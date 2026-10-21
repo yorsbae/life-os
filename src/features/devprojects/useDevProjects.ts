@@ -7,7 +7,7 @@ export interface DevProject {
   user_id: string;
   nama: string;
   riset_kebutuhan: string | null;
-  status: "Aktif" | "Selesai" | "Ditunda";
+  status: "Aktif" | "Selesai" | "Ditunda" | "Arsip";
   created_at: string;
 }
 export interface DevLog {
@@ -33,6 +33,8 @@ export interface DevIssue {
 export function useDevProjects() {
   const { user } = useAuth();
   const [projects, setProjects] = useState<DevProject[]>([]);
+  // Progres tiap project = to-do selesai / total to-do
+  const [progress, setProgress] = useState<Record<string, { done: number; total: number }>>({});
   const [loading, setLoading] = useState(true);
 
   const fetchProjects = useCallback(async () => {
@@ -43,6 +45,16 @@ export function useDevProjects() {
       .select("*")
       .order("created_at", { ascending: false });
     if (!error) setProjects(data as DevProject[]);
+    const todos = await db.from("dev_project_todos").select("project_id, is_done");
+    if (!todos.error) {
+      const map: Record<string, { done: number; total: number }> = {};
+      for (const r of todos.data as { project_id: string; is_done: boolean }[]) {
+        const m = (map[r.project_id] ??= { done: 0, total: 0 });
+        m.total++;
+        if (r.is_done) m.done++;
+      }
+      setProgress(map);
+    }
     setLoading(false);
   }, [user]);
 
@@ -80,7 +92,7 @@ export function useDevProjects() {
     return { error: null };
   };
 
-  return { projects, loading, addProject, updateProject, deleteProject };
+  return { projects, progress, loading, addProject, updateProject, deleteProject, refetch: fetchProjects };
 }
 
 // Hook terpisah untuk detail 1 project (logs, todos, issues) - dipanggil saat project dibuka

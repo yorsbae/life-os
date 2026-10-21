@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import { toDateStr } from "../../utils/dates";
+import { t } from "../../lib/i18n";
 
 export type TaskPriority = "P1" | "P2" | "P3";
 export type TaskStatus = "Todo" | "In Progress" | "Selesai";
@@ -30,15 +31,19 @@ export interface Subtask {
   urutan: number;
 }
 
-export const PRIORITY_LABEL: Record<TaskPriority, string> = {
-  P1: "P1 Prioritas",
-  P2: "P2 Normal",
-  P3: "P3 Santai",
-};
+// Dipanggil saat render (bukan konstanta modul) supaya ikut bahasa aktif.
+export function priorityLabel(p: TaskPriority): string {
+  return p === "P1" ? t("P1 Prioritas") : p === "P2" ? t("P2 Normal") : t("P3 Santai");
+}
+export const PRIORITIES: TaskPriority[] = ["P1", "P2", "P3"];
 
-export function formatRange(t: Pick<Task, "jam_mulai" | "jam_selesai">) {
-  if (t.jam_mulai && t.jam_selesai) return `${t.jam_mulai} - ${t.jam_selesai}`;
-  return t.jam_mulai ?? "Sepanjang hari";
+export function statusLabel(s: TaskStatus): string {
+  return s === "Todo" ? t("Belum dikerjakan") : s === "In Progress" ? t("Dalam proses") : t("Selesai");
+}
+
+export function formatRange(task: Pick<Task, "jam_mulai" | "jam_selesai">) {
+  if (task.jam_mulai && task.jam_selesai) return `${task.jam_mulai} - ${task.jam_selesai}`;
+  return task.jam_mulai ?? t("Sepanjang hari");
 }
 
 /** Seluruh tugas, urut tanggal lalu jam. Filter hari/minggu/bulan dilakukan di UI. */
@@ -71,7 +76,7 @@ export function useTasks() {
   }, [fetchTasks]);
 
   const addTask = async (input: TaskInput) => {
-    if (!user) return { error: "Database belum siap", id: null as string | null };
+    if (!user) return { error: t("Database belum siap"), id: null as string | null };
     const id = crypto.randomUUID();
     const { error } = await db.from("tasks").insert({
       tanggal_mulai: toDateStr(),

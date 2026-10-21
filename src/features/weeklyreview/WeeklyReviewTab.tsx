@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
+import { CheckCircle2, ChevronLeft, ChevronRight, CircleOff, Target } from "lucide-react";
 import { useWeeklyReview } from "./useWeeklyReview";
+import Field from "../../components/ui/Field";
+import { Card, PrimaryButton } from "../../components/ui/Controls";
+import { t } from "../../lib/i18n";
+import { fmtDate } from "../../utils/format";
 
-function formatRentangMinggu(mingguMulai: string) {
-  const start = new Date(mingguMulai);
+function rentangMinggu(mingguMulai: string) {
+  const start = new Date(mingguMulai + "T00:00:00");
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-  return `${start.toLocaleDateString("id-ID", { day: "numeric", month: "short" })} - ${end.toLocaleDateString("id-ID", { day: "numeric", month: "short" })}`;
+  return `${fmtDate(start, "d MMM")} - ${fmtDate(end, "d MMM")}`;
 }
 
 export default function WeeklyReviewTab() {
@@ -23,6 +28,7 @@ export default function WeeklyReviewTab() {
   const [saveMsg, setSaveMsg] = useState("");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBerhasil(review?.apa_yang_berhasil ?? "");
     setGagal(review?.apa_yang_gagal ?? "");
     setDiubah(review?.yang_mau_diubah ?? "");
@@ -30,103 +36,56 @@ export default function WeeklyReviewTab() {
 
   const handleSave = async () => {
     setIsSaving(true);
-    const result = await saveReview({
-      apa_yang_berhasil: berhasil,
-      apa_yang_gagal: gagal,
-      yang_mau_diubah: diubah,
-    });
-    setSaveMsg(result.error ? `Gagal: ${result.error}` : "Tersimpan!");
+    const result = await saveReview({ apa_yang_berhasil: berhasil, apa_yang_gagal: gagal, yang_mau_diubah: diubah });
+    setSaveMsg(result.error ? t("Gagal: {0}", [result.error]) : t("Tersimpan!"));
     setIsSaving(false);
     setTimeout(() => setSaveMsg(""), 2000);
   };
 
-  const inputClass =
-    "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500";
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between bg-surface rounded-xl border border-surface-light px-3 py-2">
-        <button
-          onClick={() => setWeekOffset((w) => w - 1)}
-          className="text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1"
-        >
-          ←
+      <Card className="!py-2 !px-3 flex items-center justify-between">
+        <button onClick={() => setWeekOffset((w) => w - 1)} aria-label={t("Sebelumnya")} className="p-2 text-gray-300">
+          <ChevronLeft size={18} />
         </button>
-        <div className="text-center">
-          <p className="text-sm font-medium text-gray-50">
-            {weekOffset === 0
-              ? "Minggu Ini"
-              : weekOffset === -1
-                ? "Minggu Lalu"
-                : formatRentangMinggu(mingguMulai)}
+        <div className="text-center min-w-0">
+          <p className="text-sm font-medium text-gray-50 truncate">
+            {weekOffset === 0 ? t("Minggu Ini") : weekOffset === -1 ? t("Minggu Lalu") : rentangMinggu(mingguMulai)}
           </p>
-          <p className="text-xs text-gray-400">
-            {formatRentangMinggu(mingguMulai)}
-          </p>
+          <p className="text-xs text-gray-400">{rentangMinggu(mingguMulai)}</p>
         </div>
-        <button
-          onClick={() => setWeekOffset((w) => w + 1)}
-          disabled={weekOffset >= 0}
-          className="text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1 disabled:opacity-30"
-        >
-          →
+        <button onClick={() => setWeekOffset((w) => w + 1)} disabled={weekOffset >= 0} aria-label={t("Selanjutnya")} className="p-2 text-gray-300 disabled:opacity-30">
+          <ChevronRight size={18} />
         </button>
-      </div>
+      </Card>
 
       {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>
+        <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>
       ) : (
-        <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              ✅ Apa yang berhasil minggu ini?
-            </label>
-            <textarea
-              value={berhasil}
-              onChange={(e) => setBerhasil(e.target.value)}
-              rows={3}
-              className={inputClass}
-              placeholder="Ceritakan pencapaian, sekecil apapun..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              ❌ Apa yang tidak berjalan, kenapa?
-            </label>
-            <textarea
-              value={gagal}
-              onChange={(e) => setGagal(e.target.value)}
-              rows={3}
-              className={inputClass}
-              placeholder="Jujur saja, ini buat kamu sendiri..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              🎯 Satu hal yang mau diubah minggu depan?
-            </label>
-            <textarea
-              value={diubah}
-              onChange={(e) => setDiubah(e.target.value)}
-              rows={2}
-              className={inputClass}
-              placeholder="Fokus ke 1 hal saja, jangan terlalu banyak..."
-            />
-          </div>
-
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="w-full bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
-          >
-            {isSaving ? "Menyimpan..." : "Simpan Review"}
-          </button>
-          {saveMsg && (
-            <p className="text-xs text-center text-gray-500">{saveMsg}</p>
-          )}
-        </div>
+        <Card className="space-y-4">
+          <Field label={t("Apa yang berhasil minggu ini?")}>
+            <div className="space-y-1.5">
+              <CheckCircle2 size={16} className="text-primary" />
+              <textarea value={berhasil} onChange={(e) => setBerhasil(e.target.value)} className="input-field min-h-24" placeholder={t("Ceritakan pencapaian, sekecil apa pun...")} />
+            </div>
+          </Field>
+          <Field label={t("Apa yang tidak berjalan, kenapa?")}>
+            <div className="space-y-1.5">
+              <CircleOff size={16} className="text-red-400" />
+              <textarea value={gagal} onChange={(e) => setGagal(e.target.value)} className="input-field min-h-24" placeholder={t("Jujur saja, ini untuk dirimu sendiri...")} />
+            </div>
+          </Field>
+          <Field label={t("Satu hal yang mau diubah minggu depan?")}>
+            <div className="space-y-1.5">
+              <Target size={16} className="text-primary" />
+              <textarea value={diubah} onChange={(e) => setDiubah(e.target.value)} className="input-field min-h-20" placeholder={t("Fokus ke satu hal saja, jangan terlalu banyak...")} />
+            </div>
+          </Field>
+          <PrimaryButton onClick={handleSave} disabled={isSaving}>
+            {isSaving ? t("Menyimpan...") : t("Simpan Review")}
+          </PrimaryButton>
+          {saveMsg && <p className="text-xs text-center text-gray-400">{saveMsg}</p>}
+        </Card>
       )}
     </div>
   );

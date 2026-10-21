@@ -4,6 +4,8 @@ import { getLang, setLangRaw, type Lang } from "../lib/i18n";
 interface LanguageContextType {
   lang: Lang;
   setLang: (l: Lang) => void;
+  /** Render ulang seluruh pohon (mis. setelah mengubah pengaturan privasi). */
+  remount: () => void;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -12,14 +14,15 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 // termasuk konstanta tingkat modul, dirender ulang dengan bahasa baru.
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(getLang());
+  const [epoch, setEpoch] = useState(0);
   const setLang = (l: Lang) => {
     setLangRaw(l);
     setLangState(l);
   };
   setLangRaw(lang); // sinkronkan <html lang> saat pertama render
   return (
-    <LanguageContext.Provider value={{ lang, setLang }}>
-      <Fragment key={lang}>{children}</Fragment>
+    <LanguageContext.Provider value={{ lang, setLang, remount: () => setEpoch((e) => e + 1) }}>
+      <Fragment key={`${lang}-${epoch}`}>{children}</Fragment>
     </LanguageContext.Provider>
   );
 }

@@ -1,122 +1,194 @@
+import { useMemo, useState } from "react";
+import { Award, BookOpen, Clapperboard, Dumbbell, Flame, Medal, NotebookPen, PiggyBank, Timer, Trophy, type LucideIcon } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
-import { useMemo } from "react";
-import { useReadings } from "../reading/useReadings";
-import { useCreativeProjects } from "../creative/useCreativeProjects";
-import { useExercises } from "../exercise/useExercises";
+import Segmented from "../../components/ui/Segmented";
+import { ProgressBar } from "../../components/ui/Progress";
+import { Card, EmptyState, GhostButton, SectionTitle } from "../../components/ui/Controls";
+import { useAchievementData, currentStreak, longestStreak } from "./useAchievementData";
+import { t, tx } from "../../lib/i18n";
+import { fmtDate, rupiah, num } from "../../utils/format";
 
-interface Achievement {
+type Tab = "pencapaian" | "rekor";
+const ym = (s: unknown) => String(s ?? "").slice(0, 7);
+const nv = (v: unknown) => Number(v ?? 0);
+
+interface Badge {
+  id: string;
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  current: number;
+  target: number;
+}
+
+interface TimelineItem {
   id: string;
   tanggal: string;
-  icon: string;
+  icon: LucideIcon;
   title: string;
   detail: string;
 }
 
 export default function AchievementsPage() {
-  const { readings } = useReadings();
-  const { projects } = useCreativeProjects();
-  const { exercises } = useExercises();
+  const { data, loading } = useAchievementData();
+  const [tab, setTab] = useState<Tab>("pencapaian");
+  const [showAll, setShowAll] = useState(false);
 
-  const achievements: Achievement[] = useMemo(() => {
-    const list: Achievement[] = [];
+  const calc = useMemo(() => {
+    const thisMonth = new Date().toISOString().slice(0, 7);
+    const { habits, habitLogs, readings, exercises, focus, journals, incomes, expenses, budgets, creative } = data;
 
-    // Buku yang sudah selesai dibaca
-    readings
-      .filter((r) => r.status === "Selesai")
-      .forEach((r) => {
-        list.push({
-          id: `book-${r.id}`,
-          tanggal: r.tanggal,
-          icon: "📚",
-          title: `Selesai baca "${r.judul_buku}"`,
-          detail: r.insight ?? "",
-        });
-      });
+    // Hari "habit tuntas" per habit
+    const doneByHabit = new Map<string, Set<string>>();
+    for (const h of habits) {
+      const tgt = nv(h.target_harian) || 1;
+      const set = new Set<string>();
+      for (const l of habitLogs) if (l.habit_id === h.id && nv(l.nilai) >= tgt) set.add(String(l.tanggal));
+      doneByHabit.set(String(h.id), set);
+    }
+    const habitCur = Math.max(0, ...[...doneByHabit.values()].map(currentStreak));
+    const habitBest = Math.max(0, ...[...doneByHabit.values()].map(longestStreak));
 
-    // Konten yang sudah upload
-    projects
-      .filter((p) => p.tanggal_upload)
-      .forEach((p) => {
-        list.push({
-          id: `upload-${p.id}`,
-          tanggal: p.tanggal_upload!,
-          icon: "🎬",
-          title: `Upload konten "${p.judul}"`,
-          detail: p.platform ? `di ${p.platform}` : "",
-        });
-      });
+    const journalDates = new Set(journals.map((j) => String(j.tanggal)));
+    const booksDone = readings.filter((r) => r.status === "Selesai");
+    const booksThisMonth = booksDone.filter((r) => ym(r.tanggal) === thisMonth).length;
+    const booksPerMonth = new Map<string, number>();
+    for (const r of booksDone) booksPerMonth.set(ym(r.tanggal), (booksPerMonth.get(ym(r.tanggal)) ?? 0) + 1);
+    const exThisMonth = exercises.filter((e) => ym(e.tanggal) === thisMonth).length;
+    const focusMin = focus.reduce((s, f) => s + nv(f.durasi_aktual), 0);
+    const uploads = creative.filter((p) => p.tanggal_upload).length;
 
-    // Personal record lari (jarak terjauh yang PERNAH dicapai, ditandai di tanggal dicapainya)
-    const runningExercises = exercises
-      .filter((e) => e.tipe === "Running" && e.jarak)
-      .sort(
-        (a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime(),
-      );
+    const incMonth = incomes.filter((i) => ym(i.tanggal) === thisMonth).reduce((s, i) => s + nv(i.nominal), 0);
+    const expMonth = expenses.filter((e) => ym(e.tanggal) === thisMonth).reduce((s, e) => s + nv(e.nominal), 0);
+    const target = nv(budgets.find((b) => ym(b.bulan) === thisMonth)?.target_saving);
+
+    const badges: Badge[] = [
+      { id: "habit", icon: Flame, title: t("Konsisten Habit"), desc: t("7 hari berturut-turut"), current: habitCur, target: 7 },
+      { id: "read", icon: BookOpen, title: t("Membaca"), desc: t("5 buku dalam 1 bulan"), current: booksThisMonth, target: 5 },
+      { id: "sport", icon: Dumbbell, title: t("Olahraga"), desc: t("10 sesi dalam 1 bulan"), current: exThisMonth, target: 10 },
+      { id: "focus", icon: Timer, title: t("Fokus"), desc: t("10 jam total sesi fokus"), current: Math.round(focusMin / 6) / 10, target: 10 },
+      { id: "save", icon: PiggyBank, title: t("Hemat"), desc: target > 0 ? t("Capai target tabungan bulan ini") : t("Atur target tabungan di Money"), current: Math.max(0, incMonth - expMonth), target: target || 1 },
+      { id: "journal", icon: NotebookPen, title: t("Jurnal"), desc: t("7 hari berturut-turut menulis"), current: currentStreak(journalDates), target: 7 },
+      { id: "create", icon: Clapperboard, title: t("Kreator"), desc: t("Upload 3 konten"), current: uploads, target: 3 },
+    ];
+
+    // Rekor pribadi
+    const monthNet = new Map<string, number>();
+    for (const i of incomes) monthNet.set(ym(i.tanggal), (monthNet.get(ym(i.tanggal)) ?? 0) + nv(i.nominal));
+    for (const e of expenses) monthNet.set(ym(e.tanggal), (monthNet.get(ym(e.tanggal)) ?? 0) - nv(e.nominal));
+    const best = (arr: number[]) => (arr.length ? Math.max(...arr) : 0);
+    const bestMonth = [...monthNet.entries()].sort((a, b) => b[1] - a[1])[0];
+
+    const records: { id: string; icon: LucideIcon; label: string; value: string }[] = [
+      { id: "streak", icon: Flame, label: t("Streak habit terpanjang"), value: t("{0} hari", [habitBest]) },
+      { id: "jstreak", icon: NotebookPen, label: t("Streak jurnal terpanjang"), value: t("{0} hari", [longestStreak(journalDates)]) },
+      { id: "dist", icon: Medal, label: t("Lari terjauh"), value: `${num(best(exercises.filter((e) => e.tipe === "Running").map((e) => nv(e.jarak))))} km` },
+      { id: "dur", icon: Dumbbell, label: t("Latihan terlama"), value: t("{0} menit", [best(exercises.map((e) => nv(e.durasi)))]) },
+      { id: "focus", icon: Timer, label: t("Sesi fokus terlama"), value: t("{0} menit", [best(focus.map((f) => nv(f.durasi_aktual)))]) },
+      { id: "inc", icon: Trophy, label: t("Pemasukan terbesar"), value: rupiah(best(incomes.map((i) => nv(i.nominal)))) },
+      { id: "save", icon: PiggyBank, label: t("Tabungan bulanan terbaik"), value: bestMonth ? rupiah(Math.max(0, bestMonth[1])) : rupiah(0) },
+      { id: "books", icon: BookOpen, label: t("Buku terbanyak dalam 1 bulan"), value: t("{0} buku", [best([...booksPerMonth.values()])]) },
+    ];
+
+    // Riwayat pencapaian (timeline lama): buku selesai, konten ter-upload, rekor lari baru
+    const timeline: TimelineItem[] = [];
+    for (const r of booksDone)
+      timeline.push({ id: `b${r.id}`, tanggal: String(r.tanggal), icon: BookOpen, title: t('Selesai baca "{0}"', [String(r.judul_buku)]), detail: String(r.insight ?? "") });
+    for (const p of creative.filter((x) => x.tanggal_upload))
+      timeline.push({ id: `u${p.id}`, tanggal: String(p.tanggal_upload), icon: Clapperboard, title: t('Upload konten "{0}"', [String(p.judul)]), detail: p.platform ? t("di {0}", [String(p.platform)]) : "" });
     let maxKm = 0;
-    runningExercises.forEach((e) => {
-      if (e.jarak! > maxKm) {
-        maxKm = e.jarak!;
-        list.push({
-          id: `pr-${e.id}`,
-          tanggal: e.tanggal,
-          icon: "🏃",
-          title: `Personal Record lari: ${e.jarak} km`,
-          detail: "Jarak terjauh baru!",
-        });
+    [...exercises].filter((e) => e.tipe === "Running" && nv(e.jarak) > 0).sort((a, b) => String(a.tanggal).localeCompare(String(b.tanggal))).forEach((e) => {
+      if (nv(e.jarak) > maxKm) {
+        maxKm = nv(e.jarak);
+        timeline.push({ id: `p${e.id}`, tanggal: String(e.tanggal), icon: Medal, title: t("Rekor lari baru: {0} km", [nv(e.jarak)]), detail: t("Jarak terjauh baru!") });
       }
     });
+    timeline.sort((a, b) => b.tanggal.localeCompare(a.tanggal));
 
-    return list.sort(
-      (a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime(),
-    );
-  }, [readings, projects, exercises]);
+    return { badges, records, timeline };
+  }, [data]);
+
+  const badges = [...calc.badges].sort((a, b) => Number(b.current >= b.target) - Number(a.current >= a.target) || b.current / b.target - a.current / a.target);
+  const shown = showAll ? badges : badges.slice(0, 3);
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <PageHeader title="Achievements" className="-mx-4 -mt-4" />
-      <div>
-        <h1 className="sr-only">
-          🏆 Achievements
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Momen-momen yang layak dirayakan, bukti kamu sudah melangkah jauh.
-        </p>
-      </div>
+    <div className="pb-10">
+      <PageHeader title={t("Achievements")} />
+      <div className="px-4 space-y-4">
+        <Segmented
+          options={[
+            { key: "pencapaian", label: t("Pencapaian") },
+            { key: "rekor", label: t("Rekor") },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
 
-      {achievements.length === 0 ? (
-        <p className="text-gray-400 text-sm py-8 text-center">
-          Belum ada achievement tercatat. Selesaikan buku, upload konten, atau
-          pecahkan PR lari untuk mulai isi timeline ini.
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {achievements.map((a) => (
-            <div
-              key={a.id}
-              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex gap-3"
-            >
-              <span className="text-2xl">{a.icon}</span>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {a.title}
-                </p>
-                {a.detail && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {a.detail}
-                  </p>
-                )}
-                <p className="text-xs text-gray-400 mt-1">
-                  {new Date(a.tanggal).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
+        {loading ? (
+          <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>
+        ) : tab === "pencapaian" ? (
+          <>
+            <div className="space-y-3">
+              {shown.map((b) => {
+                const done = b.current >= b.target;
+                const Icon = b.icon;
+                return (
+                  <Card key={b.id} className="flex items-center gap-3">
+                    <span className={`w-12 h-12 shrink-0 rounded-full flex items-center justify-center ${done ? "bg-primary text-on-primary" : "bg-surface-light text-primary"}`}>
+                      {done ? <Award size={22} /> : <Icon size={22} />}
+                    </span>
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <p className="text-sm font-semibold text-gray-50 truncate">{b.title}</p>
+                      <p className="text-[11px] text-gray-400 break-words">{b.desc}</p>
+                      <ProgressBar value={b.current} max={b.target} />
+                    </div>
+                    <span className="text-[11px] text-gray-400 shrink-0 text-right">
+                      {done ? t("Tercapai") : `${num(b.current)}/${num(b.target)}`}
+                    </span>
+                  </Card>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      )}
+            {badges.length > 3 && <GhostButton onClick={() => setShowAll((v) => !v)}>{showAll ? t("Sembunyikan") : t("Lihat Semua")}</GhostButton>}
+
+            <div className="space-y-2 pt-2">
+              <SectionTitle>{t("Riwayat")}</SectionTitle>
+              {calc.timeline.length === 0 ? (
+                <EmptyState icon={Trophy} title={t("Belum ada riwayat pencapaian")} hint={t("Selesaikan buku, upload konten, atau pecahkan rekor lari untuk mengisi riwayat ini.")} />
+              ) : (
+                calc.timeline.map((a) => {
+                  const Icon = a.icon;
+                  return (
+                    <Card key={a.id} className="!py-3 flex items-start gap-3">
+                      <Icon size={18} className="text-primary mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-100 break-words">{a.title}</p>
+                        {a.detail && <p className="text-xs text-gray-400 mt-0.5 break-words">{tx(a.detail)}</p>}
+                        <p className="text-[11px] text-gray-500 mt-1">{fmtDate(a.tanggal, "d MMMM yyyy")}</p>
+                      </div>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="space-y-3">
+            {calc.records.map((r) => {
+              const Icon = r.icon;
+              return (
+                <Card key={r.id} className="flex items-center gap-3">
+                  <span className="w-10 h-10 shrink-0 rounded-xl bg-surface-light text-primary flex items-center justify-center">
+                    <Icon size={18} />
+                  </span>
+                  <p className="flex-1 min-w-0 text-sm text-gray-200 break-words">{r.label}</p>
+                  <p className="text-sm font-semibold text-primary shrink-0 text-right">{r.value}</p>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,229 +1,195 @@
-import { useState, useMemo, type FormEvent } from "react";
+import { useMemo, useState } from "react";
+import { Smile, Meh, Zap, BatteryLow, Frown, CloudRain, Flame, Trash2, X, type LucideIcon } from "lucide-react";
+import PageHeader from "../../components/ui/PageHeader";
+import Field from "../../components/ui/Field";
+import { Card, Chip, EmptyState, PrimaryButton, GhostButton, SectionTitle } from "../../components/ui/Controls";
 import { useJournals } from "./useJournals";
 import { MOOD_OPTIONS, type Journal, type JournalInput } from "../../types";
+import { t, tx } from "../../lib/i18n";
+import { fmtDate } from "../../utils/format";
+import { toDateStr } from "../../utils/dates";
 
-const initialForm: JournalInput = {
-  konten: "",
-  mood: null,
-  tanggal: new Date().toISOString().split("T")[0],
+const MOOD_ICON: Record<string, LucideIcon> = {
+  Senang: Smile,
+  Biasa: Meh,
+  Semangat: Zap,
+  Lelah: BatteryLow,
+  Sedih: Frown,
+  Cemas: CloudRain,
 };
+const PRESET_TAGS = ["Syukur", "Lelah", "Produktif"];
 
-// Hitung berapa hari berturut-turut ada entry journal (dihitung mundur dari hari ini/kemarin)
+const emptyForm = (): JournalInput => ({ judul: "", konten: "", mood: null, tags: [], tanggal: toDateStr() });
+
 function calculateStreak(journals: Journal[]): number {
-  if (journals.length === 0) return 0;
-
-  const uniqueDates = Array.from(new Set(journals.map((j) => j.tanggal)))
-    .sort()
-    .reverse();
-  const today = new Date().toISOString().split("T")[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-
-  // Streak cuma valid kalau entry terakhir hari ini atau kemarin (kalau sudah lebih dari itu, streak putus)
-  if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0;
-
+  const dates = Array.from(new Set(journals.map((j) => j.tanggal))).sort().reverse();
+  if (dates.length === 0) return 0;
+  const today = toDateStr();
+  const yesterday = toDateStr(new Date(Date.now() - 86400000));
+  if (dates[0] !== today && dates[0] !== yesterday) return 0;
   let streak = 1;
-  for (let i = 0; i < uniqueDates.length - 1; i++) {
-    const curr = new Date(uniqueDates[i]);
-    const next = new Date(uniqueDates[i + 1]);
-    const diffDays = Math.round((curr.getTime() - next.getTime()) / 86400000);
-    if (diffDays === 1) streak++;
+  for (let i = 0; i < dates.length - 1; i++) {
+    const diff = Math.round((new Date(dates[i]).getTime() - new Date(dates[i + 1]).getTime()) / 86400000);
+    if (diff === 1) streak++;
     else break;
   }
   return streak;
 }
 
 export default function JournalPage() {
-  const { journals, loading, addJournal, updateJournal, deleteJournal } =
-    useJournals();
+  const { journals, addJournal, updateJournal, deleteJournal } = useJournals();
   const [editing, setEditing] = useState<Journal | null>(null);
-  const [form, setForm] = useState<JournalInput>(initialForm);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState<JournalInput>(emptyForm);
+  const [customTag, setCustomTag] = useState("");
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const streak = useMemo(() => calculateStreak(journals), [journals]);
+  const tags = form.tags ?? [];
+  const allTags = [...PRESET_TAGS, ...tags.filter((x) => !PRESET_TAGS.includes(x))];
+
+  const toggleTag = (x: string) =>
+    setForm((f) => ({ ...f, tags: (f.tags ?? []).includes(x) ? (f.tags ?? []).filter((y) => y !== x) : [...(f.tags ?? []), x] }));
 
   const startEdit = (j: Journal) => {
     setEditing(j);
-    setForm({ konten: j.konten, mood: j.mood, tanggal: j.tanggal });
+    setForm({ judul: j.judul ?? "", konten: j.konten, mood: j.mood, tags: j.tags ?? [], tanggal: j.tanggal });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  const cancelEdit = () => {
+  const reset = () => {
     setEditing(null);
-    setForm(initialForm);
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+    setForm(emptyForm());
     setError("");
-    setIsSubmitting(true);
-
-    const result = editing
-      ? await updateJournal(editing.id, form)
-      : await addJournal(form);
-
-    if (result.error) {
-      setError(result.error);
-      setIsSubmitting(false);
-      return;
-    }
-
-    setEditing(null);
-    setForm(initialForm);
-    setIsSubmitting(false);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Yakin hapus entry journal ini?")) deleteJournal(id);
+  const submit = async () => {
+    if (!form.konten.trim()) return setError(t("Isi jurnal tidak boleh kosong"));
+    setSaving(true);
+    setError("");
+    const payload = { ...form, judul: form.judul?.trim() || null, konten: form.konten.trim() };
+    const res = editing ? await updateJournal(editing.id, payload) : await addJournal(payload);
+    setSaving(false);
+    if (res.error) setError(res.error);
+    else reset();
   };
 
   return (
-    <div className="space-y-4">
-      {streak > 0 && (
-        <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-xl p-3 text-center">
-          <p className="text-sm text-orange-800 dark:text-orange-200">
-            🔥 Streak:{" "}
-            <span className="font-semibold">{streak} hari berturut-turut</span>
-          </p>
-        </div>
-      )}
-
-      <form
-        onSubmit={handleSubmit}
-        className="bg-surface p-5 rounded-xl border border-surface-light space-y-4"
-      >
-        <h2 className="font-semibold text-gray-50">
-          {editing ? "Edit Journal" : "Tulis Journal Hari Ini"}
-        </h2>
-
-        {error && (
-          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-            {error}
+    <div className="pb-28">
+      <PageHeader title={t("Jurnal")} />
+      <div className="px-4 space-y-5">
+        {streak > 0 && (
+          <div className="flex items-center gap-2 text-xs text-orange-300 px-1">
+            <Flame size={14} /> {t("{0} hari berturut-turut menulis jurnal", [streak])}
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Mood (opsional)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {MOOD_OPTIONS.map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() =>
-                  setForm({ ...form, mood: form.mood === m ? null : m })
-                }
-                className={`px-3 py-1.5 rounded-full text-sm border transition ${
-                  form.mood === m
-                    ? "bg-primary text-on-primary border-primary"
-                    : "border-surface-light text-gray-600 dark:text-gray-300"
-                }`}
-              >
-                {m}
+        <Card className="space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <input
+              type="date"
+              className="input-field !w-auto"
+              value={form.tanggal}
+              onChange={(e) => e.target.value && setForm({ ...form, tanggal: e.target.value })}
+              aria-label={t("Tanggal")}
+            />
+            {editing && (
+              <button onClick={reset} className="text-xs text-gray-400 flex items-center gap-1">
+                <X size={14} /> {t("Batal")}
               </button>
-            ))}
+            )}
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Refleksi
-          </label>
-          <textarea
-            required
-            value={form.konten}
-            onChange={(e) => setForm({ ...form, konten: e.target.value })}
-            rows={5}
-            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-            placeholder="Bagaimana hari ini? Apa yang kamu pelajari atau rasakan?"
-          />
-        </div>
+          <div className="grid grid-cols-6 gap-1.5">
+            {MOOD_OPTIONS.map((m) => {
+              const Icon = MOOD_ICON[m] ?? Meh;
+              const active = form.mood === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setForm({ ...form, mood: active ? null : m })}
+                  aria-label={tx(m) as string}
+                  aria-pressed={active}
+                  className={`flex flex-col items-center gap-1 py-2 rounded-xl border text-[9px] ${
+                    active ? "border-primary bg-primary/15 text-primary" : "border-surface-light text-gray-400"
+                  }`}
+                >
+                  <Icon size={20} />
+                  <span className="truncate max-w-full px-0.5">{tx(m)}</span>
+                </button>
+              );
+            })}
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Tanggal
-          </label>
-          <input
-            type="date"
-            required
-            value={form.tanggal}
-            onChange={(e) => setForm({ ...form, tanggal: e.target.value })}
-            className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-          />
-        </div>
+          <Field label={t("Judul")}>
+            <input className="input-field" placeholder={t("Hari ini cukup baik")} value={form.judul ?? ""} onChange={(e) => setForm({ ...form, judul: e.target.value })} />
+          </Field>
+          <Field label={t("Refleksi")}>
+            <textarea className="input-field min-h-32" placeholder={t("Bagaimana harimu? Apa yang kamu pelajari atau rasakan?")} value={form.konten} onChange={(e) => setForm({ ...form, konten: e.target.value })} />
+          </Field>
 
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition"
-          >
-            {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
-          </button>
-          {editing && (
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="px-4 py-2.5 rounded-lg border border-surface-light dark:text-gray-300"
+          <div className="space-y-2">
+            <span className="text-xs text-gray-400">{t("Tag")}</span>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map((x) => (
+                <Chip key={x} active={tags.includes(x)} onClick={() => toggleTag(x)}>
+                  {tx(x)}
+                </Chip>
+              ))}
+            </div>
+            <form
+              className="flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const v = customTag.trim();
+                if (v && !tags.includes(v)) toggleTag(v);
+                setCustomTag("");
+              }}
             >
-              Batal
-            </button>
+              <input className="input-field" placeholder={t("Tag baru")} value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
+              <GhostButton type="submit" className="!w-auto px-4">{t("Tambah")}</GhostButton>
+            </form>
+          </div>
+
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <PrimaryButton onClick={submit} disabled={saving}>{saving ? t("Menyimpan...") : t("Simpan")}</PrimaryButton>
+        </Card>
+
+        <div className="space-y-2">
+          <SectionTitle>{t("Riwayat")}</SectionTitle>
+          {journals.length === 0 ? (
+            <EmptyState title={t("Belum ada entri jurnal")} />
+          ) : (
+            journals.map((j) => {
+              const Icon = MOOD_ICON[j.mood ?? ""] ?? Meh;
+              return (
+                <Card key={j.id} className="space-y-1.5">
+                  <div className="flex items-start gap-3">
+                    <button className="flex-1 min-w-0 text-left" onClick={() => startEdit(j)}>
+                      <p className="text-[11px] text-gray-400">{fmtDate(j.tanggal, "EEE, d MMM yyyy")}</p>
+                      <p className="text-sm font-medium text-gray-50 truncate">{j.judul || j.konten.slice(0, 40)}</p>
+                      <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">{j.konten}</p>
+                    </button>
+                    <Icon size={18} className="text-primary shrink-0 mt-1" />
+                    <button
+                      aria-label={t("Hapus")}
+                      className="text-gray-600 shrink-0 mt-1"
+                      onClick={() => confirm(t("Hapus entri ini?")) && deleteJournal(j.id)}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                  {(j.tags ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {(j.tags ?? []).map((x) => <Chip key={x} tone="primary">{tx(x)}</Chip>)}
+                    </div>
+                  )}
+                </Card>
+              );
+            })
           )}
         </div>
-      </form>
-
-      {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat data...</p>
-      ) : journals.length === 0 ? (
-        <p className="text-gray-400 text-sm py-8 text-center">
-          Belum ada entry journal.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {journals.map((j) => (
-            <div
-              key={j.id}
-              className="bg-surface p-4 rounded-xl border border-surface-light"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs text-gray-400">
-                      {new Date(j.tanggal).toLocaleDateString("id-ID", {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </span>
-                    {j.mood && (
-                      <span className="text-xs px-2 py-0.5 bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-300 rounded-full">
-                        {j.mood}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                    {j.konten}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 ml-4 shrink-0">
-                  <button
-                    onClick={() => startEdit(j)}
-                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(j.id)}
-                    className="text-xs text-red-500 hover:text-red-700"
-                  >
-                    Hapus
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
