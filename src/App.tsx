@@ -1,8 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import { ShellProvider } from "./context/ShellContext";
+import { LanguageProvider } from "./context/LanguageContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ShellProvider, useShell } from "./context/ShellContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BackButtonHandler from "./components/BackButtonHandler";
 import Layout from "./components/Layout";
@@ -21,7 +23,6 @@ import ExercisePage from "./features/exercise/ExercisePage";
 import AnalyticsPage from "./features/analytics/AnalyticsPage";
 import GoalsPage from "./features/goals/GoalsPage";
 import MindGrowthPage from "./features/mindgrowth/MindGrowthPage";
-import PageHeader from "./components/ui/PageHeader";
 import JournalPage from "./features/journal/JournalPage";
 import NotesPage from "./features/notes/NotesPage";
 import CreativeBrainPage from "./features/creative/CreativeBrainPage";
@@ -31,28 +32,26 @@ import AchievementsPage from "./features/achievements/AchievementsPage";
 import ProfilePage from "./features/profile/ProfilePage";
 
 // Pengguna baru diarahkan ke alur Welcome (splash + onboarding) satu kali saja.
+// Status dibaca sekali dari database lalu disimpan di ShellContext; WelcomeFlow
+// mengubahnya langsung saat selesai sehingga tidak ada pembacaan ulang yang bisa balapan.
 function FirstRunGate({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { introDone, setIntroDone } = useShell();
   const location = useLocation();
-  const [state, setState] = useState<"checking" | "new" | "ready">("checking");
 
-  // Dicek ulang tiap pindah halaman selama belum "ready", supaya selesai onboarding
-  // (yang menulis intro_done lalu navigate("/")) tidak terpental kembali ke /welcome.
-  const path = location.pathname;
   useEffect(() => {
-    if (!user || state === "ready") return;
+    if (!user || introDone !== null) return;
     let cancelled = false;
-    getSetting("intro_done").then((v) => {
-      if (!cancelled) setState(v ? "ready" : "new");
-    });
+    getSetting("intro_done")
+      .then((v) => !cancelled && setIntroDone(!!v))
+      .catch(() => !cancelled && setIntroDone(true));
     return () => {
       cancelled = true;
     };
-  }, [user, path, state]);
+  }, [user, introDone, setIntroDone]);
 
-  if (state === "checking") return null;
-  if (state === "new" && path !== "/welcome")
-    return <Navigate to="/welcome" replace />;
+  if (introDone === null) return null;
+  if (!introDone && location.pathname !== "/welcome") return <Navigate to="/welcome" replace />;
   return <>{children}</>;
 }
 
@@ -92,14 +91,7 @@ function AppContent() {
             <Route path="/focus" element={bare(<FocusModePage />)} />
             <Route path="/goals" element={withLayout(<GoalsPage />)} />
             <Route path="/learning" element={withLayout(<MindGrowthPage />)} />
-            <Route path="/journal" element={withLayout(
-                <>
-                  <PageHeader title="Journal" />
-                  <div className="px-4">
-                    <JournalPage />
-                  </div>
-                </>,
-              )} />
+            <Route path="/journal" element={withLayout(<JournalPage />)} />
             <Route path="/notes" element={withLayout(<NotesPage />)} />
             <Route path="/creative" element={withLayout(<CreativeBrainPage />)} />
             <Route path="/projects" element={withLayout(<DevProjectsPage />)} />
@@ -111,7 +103,7 @@ function AppContent() {
               path="/achievements"
               element={withLayout(<AchievementsPage />)}
             />
-            <Route path="/profile" element={withLayout(<ProfilePage />)} />
+            <Route path="/profile/*" element={withLayout(<ProfilePage />)} />
 
             {/* Rute lama dialihkan ke modul baru */}
             <Route path="/mind-growth" element={<Navigate to="/learning" replace />} />
@@ -130,7 +122,11 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <ShellProvider>
-          <AppContent />
+          <LanguageProvider>
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
+          </LanguageProvider>
         </ShellProvider>
       </AuthProvider>
     </ThemeProvider>

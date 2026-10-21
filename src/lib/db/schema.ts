@@ -214,7 +214,38 @@ const v2: string[] = [
   `CREATE INDEX idx_focus_tanggal ON focus_sessions(tanggal)`,
 ];
 
-export const MIGRATIONS: string[][] = [v1, v2];
+// v3 — Revamp UI tahap 2: akun & transfer, tidur, materi belajar, referensi kreatif,
+// serta kolom tambahan untuk journal (judul, tag) dan goals (satuan).
+const v3: string[] = [
+  `CREATE TABLE accounts (
+    ${ID}, ${UID}, nama TEXT NOT NULL, tipe TEXT NOT NULL DEFAULT 'Tunai',
+    saldo_awal REAL NOT NULL DEFAULT 0, ${CREATED}
+  )`,
+  `CREATE TABLE transfers (
+    ${ID}, ${UID}, dari_akun TEXT NOT NULL, ke_akun TEXT NOT NULL,
+    nominal REAL NOT NULL, tanggal TEXT NOT NULL, catatan TEXT, ${CREATED}
+  )`,
+  `CREATE TABLE sleep_logs (
+    ${ID}, ${UID}, tanggal TEXT NOT NULL, jam REAL NOT NULL, ${CREATED},
+    UNIQUE (user_id, tanggal)
+  )`,
+  `CREATE TABLE study_items (
+    ${ID}, ${UID}, judul TEXT NOT NULL, tipe TEXT NOT NULL DEFAULT 'Kursus',
+    selesai REAL NOT NULL DEFAULT 0, total REAL, satuan TEXT DEFAULT 'materi',
+    catatan TEXT, ${CREATED}
+  )`,
+  `CREATE TABLE creative_refs (
+    ${ID}, ${UID}, judul TEXT NOT NULL, url TEXT, catatan TEXT, ${CREATED}
+  )`,
+  `ALTER TABLE incomes ADD COLUMN akun TEXT`,
+  `ALTER TABLE journals ADD COLUMN judul TEXT`,
+  `ALTER TABLE journals ADD COLUMN tags TEXT`,
+  `ALTER TABLE goals ADD COLUMN satuan TEXT`,
+  `CREATE INDEX idx_transfers_tanggal ON transfers(tanggal)`,
+  `CREATE INDEX idx_sleep_tanggal ON sleep_logs(tanggal)`,
+];
+
+export const MIGRATIONS: string[][] = [v1, v2, v3];
 
 export function migrationStatements(index: number): SqlStatement[] {
   return [
@@ -246,7 +277,7 @@ export const TABLE_META: Record<string, TableMeta> = {
   training_plan_sessions: { bool: [], json: [] },
   body_weight_logs: { bool: [], json: [] },
   learnings: { bool: [], json: [] },
-  journals: { bool: [], json: [] },
+  journals: { bool: [], json: ["tags"] },
   readings: { bool: [], json: [] },
   weekly_reviews: { bool: [], json: [] },
   creative_projects: { bool: ["is_archived"], json: [] },
@@ -266,6 +297,11 @@ export const TABLE_META: Record<string, TableMeta> = {
   habits: { bool: ["aktif"], json: [] },
   habit_logs: { bool: [], json: [] },
   focus_sessions: { bool: ["selesai"], json: [] },
+  accounts: { bool: [], json: [] },
+  transfers: { bool: [], json: [] },
+  sleep_logs: { bool: [], json: [] },
+  study_items: { bool: [], json: [] },
+  creative_refs: { bool: [], json: [] },
 };
 
 // Tabel dengan primary key bernama "id" yang dibuatkan UUID otomatis saat insert.
@@ -307,6 +343,11 @@ export const BACKUP_TABLES = [
   "habits",
   "habit_logs",
   "focus_sessions",
+  "accounts",
+  "transfers",
+  "sleep_logs",
+  "study_items",
+  "creative_refs",
 ] as const;
 
 export const BACKUP_FORMAT = "lifeos-backup";

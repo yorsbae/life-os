@@ -41,7 +41,7 @@ export default function CurrencyInput({
         autoFocus={autoFocus}
         value={displayValue}
         onChange={handleChange}
-        placeholder={placeholder}
+        placeholder={placeholder?.replace(/^\s*Rp\s*/i, "")}
         className={`pl-9 ${className}`}
       />
     </div>

@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { Check, Plus } from "lucide-react";
+import { Check, Inbox, Plus, type LucideIcon } from "lucide-react";
 
 export function Card({
   children,
@@ -163,14 +163,20 @@ export function SectionTitle({
 export function EmptyState({
   title,
   hint,
+  icon: Icon = Inbox,
+  action,
 }: {
   title: string;
   hint?: string;
+  icon?: LucideIcon;
+  action?: ReactNode;
 }) {
   return (
-    <div className="card p-6 text-center space-y-1">
+    <div className="card p-6 text-center flex flex-col items-center gap-2">
+      <Icon size={28} className="text-gray-500" strokeWidth={1.5} />
       <p className="text-sm font-medium text-gray-200">{title}</p>
       {hint && <p className="text-xs text-gray-400">{hint}</p>}
+      {action}
     </div>
   );
 }

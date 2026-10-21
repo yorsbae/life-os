@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
+import { useShell } from "../../context/ShellContext";
 import { setSetting } from "../../utils/appSettings";
 import { useExerciseSchedule, HARI_LABEL } from "../exercise/useExerciseSchedule";
 import { useBudgetTarget } from "../money/useBudgetTarget";
@@ -62,6 +63,8 @@ function Slide({
 export default function WelcomeFlow() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setIntroDone } = useShell();
+  const [error, setError] = useState("");
   const [step, setStep] = useState<Step>("splash");
 
   const { saveDaySchedule } = useExerciseSchedule();
@@ -79,18 +82,25 @@ export default function WelcomeFlow() {
   const finish = async (withSetup: boolean) => {
     if (!user || saving) return;
     setSaving(true);
-    if (withSetup) {
-      for (let hari = 0; hari <= 6; hari++) {
-        await saveDaySchedule(hari, activeDays.has(hari) ? "Strength" : "Rest", null, null);
+    setError("");
+    try {
+      if (withSetup) {
+        for (let hari = 0; hari <= 6; hari++) {
+          await saveDaySchedule(hari, activeDays.has(hari) ? "Strength" : "Rest", null, null);
+        }
+        if (targetSaving) await saveTarget({ target_saving: targetSaving });
       }
-      if (targetSaving) await saveTarget({ target_saving: targetSaving });
+      await db.from("profiles").upsert({
+        id: user.id,
+        ...(nama.trim() ? { nama: nama.trim() } : {}),
+        onboarding_done: true,
+      });
+      await setSetting("intro_done", "1");
+    } catch (e) {
+      // Data setup gagal tersimpan tidak boleh mengunci pengguna di layar ini.
+      setError(e instanceof Error ? e.message : String(e));
     }
-    await db.from("profiles").upsert({
-      id: user.id,
-      ...(nama.trim() ? { nama: nama.trim() } : {}),
-      onboarding_done: true,
-    });
-    await setSetting("intro_done", "1");
+    setIntroDone(true);
     navigate("/", { replace: true });
   };
 
@@ -251,12 +261,13 @@ export default function WelcomeFlow() {
           <CurrencyInput
             value={targetSaving}
             onChange={setTargetSaving}
-            placeholder="Rp 0"
+            placeholder="0"
             className="input-field"
           />
         </div>
       </div>
 
+      {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
       <PrimaryButton onClick={() => finish(true)} disabled={saving}>
         {saving ? "Menyimpan..." : "Selesai, masuk ke Home"}
       </PrimaryButton>

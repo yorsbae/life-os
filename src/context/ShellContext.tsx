@@ -8,6 +8,9 @@ interface ShellContextType {
   closeDrawer: () => void;
   openSearch: () => void;
   closeSearch: () => void;
+  /** null = belum dicek, false = pengguna baru (tampilkan Welcome), true = sudah onboarding */
+  introDone: boolean | null;
+  setIntroDone: (v: boolean) => void;
 }
 
 const ShellContext = createContext<ShellContextType | undefined>(undefined);
@@ -15,6 +18,7 @@ const ShellContext = createContext<ShellContextType | undefined>(undefined);
 export function ShellProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [introDone, setIntroDone] = useState<boolean | null>(null);
   return (
     <ShellContext.Provider
       value={{
@@ -24,6 +28,8 @@ export function ShellProvider({ children }: { children: ReactNode }) {
         closeDrawer: () => setDrawerOpen(false),
         openSearch: () => setSearchOpen(true),
         closeSearch: () => setSearchOpen(false),
+        introDone,
+        setIntroDone,
       }}
     >
       {children}
