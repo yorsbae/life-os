@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export interface ExerciseSchedule {
   id: string;
   user_id: string;
@@ -48,7 +49,7 @@ export function useExerciseSchedule() {
     sub_kategori: string | null,
     catatan: string | null,
   ) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("exercise_schedules")
       .upsert(

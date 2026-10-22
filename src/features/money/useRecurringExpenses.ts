@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export interface RecurringExpense {
   id: string;
   user_id: string;
@@ -34,7 +35,7 @@ export function useRecurringExpenses() {
   }, [fetchItems]);
 
   const addItem = async (input: RecurringExpenseInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("recurring_expenses")
       .insert({ ...input, user_id: user.id });

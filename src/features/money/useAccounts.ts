@@ -6,6 +6,7 @@ import { useExpenses } from "../expense/useExpenses";
 import { useIncomes } from "../income/useIncomes";
 import { useTransfers } from "./useTransfers";
 
+import { t } from "../../lib/i18n";
 export const ACCOUNT_TYPES = ["Tunai", "Bank", "E-Wallet"] as const;
 export type AccountType = (typeof ACCOUNT_TYPES)[number];
 
@@ -65,11 +66,11 @@ export function useAccounts() {
   }, [fetchAccounts]);
 
   const addAccount = async (nama: string, tipe: string, saldoAwal: number) => {
-    if (!user) return { error: "Database belum siap" };
+    if (!user) return { error: t("Database belum siap") };
     const name = nama.trim();
-    if (!name) return { error: "Nama akun wajib diisi" };
+    if (!name) return { error: t("Nama akun wajib diisi") };
     if (accounts.some((a) => a.nama.toLowerCase() === name.toLowerCase()))
-      return { error: "Nama akun sudah dipakai" };
+      return { error: t("Nama akun sudah dipakai") };
     const { error } = await db
       .from("accounts")
       .insert({ user_id: user.id, nama: name, tipe, saldo_awal: saldoAwal });

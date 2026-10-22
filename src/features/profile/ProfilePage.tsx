@@ -3,7 +3,7 @@ import { Bell, ChevronRight, Database, Info, Languages, LayoutDashboard, Palette
 import PageHeader from "../../components/ui/PageHeader";
 import { Card } from "../../components/ui/Controls";
 import { useProfile } from "./useProfile";
-import { LANGUAGES, getLang, t } from "../../lib/i18n";
+import { LANGUAGES, getLang, t, tx } from "../../lib/i18n";
 import EditProfile from "./EditProfile";
 import { AboutPage, AppearancePage, DataPage, LanguagePage, ModulesPage, PrivacyPage, RemindersPage } from "./SettingsPages";
 
@@ -44,8 +44,8 @@ function SettingsHome() {
             <button key={to} onClick={() => navigate(to)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left">
               <span className="w-9 h-9 rounded-xl bg-surface-light text-primary flex items-center justify-center shrink-0"><Icon size={18} /></span>
               <span className="flex-1 min-w-0">
-                <span className="block text-sm text-gray-50 truncate">{title}</span>
-                <span className="block text-[11px] text-gray-400 truncate">{sub}</span>
+                <span className="block text-sm text-gray-50 truncate">{tx(title)}</span>
+                <span className="block text-[11px] text-gray-400 truncate">{tx(sub)}</span>
               </span>
               <ChevronRight size={16} className="text-gray-500 shrink-0" />
             </button>

@@ -132,7 +132,7 @@ export default function ExerciseForm({
           <textarea className="input-field min-h-16" value={catatan} onChange={(e) => setCatatan(e.target.value)} />
         </label>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red-400">{tx(error)}</p>}
         <PrimaryButton type="submit" disabled={saving}>
           {saving ? t("Menyimpan...") : t("Simpan")}
         </PrimaryButton>

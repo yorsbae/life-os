@@ -138,7 +138,7 @@ export default function HabitPage() {
             <Icon size={18} />
           </span>
           <button className="flex-1 min-w-0 text-left" onClick={() => setEditing(h)}>
-            <p className="text-sm font-medium text-gray-100 truncate">{h.nama}</p>
+            <p className="text-sm font-medium text-gray-100 truncate">{tx(h.nama)}</p>
             <p className="text-[11px] text-gray-400 truncate">
               {num(v)}/{num(h.target_harian)} {tx(h.satuan)}
             </p>
@@ -177,7 +177,7 @@ export default function HabitPage() {
     return (
       <Card key={h.id} className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-medium text-gray-100 truncate min-w-0">{h.nama}</p>
+          <p className="text-sm font-medium text-gray-100 truncate min-w-0">{tx(h.nama)}</p>
           <span className="text-[11px] text-gray-400 shrink-0">{t("{0}/{1} hari", [doneDays, days.length])}</span>
         </div>
         <ProgressBar value={doneDays} max={days.length} />

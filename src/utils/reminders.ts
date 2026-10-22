@@ -3,6 +3,7 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 import { db } from "../lib/db";
 import { getSetting, setSetting } from "./appSettings";
 
+import { t, intlLocale } from "../lib/i18n";
 // Pengingat jadwal Calendar lewat notifikasi LOKAL Android (dijadwalkan di perangkat,
 // tanpa server, tanpa internet). Menggantikan Web Push + Edge Function `send-reminders`.
 //
@@ -67,7 +68,7 @@ export async function syncEventReminders(events: ReminderEvent[]) {
     notifications: upcoming.map(({ e, at }) => ({
       id: notificationId(e.id),
       title: "🗓 Jadwal Sebentar Lagi",
-      body: `${e.judul} - ${new Date(e.tanggal_mulai).toLocaleTimeString("id-ID", {
+      body: `${e.judul} - ${new Date(e.tanggal_mulai).toLocaleTimeString(intlLocale(), {
         hour: "2-digit",
         minute: "2-digit",
       })}`,
@@ -84,11 +85,11 @@ async function loadEvents(): Promise<ReminderEvent[]> {
 /** Minta izin notifikasi lalu aktifkan pengingat. */
 export async function enableReminders(): Promise<{ error: string | null }> {
   if (!remindersSupported()) {
-    return { error: "Pengingat hanya tersedia di aplikasi Android." };
+    return { error: t("Pengingat hanya tersedia di aplikasi Android.") };
   }
   const perm = await LocalNotifications.requestPermissions();
   if (perm.display !== "granted") {
-    return { error: "Izin notifikasi ditolak. Aktifkan lewat Pengaturan Android → Aplikasi → Life OS → Notifikasi." };
+    return { error: t("Izin notifikasi ditolak. Aktifkan lewat Pengaturan Android → Aplikasi → Life OS → Notifikasi.") };
   }
   await setSetting(SETTING_KEY, "1");
   await syncEventReminders(await loadEvents());

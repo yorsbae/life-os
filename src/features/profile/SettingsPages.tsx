@@ -10,7 +10,7 @@ import { exportAllData, readBackupFile, restoreBackup } from "../../utils/export
 import { hideAmounts, setHideAmounts } from "../../lib/privacy";
 import NotificationSettings from "./NotificationSettings";
 import WeatherSettings from "./WeatherSettings";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 
 export const APP_VERSION = "1.0.0";
 
@@ -52,7 +52,7 @@ export function AppearancePage() {
       <Card className="space-y-3">
         <SectionTitle>{t("Ukuran teks")}</SectionTitle>
         <div className="flex gap-2">
-          {sizes.map((s) => <Chip key={s.key} active={fontSize === s.key} onClick={() => setFontSize(s.key)}>{s.label}</Chip>)}
+          {sizes.map((s) => <Chip key={s.key} active={fontSize === s.key} onClick={() => setFontSize(s.key)}>{tx(s.label)}</Chip>)}
         </div>
       </Card>
     </SubPage>
@@ -147,13 +147,13 @@ export function DataPage() {
         <p className="text-xs text-gray-400">
           {t("Data hanya tersimpan di HP ini. Jika aplikasi dihapus atau HP hilang, data ikut hilang, jadi simpan backup secara berkala. File backup berisi semua datamu dalam bentuk teks biasa (JSON), simpan di tempat yang aman.")}
         </p>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-xs text-red-400">{tx(error)}</p>}
         <GhostButton onClick={doExport} disabled={exporting}>{exporting ? t("Menyiapkan file...") : t("Buat Backup")}</GhostButton>
         <label className={`block w-full text-center border border-surface-light text-gray-200 py-3 rounded-xl text-sm font-medium ${importing ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}>
           {importing ? t("Memproses...") : t("Pulihkan dari Backup")}
           <input type="file" accept="application/json,.json" className="hidden" onChange={doImport} />
         </label>
-        {msg && <p className={`text-xs ${msg.ok ? "text-primary" : "text-red-400"}`}>{msg.text}</p>}
+        {msg && <p className={`text-xs ${msg.ok ? "text-primary" : "text-red-400"}`}>{tx(msg.text)}</p>}
       </Card>
     </SubPage>
   );
@@ -194,7 +194,7 @@ export function AboutPage() {
     <SubPage title={t("Tentang Life OS")}>
       <Card className="text-center space-y-1 py-6">
         <p className="text-2xl font-bold text-primary">Life OS</p>
-        <p className="text-xs text-gray-400">Better Habits · A Greater You</p>
+        <p className="text-xs text-gray-400">{t("Better Habits · A Greater You")}</p>
         <p className="text-xs text-gray-500 pt-2">{t("Versi {0}", [APP_VERSION])}</p>
       </Card>
       <Card><p className="text-sm text-gray-300">{t("Aplikasi manajemen hidup pribadi: keuangan, kegiatan, kebiasaan, olahraga, belajar, jurnal, dan tujuan dalam satu tempat. Berjalan sepenuhnya di HP, tanpa server dan tanpa akun.")}</p></Card>

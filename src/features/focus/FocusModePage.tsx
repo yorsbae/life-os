@@ -6,7 +6,7 @@ import { Card, PrimaryButton, GhostButton } from "../../components/ui/Controls";
 import { Ring } from "../../components/ui/Progress";
 import { useTasks } from "../plan/useTasks";
 import { useFocusSessions } from "./useFocusSessions";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 import { num } from "../../utils/format";
 
 type Mode = "pomodoro" | "50/10" | "timer";
@@ -106,7 +106,7 @@ export default function FocusModePage() {
           <span className="text-xs text-gray-400">{t("Tugas")}</span>
           <select className="input-field" value={taskId} onChange={(e) => setTaskId(e.target.value)} disabled={running}>
             <option value="">{t("Tanpa tugas")}</option>
-            {open.map((t) => <option key={t.id} value={t.id}>{t.judul}</option>)}
+            {open.map((t) => <option key={t.id} value={t.id}>{tx(t.judul)}</option>)}
           </select>
         </label>
 

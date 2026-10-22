@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { Wishlist, WishlistInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useWishlists() {
   const { user } = useAuth();
   const [wishlists, setWishlists] = useState<Wishlist[]>([]);
@@ -25,7 +26,7 @@ export function useWishlists() {
   }, [fetchWishlists]);
 
   const addWishlist = async (input: WishlistInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("wishlists")
       .insert({ ...input, user_id: user.id });

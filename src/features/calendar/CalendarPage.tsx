@@ -118,7 +118,7 @@ export default function CalendarPage() {
         <Segmented
           options={[
             { key: "bulan", label: t("Bulan") },
-            { key: "minggu", label: t("Minggu") },
+            { key: "minggu", label: t("Pekan") },
             { key: "hari", label: t("Hari") },
           ]}
           value={view}
@@ -129,7 +129,7 @@ export default function CalendarPage() {
           <button aria-label={t("Sebelumnya")} onClick={() => shift(-1)} className="p-1.5 text-gray-300">
             <ChevronLeft size={18} />
           </button>
-          <p className="flex-1 text-center text-sm font-semibold text-gray-100 truncate">{heading}</p>
+          <p className="flex-1 text-center text-sm font-semibold text-gray-100 truncate">{tx(heading)}</p>
           <button aria-label={t("Berikutnya")} onClick={() => shift(1)} className="p-1.5 text-gray-300">
             <ChevronRight size={18} />
           </button>
@@ -172,12 +172,12 @@ export default function CalendarPage() {
         )}
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-gray-100 px-1 capitalize">{listTitle}</p>
+          <p className="text-sm font-semibold text-gray-100 px-1 capitalize">{tx(listTitle)}</p>
           {(spent > 0 || earned > 0 || workouts > 0) && (
             <div className="flex gap-2 flex-wrap px-1">
               {spent > 0 && <span className="text-[11px] px-2.5 py-1 rounded-full bg-red-500/10 text-red-300">{t("Pengeluaran")} {rupiah(spent)}</span>}
               {earned > 0 && <span className="text-[11px] px-2.5 py-1 rounded-full bg-primary/10 text-primary">{t("Pemasukan")} {rupiah(earned)}</span>}
-              {workouts > 0 && <span className="text-[11px] px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-300">{t("Olahraga")} ×{workouts}</span>}
+              {workouts > 0 && <span className="text-[11px] px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-300">{t("Olahraga")} ×{tx(workouts)}</span>}
             </div>
           )}
           {dayItems.length === 0 ? (
@@ -195,9 +195,9 @@ export default function CalendarPage() {
                     <Icon size={18} />
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className={`block text-sm truncate ${it.done ? "text-gray-500 line-through" : "text-gray-100"}`}>{it.title}</span>
+                    <span className={`block text-sm truncate ${it.done ? "text-gray-500 line-through" : "text-gray-100"}`}>{tx(it.title)}</span>
                     <span className="block text-[11px] text-gray-400 truncate">
-                      {it.range}
+                      {tx(it.range)}
                       {it.event ? ` · ${tx(EVENT_TIPE_LABEL[it.event.tipe])}` : ` · ${t("Tugas")}`}
                     </span>
                   </span>

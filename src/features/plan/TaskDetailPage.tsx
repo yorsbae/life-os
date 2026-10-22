@@ -56,8 +56,8 @@ export default function TaskDetailPage() {
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-gray-50 break-words">{task.judul}</h2>
-          {task.deskripsi && <p className="text-sm text-gray-400 mt-1 break-words">{task.deskripsi}</p>}
+          <h2 className="text-xl font-bold text-gray-50 break-words">{tx(task.judul)}</h2>
+          {task.deskripsi && <p className="text-sm text-gray-400 mt-1 break-words">{tx(task.deskripsi)}</p>}
         </div>
 
         <Card className="space-y-3">
@@ -65,7 +65,7 @@ export default function TaskDetailPage() {
             <p className="text-xs text-gray-400 mb-1">{t("Tanggal")}</p>
             <div className="flex items-center gap-2 text-sm text-gray-100">
               <Calendar size={16} className="text-primary shrink-0" />
-              <span>{dateText}</span>
+              <span>{tx(dateText)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-100 mt-1.5">
               <Clock size={16} className="text-primary shrink-0" />
@@ -99,7 +99,7 @@ export default function TaskDetailPage() {
           {subtasks.map((s) => (
             <div key={s.id} className="flex items-center gap-3">
               <CheckCircle size={20} checked={s.is_done} onClick={() => toggleSubtask(s)} />
-              <span className={`flex-1 min-w-0 break-words text-sm ${s.is_done ? "text-gray-500 line-through" : "text-gray-100"}`}>{s.judul}</span>
+              <span className={`flex-1 min-w-0 break-words text-sm ${s.is_done ? "text-gray-500 line-through" : "text-gray-100"}`}>{tx(s.judul)}</span>
               <button aria-label={t("Hapus subtugas")} className="text-gray-600 shrink-0" onClick={() => deleteSubtask(s.id)}>
                 <Trash2 size={14} />
               </button>

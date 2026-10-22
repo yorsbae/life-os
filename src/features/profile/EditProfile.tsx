@@ -71,7 +71,7 @@ export default function EditProfile() {
             </Field>
           </div>
           <PrimaryButton onClick={save} disabled={saving}>{saving ? t("Menyimpan...") : t("Simpan")}</PrimaryButton>
-          {msg && <p className="text-xs text-center text-gray-400">{msg}</p>}
+          {msg && <p className="text-xs text-center text-gray-400">{tx(msg)}</p>}
         </Card>
 
         <Card className="space-y-3">

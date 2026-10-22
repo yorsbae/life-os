@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import { toDateStr } from "../../utils/dates";
 
+import { t } from "../../lib/i18n";
 export interface SleepLog {
   id: string;
   user_id: string;
@@ -33,7 +34,7 @@ export function useSleepLogs() {
 
   /** Simpan jam tidur untuk satu tanggal (satu catatan per tanggal; menimpa yang lama). */
   const saveSleep = async (jam: number, tanggal: string = toDateStr()) => {
-    if (!user) return { error: "Database belum siap" };
+    if (!user) return { error: t("Database belum siap") };
     const { error } = await db
       .from("sleep_logs")
       .upsert({ user_id: user.id, tanggal, jam }, { onConflict: "user_id,tanggal" });

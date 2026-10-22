@@ -31,7 +31,7 @@ export default function ExercisePlanWidget() {
     const done = isPlan && isSessionDone(schedule);
     return (
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-gray-400 w-16 shrink-0">{label}</span>
+        <span className="text-gray-400 w-16 shrink-0">{tx(label)}</span>
         {isRest ? (
           <span className="text-gray-400 flex items-center gap-1.5">
             <Moon size={14} /> {t("Hari istirahat")}

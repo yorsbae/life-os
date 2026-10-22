@@ -5,13 +5,14 @@ import { useEncryptionSalt } from "../../hooks/useEncryptionSalt";
 import { encryptText, decryptText } from "../../utils/cryptoUtils";
 import PinPromptModal from "../../components/PinPromptModal";
 
+import { t, tx, intlLocale } from "../../lib/i18n";
 interface DetailProps {
   account: SocialAccount;
   onBack: () => void;
 }
 
 function formatRupiah(n: number) {
-  return new Intl.NumberFormat("id-ID", {
+  return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
@@ -72,11 +73,11 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
         const cipher = await encryptText(pinAction.newPassword, pin, salt);
         await updateAccount(account.id, { password_encrypted: cipher });
         setNewPasswordInput("");
-        alert("Password tersimpan (terenkripsi).");
+        alert(t("Password tersimpan (terenkripsi)."));
       }
       setPinAction(null);
     } catch {
-      setPinError("PIN salah atau data rusak, coba lagi.");
+      setPinError(t("PIN salah atau data rusak, coba lagi."));
     }
   };
 
@@ -89,27 +90,26 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
         onClick={onBack}
         className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
       >
-        ← Semua Akun
-      </button>
+        {t("← Semua Akun")}</button>
 
       <div>
         <h1 className="text-xl font-semibold text-gray-50 break-words">
-          @{account.username}
+          @{tx(account.username)}
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {account.platform} · {account.niche}
+          {tx(account.platform)} · {tx(account.niche)}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-surface rounded-xl border border-surface-light p-4">
-          <p className="text-xs text-gray-400">Followers Terakhir</p>
+          <p className="text-xs text-gray-400">{t("Followers Terakhir")}</p>
           <p className="text-lg font-semibold text-gray-50">
-            {latestFollowers?.toLocaleString("id-ID") ?? "-"}
+            {latestFollowers?.toLocaleString(intlLocale()) ?? "-"}
           </p>
         </div>
         <div className="bg-surface rounded-xl border border-surface-light p-4">
-          <p className="text-xs text-gray-400">Total Earnings</p>
+          <p className="text-xs text-gray-400">{t("Total Earnings")}</p>
           <p className="text-lg font-semibold text-green-600 dark:text-green-400">
             {formatRupiah(totalEarnings)}
           </p>
@@ -117,17 +117,13 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
       </div>
 
       <div className="flex gap-1 border-b border-surface-light overflow-x-auto">
-        {(["info", "metrics", "earnings"] as const).map((t) => (
+        {(["info", "metrics", "earnings"] as const).map((tb) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${tab === t ? "border-primary text-gray-50" : "border-transparent text-gray-400"}`}
+            key={tb}
+            onClick={() => setTab(tb)}
+            className={`px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap shrink-0 ${tab === tb ? "border-primary text-gray-50" : "border-transparent text-gray-400"}`}
           >
-            {t === "info"
-              ? "Info & Password"
-              : t === "metrics"
-                ? "Metrics"
-                : "Earnings"}
+            {tb === "info" ? t("Info & Password") : tb === "metrics" ? t("Metrics") : t("Earnings")}
           </button>
         ))}
       </div>
@@ -135,19 +131,17 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
       {tab === "info" && (
         <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-3">
           <h3 className="font-semibold text-gray-50">
-            🔒 Password (Terenkripsi)
-          </h3>
+            {t("🔒 Password (Terenkripsi)")}</h3>
           {decryptedPassword ? (
             <div className="flex items-center gap-2">
               <code className="flex-1 bg-bg px-3 py-2 rounded-lg text-sm text-gray-50">
-                {decryptedPassword}
+                {tx(decryptedPassword)}
               </code>
               <button
                 onClick={() => setDecryptedPassword(null)}
                 className="text-xs text-gray-400"
               >
-                Sembunyikan
-              </button>
+                {t("Sembunyikan")}</button>
             </div>
           ) : (
             <button
@@ -155,22 +149,18 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
               disabled={!account.password_encrypted}
               className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-50 px-3 py-2 rounded-lg disabled:opacity-40"
             >
-              {account.password_encrypted
-                ? "👁 Lihat Password (butuh PIN)"
-                : "Belum ada password tersimpan"}
+              {account.password_encrypted ? t("👁 Lihat Password (butuh PIN)") : t("Belum ada password tersimpan")}
             </button>
           )}
 
           <div className="border-t border-surface-light pt-3 space-y-2">
             <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-              {account.password_encrypted
-                ? "Ganti Password"
-                : "Set Password Baru"}
+              {account.password_encrypted ? t("Ganti Password") : t("Set Password Baru")}
             </label>
             <div className="flex gap-2">
               <input
                 type="password"
-                placeholder="Password baru"
+                placeholder={t("Password baru")}
                 value={newPasswordInput}
                 onChange={(e) => setNewPasswordInput(e.target.value)}
                 className={inputClass}
@@ -180,13 +170,10 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                 disabled={!newPasswordInput}
                 className="bg-primary text-on-primary px-4 rounded-lg text-sm disabled:opacity-50"
               >
-                Simpan
-              </button>
+                {t("Simpan")}</button>
             </div>
             <p className="text-xs text-gray-400">
-              Akan diminta PIN App Lock untuk enkripsi/dekripsi. Kalau belum
-              aktifkan App Lock, set dulu di Profile.
-            </p>
+              {t("Akan diminta PIN App Lock untuk enkripsi/dekripsi. Kalau belum aktifkan App Lock, set dulu di Profile.")}</p>
           </div>
         </div>
       )}
@@ -197,14 +184,14 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="number"
-                placeholder="Followers"
+                placeholder={t("Followers")}
                 value={followers}
                 onChange={(e) => setFollowers(e.target.value)}
                 className={inputClass}
               />
               <input
                 type="text"
-                placeholder="Catatan insight"
+                placeholder={t("Catatan insight")}
                 value={insightNote}
                 onChange={(e) => setInsightNote(e.target.value)}
                 className={inputClass}
@@ -222,11 +209,10 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
               }}
               className="w-full bg-primary text-on-primary py-2 rounded-lg text-sm"
             >
-              + Catat Metrics Hari Ini
-            </button>
+              {t("+ Catat Metrics Hari Ini")}</button>
           </div>
           {loading ? (
-            <p className="text-gray-400 text-sm text-center py-4">Memuat...</p>
+            <p className="text-gray-400 text-sm text-center py-4">{t("Memuat...")}</p>
           ) : (
             metrics.map((m) => (
               <div
@@ -235,10 +221,9 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
               >
                 <div>
                   <p className="text-sm text-gray-50">
-                    {m.followers?.toLocaleString("id-ID") ?? "-"} followers
-                  </p>
+                    {m.followers?.toLocaleString(intlLocale()) ?? "-"} {t("followers")}</p>
                   <p className="text-xs text-gray-400">
-                    {new Date(m.tanggal).toLocaleDateString("id-ID", {
+                    {new Date(m.tanggal).toLocaleDateString(intlLocale(), {
                       day: "numeric",
                       month: "short",
                     })}{" "}
@@ -249,8 +234,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                   onClick={() => deleteMetric(m.id)}
                   className="text-xs text-red-500"
                 >
-                  Hapus
-                </button>
+                  {t("Hapus")}</button>
               </div>
             ))
           )}
@@ -263,14 +247,14 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
-                placeholder="Sumber (nama brand)"
+                placeholder={t("Sumber (nama brand)")}
                 value={earningSumber}
                 onChange={(e) => setEarningSumber(e.target.value)}
                 className={inputClass}
               />
               <input
                 type="number"
-                placeholder="Nominal"
+                placeholder={t("Nominal")}
                 value={earningNominal}
                 onChange={(e) => setEarningNominal(e.target.value)}
                 className={inputClass}
@@ -282,7 +266,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
               >
                 {EARNING_TIPE.map((t) => (
                   <option key={t} value={t}>
-                    {t}
+                    {tx(t)}
                   </option>
                 ))}
               </select>
@@ -303,11 +287,10 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
               }}
               className="w-full bg-primary text-on-primary py-2 rounded-lg text-sm"
             >
-              + Catat Earnings
-            </button>
+              {t("+ Catat Earnings")}</button>
           </div>
           {loading ? (
-            <p className="text-gray-400 text-sm text-center py-4">Memuat...</p>
+            <p className="text-gray-400 text-sm text-center py-4">{t("Memuat...")}</p>
           ) : (
             earnings.map((e) => (
               <div
@@ -316,11 +299,11 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
               >
                 <div>
                   <p className="text-sm text-gray-50">
-                    {e.sumber}{" "}
-                    <span className="text-xs text-gray-400">({e.tipe})</span>
+                    {tx(e.sumber)}{" "}
+                    <span className="text-xs text-gray-400">({tx(e.tipe)})</span>
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(e.tanggal).toLocaleDateString("id-ID", {
+                    {new Date(e.tanggal).toLocaleDateString(intlLocale(), {
                       day: "numeric",
                       month: "short",
                     })}
@@ -334,8 +317,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                     onClick={() => deleteEarning(e.id)}
                     className="text-xs text-red-500"
                   >
-                    Hapus
-                  </button>
+                    {t("Hapus")}</button>
                 </div>
               </div>
             ))
@@ -346,9 +328,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
       {pinAction && (
         <PinPromptModal
           title={
-            pinAction.mode === "view"
-              ? "Masukkan PIN untuk lihat password"
-              : "Masukkan PIN untuk enkripsi password"
+            pinAction.mode === "view" ? t("Masukkan PIN untuk lihat password") : t("Masukkan PIN untuk enkripsi password")
           }
           onSubmit={handlePinSubmit}
           onCancel={() => setPinAction(null)}

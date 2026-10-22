@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export interface Profile {
   id: string;
   nama: string | null;
@@ -46,7 +47,7 @@ export function useProfile() {
   }, [fetchProfile]);
 
   const saveProfile = async (input: Partial<ProfileInput>) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("profiles")
       .upsert({ id: user.id, ...input });

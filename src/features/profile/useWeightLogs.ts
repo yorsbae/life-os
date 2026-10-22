@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export interface WeightLog {
   id: string;
   user_id: string;
@@ -30,7 +31,7 @@ export function useWeightLogs() {
   }, [fetchLogs]);
 
   const addLog = async (berat: number, tanggal: string) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("body_weight_logs")
       .insert({ user_id: user.id, berat, tanggal });

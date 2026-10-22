@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import { ProgressBar } from "./Progress";
 
+import { tx } from "../../lib/i18n";
 interface ItemRowProps {
   icon: LucideIcon;
   title: string;
@@ -22,11 +23,11 @@ export default function ItemRow({ icon: Icon, title, subtitle, progress, trailin
         <Icon size={20} />
       </span>
       <span className="flex-1 min-w-0 space-y-1">
-        <span className="block text-sm font-medium text-gray-50 truncate">{title}</span>
-        {subtitle && <span className="block text-[11px] text-gray-400 truncate">{subtitle}</span>}
+        <span className="block text-sm font-medium text-gray-50 truncate">{tx(title)}</span>
+        {subtitle && <span className="block text-[11px] text-gray-400 truncate">{tx(subtitle)}</span>}
         {progress != null && <ProgressBar value={progress} max={100} />}
       </span>
-      {trailing}
+      {tx(trailing)}
       {onClick && chevron && <ChevronRight size={16} className="text-gray-500 shrink-0" />}
     </Comp>
   );

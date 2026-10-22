@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useWeightLogs } from "./useWeightLogs";
 
+import { t, intlLocale } from "../../lib/i18n";
 export default function WeightHistorySection() {
   const { logs, loading, addLog, deleteLog } = useWeightLogs();
   const [berat, setBerat] = useState<number | null>(null);
@@ -22,15 +23,14 @@ export default function WeightHistorySection() {
   return (
     <div className="bg-surface rounded-xl border border-surface-light p-5 space-y-3">
       <h2 className="font-semibold text-gray-50">
-        Histori Berat Badan
-      </h2>
+        {t("Histori Berat Badan")}</h2>
 
       <div className="flex gap-2">
         {/* Pakai input angka biasa (bukan CurrencyInput yang formatnya ribuan) karena ini kg, bukan rupiah */}
         <input
           type="number"
           step="0.1"
-          placeholder="Berat (kg)"
+          placeholder={t("Berat (kg)")}
           value={berat ?? ""}
           onChange={(e) =>
             setBerat(e.target.value ? Number(e.target.value) : null)
@@ -54,19 +54,14 @@ export default function WeightHistorySection() {
 
       {trend !== null && (
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          {trend > 0
-            ? `📈 Naik ${trend.toFixed(1)} kg`
-            : trend < 0
-              ? `📉 Turun ${Math.abs(trend).toFixed(1)} kg`
-              : "➡️ Tidak berubah"}{" "}
-          dari catatan sebelumnya
-        </p>
+          {trend > 0 ? t("📈 Naik {0} kg", [trend.toFixed(1)]) : trend < 0 ? t("📉 Turun {0} kg", [Math.abs(trend).toFixed(1)]) : t("➡️ Tidak berubah")}{" "}
+          {t("dari catatan sebelumnya")}</p>
       )}
 
       {loading ? (
-        <p className="text-gray-400 text-sm">Memuat...</p>
+        <p className="text-gray-400 text-sm">{t("Memuat...")}</p>
       ) : logs.length === 0 ? (
-        <p className="text-gray-400 text-sm">Belum ada catatan berat badan.</p>
+        <p className="text-gray-400 text-sm">{t("Belum ada catatan berat badan.")}</p>
       ) : (
         <div className="space-y-1 max-h-48 overflow-y-auto">
           {logs.map((l) => (
@@ -75,7 +70,7 @@ export default function WeightHistorySection() {
               className="flex items-center justify-between text-sm py-1"
             >
               <span className="text-gray-500 dark:text-gray-400">
-                {new Date(l.tanggal).toLocaleDateString("id-ID", {
+                {new Date(l.tanggal).toLocaleDateString(intlLocale(), {
                   day: "numeric",
                   month: "short",
                   year: "numeric",
@@ -88,8 +83,7 @@ export default function WeightHistorySection() {
                 onClick={() => deleteLog(l.id)}
                 className="text-xs text-red-500"
               >
-                Hapus
-              </button>
+                {t("Hapus")}</button>
             </div>
           ))}
         </div>

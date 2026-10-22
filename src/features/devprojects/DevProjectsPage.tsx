@@ -54,7 +54,7 @@ export default function DevProjectsPage() {
       <Card key={p.id} className="space-y-2.5">
         <div className="flex items-start gap-3">
           <button onClick={() => setOpenId(p.id)} className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-semibold text-gray-50 truncate">{p.nama}</p>
+            <p className="text-sm font-semibold text-gray-50 truncate">{tx(p.nama)}</p>
             <p className="text-[11px] text-gray-400 mt-0.5">
               {t("Progres")} {pct}%
               {p.status !== "Aktif" && <> · {tx(p.status)}</>}

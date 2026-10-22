@@ -1,3 +1,4 @@
+import { tx } from "../../lib/i18n";
 interface SegmentedProps<T extends string> {
   options: { key: T; label: string }[];
   value: T;
@@ -31,7 +32,7 @@ export default function Segmented<T extends string>({
                 : "text-gray-400 hover:text-gray-200"
             }`}
           >
-            {o.label}
+            {tx(o.label)}
           </button>
         );
       })}

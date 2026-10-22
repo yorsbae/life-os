@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { Journal, JournalInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useJournals() {
   const { user } = useAuth();
   const [journals, setJournals] = useState<Journal[]>([]);
@@ -25,7 +26,7 @@ export function useJournals() {
   }, [fetchJournals]);
 
   const addJournal = async (input: JournalInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("journals")
       .insert({ ...input, user_id: user.id });

@@ -13,7 +13,7 @@ import { toDateStr } from "../../utils/dates";
 import { fmtDate } from "../../utils/format";
 import { rupiahCompact } from "../../utils/compactMoney";
 import { HOME_SECTIONS, loadHomeSections, type HomeSection } from "../../utils/homeSections";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 import { useReminders } from "./reminders/useReminders";
 import ReminderBanners from "./reminders/ReminderBanners";
 import WeatherBadge from "./widgets/WeatherBadge";
@@ -146,8 +146,8 @@ export default function DashboardPage() {
           <div className="grid grid-cols-4 gap-1.5 text-center">
             {stats.map((s, i) => (
               <div key={i} className="min-w-0">
-                <p className="text-sm font-bold text-primary truncate">{s.value}</p>
-                <p className="text-[10px] text-gray-400 leading-tight mt-0.5 break-words">{s.label}</p>
+                <p className="text-sm font-bold text-primary truncate">{tx(s.value)}</p>
+                <p className="text-[10px] text-gray-400 leading-tight mt-0.5 break-words">{tx(s.label)}</p>
               </div>
             ))}
           </div>
@@ -161,7 +161,7 @@ export default function DashboardPage() {
           </span>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] text-gray-400">{t("Fokus")}</p>
-            <p className="text-sm font-medium text-gray-50 truncate">{focusTask ? focusTask.judul : t("Mulai sesi fokus")}</p>
+            <p className="text-sm font-medium text-gray-50 truncate">{focusTask ? tx(focusTask.judul) : t("Mulai sesi fokus")}</p>
             <p className="text-[11px] text-gray-400">{t("{0} menit", [25])}</p>
           </div>
           <ChevronRight size={18} className="text-gray-400 shrink-0" />
@@ -179,7 +179,7 @@ export default function DashboardPage() {
                 className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl bg-surface border border-surface-light text-[11px] text-gray-200 text-center"
               >
                 <Icon size={20} className="text-primary" />
-                <span className="leading-tight break-words max-w-full">{label}</span>
+                <span className="leading-tight break-words max-w-full">{tx(label)}</span>
               </Link>
             ))}
           </div>

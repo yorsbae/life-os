@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export type StudyTipe = "Kursus" | "Buku";
 
 export interface StudyItem {
@@ -36,7 +37,7 @@ export function useStudyItems() {
   }, [fetchItems]);
 
   const addItem = async (input: StudyItemInput) => {
-    if (!user) return { error: "Database belum siap" };
+    if (!user) return { error: t("Database belum siap") };
     const { error } = await db.from("study_items").insert({ ...input, user_id: user.id });
     if (error) return { error: error.message };
     await fetchItems();

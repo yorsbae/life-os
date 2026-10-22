@@ -128,7 +128,7 @@ export default function GlobalSearchModal({ onClose }: { onClose: () => void }) 
             {results.map((r) => (
               <button key={r.id} onClick={() => go(r.path)} className="card w-full flex items-center gap-3 px-4 py-3 text-left">
                 <span className="flex-1 min-w-0">
-                  <span className="block text-sm text-gray-100 truncate">{r.detail}</span>
+                  <span className="block text-sm text-gray-100 truncate">{tx(r.detail)}</span>
                   <span className="block text-[11px] text-primary">{t(r.module)}</span>
                 </span>
                 <ChevronRight size={16} className="text-gray-500 shrink-0" />

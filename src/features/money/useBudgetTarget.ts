@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { BudgetTarget, BudgetTargetInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 // Ubah objek Date jadi format YYYY-MM-01 (mewakili 1 bulan penuh)
 export function toMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
@@ -34,7 +35,7 @@ export function useBudgetTarget(selectedMonth: Date) {
   }, [fetchTarget]);
 
   const saveTarget = async (input: Partial<BudgetTargetInput>) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
 
     const { error } = await db
       .from("budget_targets")

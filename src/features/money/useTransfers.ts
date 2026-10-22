@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export interface Transfer {
   id: string;
   user_id: string;
@@ -35,7 +36,7 @@ export function useTransfers() {
   }, [fetchTransfers]);
 
   const addTransfer = async (input: TransferInput) => {
-    if (!user) return { error: "Database belum siap" };
+    if (!user) return { error: t("Database belum siap") };
     const { error } = await db.from("transfers").insert({ ...input, user_id: user.id });
     if (error) return { error: error.message };
     await fetchTransfers();

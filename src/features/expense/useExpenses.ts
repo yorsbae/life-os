@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { Expense, ExpenseInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useExpenses() {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -39,7 +40,7 @@ export function useExpenses() {
 
   // CREATE - tambah expense baru
   const addExpense = async (input: ExpenseInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
 
     const { error } = await db
       .from("expenses")

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export interface SocialAccount {
   id: string;
   user_id: string;
@@ -65,7 +66,7 @@ export function useSocialAccounts() {
   }, [fetchAccounts]);
 
   const addAccount = async (input: SocialAccountInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("social_accounts")
       .insert({ ...input, user_id: user.id });

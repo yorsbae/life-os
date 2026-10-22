@@ -7,8 +7,9 @@ import {
 import CurrencyInput from "../../components/ui/CurrencyInput";
 import { KATEGORI_EXPENSE } from "../../types";
 
+import { t, tx, intlLocale } from "../../lib/i18n";
 function formatRupiah(n: number) {
-  return new Intl.NumberFormat("id-ID", {
+  return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
@@ -72,10 +73,9 @@ export default function RecurringExpenseTab() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="font-semibold text-gray-50">
-            Recurring Expense
-          </h2>
+            {t("Recurring Expense")}</h2>
           <p className="text-xs text-gray-400">
-            Total/bulan:{" "}
+            {t("Total/bulan:")}{" "}
             <span className="text-red-500 font-medium">
               {formatRupiah(totalBulanan)}
             </span>
@@ -85,8 +85,7 @@ export default function RecurringExpenseTab() {
           onClick={() => setShowForm(true)}
           className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
         >
-          + Tambah
-        </button>
+          {t("+ Tambah")}</button>
       </div>
 
       {showForm && (
@@ -97,7 +96,7 @@ export default function RecurringExpenseTab() {
           <input
             type="text"
             required
-            placeholder="Nama (misal: Netflix)"
+            placeholder={t("Nama (misal: Netflix)")}
             value={form.nama}
             onChange={(e) => setForm({ ...form, nama: e.target.value })}
             className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
@@ -106,14 +105,14 @@ export default function RecurringExpenseTab() {
             <CurrencyInput
               value={form.nominal || null}
               onChange={(v) => setForm({ ...form, nominal: v ?? 0 })}
-              placeholder="Nominal/bulan"
+              placeholder={t("Nominal/bulan")}
               className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
             />
             <input
               type="number"
               min={1}
               max={31}
-              placeholder="Tgl jatuh tempo"
+              placeholder={t("Tgl jatuh tempo")}
               value={form.tanggal_jatuh_tempo}
               onChange={(e) =>
                 setForm({
@@ -131,7 +130,7 @@ export default function RecurringExpenseTab() {
           >
             {KATEGORI_EXPENSE.map((k) => (
               <option key={k} value={k}>
-                {k}
+                {tx(k)}
               </option>
             ))}
           </select>
@@ -141,25 +140,23 @@ export default function RecurringExpenseTab() {
               disabled={isSubmitting}
               className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
             >
-              {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
+              {isSubmitting ? t("Menyimpan...") : editing ? t("Update") : t("Simpan")}
             </button>
             <button
               type="button"
               onClick={cancelForm}
               className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 text-sm"
             >
-              Batal
-            </button>
+              {t("Batal")}</button>
           </div>
         </form>
       )}
 
       {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>
+        <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>
       ) : items.length === 0 ? (
         <p className="text-gray-400 text-sm py-8 text-center">
-          Belum ada recurring expense.
-        </p>
+          {t("Belum ada recurring expense.")}</p>
       ) : (
         <div className="space-y-2">
           {items.map((i) => (
@@ -170,18 +167,16 @@ export default function RecurringExpenseTab() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-gray-50">
-                    {i.nama}
+                    {tx(i.nama)}
                   </span>
                   {!i.aktif && (
                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-400 rounded-full">
-                      Nonaktif
-                    </span>
+                      {t("Nonaktif")}</span>
                   )}
                 </div>
                 <p className="text-xs text-gray-400">
-                  Tgl {i.tanggal_jatuh_tempo} ·{" "}
-                  {daysUntilDue(i.tanggal_jatuh_tempo)} hari lagi
-                </p>
+                  {t("Tgl")}{i.tanggal_jatuh_tempo} ·{" "}
+                  {daysUntilDue(i.tanggal_jatuh_tempo)} {t("hari lagi")}</p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="font-semibold text-red-500 text-sm">
@@ -191,20 +186,18 @@ export default function RecurringExpenseTab() {
                   onClick={() => updateItem(i.id, { aktif: !i.aktif })}
                   className="text-xs text-gray-500 dark:text-gray-400"
                 >
-                  {i.aktif ? "Matikan" : "Aktifkan"}
+                  {i.aktif ? t("Matikan") : t("Aktifkan")}
                 </button>
                 <button
                   onClick={() => startEdit(i)}
                   className="text-xs text-gray-500 dark:text-gray-400"
                 >
-                  Edit
-                </button>
+                  {t("Edit")}</button>
                 <button
                   onClick={() => deleteItem(i.id)}
                   className="text-xs text-red-500"
                 >
-                  Hapus
-                </button>
+                  {t("Hapus")}</button>
               </div>
             </div>
           ))}

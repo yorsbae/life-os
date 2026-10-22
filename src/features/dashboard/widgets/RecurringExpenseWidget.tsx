@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Repeat } from "lucide-react";
 import { useRecurringExpenses } from "../../money/useRecurringExpenses";
 import { rupiah } from "../../../utils/format";
-import { t } from "../../../lib/i18n";
+import { t, tx } from "../../../lib/i18n";
 
 function daysUntilDue(tanggal: number) {
   const now = new Date();
@@ -35,7 +35,7 @@ export default function RecurringExpenseWidget() {
           const days = daysUntilDue(item.tanggal_jatuh_tempo);
           return (
             <div key={item.id} className="flex items-center justify-between text-sm gap-2">
-              <span className="text-gray-100 truncate">{item.nama}</span>
+              <span className="text-gray-100 truncate">{tx(item.nama)}</span>
               <span className={`text-xs shrink-0 ${days <= 3 ? "text-amber-300 font-medium" : "text-gray-400"}`}>
                 {days === 0 ? t("Hari ini") : t("{0} hari lagi", [days])}
               </span>

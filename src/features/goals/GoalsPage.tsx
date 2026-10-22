@@ -109,10 +109,10 @@ export default function GoalsPage() {
                 <Card key={g.id} className="space-y-3">
                   <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-50 break-words">{g.judul}</p>
+                      <p className="text-sm font-semibold text-gray-50 break-words">{tx(g.judul)}</p>
                       <p className="text-[11px] text-gray-400 mt-0.5">{tx(GOAL_TIPE_LABEL[g.tipe])}</p>
                     </div>
-                    <span className="text-sm font-semibold text-primary shrink-0">{percent}%</span>
+                    <span className="text-sm font-semibold text-primary shrink-0">{tx(percent)}%</span>
                   </div>
                   <ProgressBar value={current} max={g.target_value} />
                   <div className="flex items-center justify-between gap-2 text-xs text-gray-400">

@@ -8,6 +8,7 @@ import {
   type CreativeStatus,
 } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useCreativeProjects() {
   const { user } = useAuth();
   const [projects, setProjects] = useState<CreativeProject[]>([]);
@@ -30,7 +31,7 @@ export function useCreativeProjects() {
   }, [fetchProjects]);
 
   const addProject = async (input: CreativeProjectInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("creative_projects")
       .insert({ ...input, user_id: user.id });
@@ -68,7 +69,7 @@ export function useCreativeProjects() {
       (s) => s.key === project.status,
     );
     if (currentIndex === -1 || currentIndex === CREATIVE_STAGES.length - 1) {
-      return { error: "Sudah di tahap terakhir" };
+      return { error: t("Sudah di tahap terakhir") };
     }
     const nextStatus = CREATIVE_STAGES[currentIndex + 1].key;
     return updateProject(project.id, { status: nextStatus });
@@ -86,7 +87,7 @@ export function useCreativeProjects() {
       (s) => s.key === targetStatus,
     );
     if (targetIndex >= currentIndex) {
-      return { error: "Cuma bisa mundur ke tahap sebelumnya" };
+      return { error: t("Cuma bisa mundur ke tahap sebelumnya") };
     }
     return updateProject(project.id, { status: targetStatus });
   };

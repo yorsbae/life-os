@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { Income, IncomeInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useIncomes() {
   const { user } = useAuth();
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -29,7 +30,7 @@ export function useIncomes() {
   }, [fetchIncomes]);
 
   const addIncome = async (input: IncomeInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("incomes")
       .insert({ ...input, user_id: user.id });

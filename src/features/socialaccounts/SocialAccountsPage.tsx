@@ -9,6 +9,7 @@ import {
 } from "./useSocialAccounts";
 import SocialAccountDetail from "./SocialAccountDetail";
 
+import { t, tx } from "../../lib/i18n";
 const initialForm = {
   platform: PLATFORM_OPTIONS[0],
   username: "",
@@ -37,7 +38,7 @@ export default function SocialAccountsPage() {
   const handleDelete = (id: string) => {
     if (
       confirm(
-        "Hapus akun ini? Semua metrics/earnings di dalamnya ikut terhapus.",
+        t("Hapus akun ini? Semua metrics/earnings di dalamnya ikut terhapus."),
       )
     )
       deleteAccount(id);
@@ -57,17 +58,15 @@ export default function SocialAccountsPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <PageHeader title="Social Accounts" className="-mx-4 -mt-4" />
+      <PageHeader title={t("Social Accounts")} className="-mx-4 -mt-4" />
       <div className="flex justify-between items-center">
         <h1 className="sr-only">
-          Social Account Tracker
-        </h1>
+          {t("Social Account Tracker")}</h1>
         <button
           onClick={() => setShowForm(true)}
           className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
         >
-          + Akun Baru
-        </button>
+          {t("+ Akun Baru")}</button>
       </div>
 
       {showForm && (
@@ -83,14 +82,14 @@ export default function SocialAccountsPage() {
             >
               {PLATFORM_OPTIONS.map((p) => (
                 <option key={p} value={p}>
-                  {p}
+                  {tx(p)}
                 </option>
               ))}
             </select>
             <input
               type="text"
               required
-              placeholder="Username"
+              placeholder={t("Username")}
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               className={inputClass}
@@ -113,40 +112,36 @@ export default function SocialAccountsPage() {
             >
               {TUJUAN_OPTIONS.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  {tx(t)}
                 </option>
               ))}
             </select>
           </div>
           <p className="text-xs text-gray-400">
-            💡 Password bisa diisi nanti dari halaman detail (terenkripsi pakai
-            PIN App Lock kamu).
-          </p>
+            {t("💡 Password bisa diisi nanti dari halaman detail (terenkripsi pakai PIN App Lock kamu).")}</p>
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
             >
-              {isSubmitting ? "Menyimpan..." : "Simpan"}
+              {isSubmitting ? t("Menyimpan...") : t("Simpan")}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
               className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 text-sm"
             >
-              Batal
-            </button>
+              {t("Batal")}</button>
           </div>
         </form>
       )}
 
       {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>
+        <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>
       ) : accounts.length === 0 ? (
         <p className="text-gray-400 text-sm py-8 text-center">
-          Belum ada akun tercatat.
-        </p>
+          {t("Belum ada akun tercatat.")}</p>
       ) : (
         <div className="space-y-2">
           {accounts.map((a) => (
@@ -161,22 +156,21 @@ export default function SocialAccountsPage() {
                 >
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium text-gray-50 wrap-break-word">
-                      @{a.username}
+                      @{tx(a.username)}
                     </span>
                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
-                      {a.platform}
+                      {tx(a.platform)}
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mt-1">
-                    {a.niche} · {a.tujuan}
+                    {tx(a.niche)} · {tx(a.tujuan)}
                   </p>
                 </button>
                 <button
                   onClick={() => handleDelete(a.id)}
                   className="text-xs text-red-500 shrink-0"
                 >
-                  Hapus
-                </button>
+                  {t("Hapus")}</button>
               </div>
             </div>
           ))}

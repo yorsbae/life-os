@@ -3,8 +3,9 @@ import { useMoneySummary } from "./useMoneySummary";
 import CurrencyInput from "../../components/ui/CurrencyInput";
 import CategoryPieChart from "../../components/Analytics/CategoryPieChart";
 
+import { t, tx, intlLocale } from "../../lib/i18n";
 function formatRupiah(n: number) {
-  return new Intl.NumberFormat("id-ID", {
+  return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
@@ -12,7 +13,7 @@ function formatRupiah(n: number) {
 }
 
 function formatBulan(date: Date) {
-  return date.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+  return date.toLocaleDateString(intlLocale(), { month: "long", year: "numeric" });
 }
 
 export default function MoneyRingkasanTab() {
@@ -61,7 +62,7 @@ export default function MoneyRingkasanTab() {
     selectedMonth.getFullYear() === new Date().getFullYear();
 
   if (loading)
-    return <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>;
+    return <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>;
 
   const targetSaving = target?.target_saving ?? null;
   const savingProgress =
@@ -105,8 +106,7 @@ export default function MoneyRingkasanTab() {
               onClick={goToThisMonth}
               className="text-xs text-blue-500 hover:underline"
             >
-              Kembali ke bulan ini
-            </button>
+              {t("Kembali ke bulan ini")}</button>
           )}
         </div>
         <button
@@ -120,19 +120,19 @@ export default function MoneyRingkasanTab() {
       {/* Angka utama */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-surface rounded-xl border border-surface-light p-4">
-          <p className="text-xs text-gray-400 mb-1">Pemasukan</p>
+          <p className="text-xs text-gray-400 mb-1">{t("Pemasukan")}</p>
           <p className="font-semibold text-green-600 dark:text-green-400 text-sm">
             {formatRupiah(totalIncome)}
           </p>
         </div>
         <div className="bg-surface rounded-xl border border-surface-light p-4">
-          <p className="text-xs text-gray-400 mb-1">Pengeluaran</p>
+          <p className="text-xs text-gray-400 mb-1">{t("Pengeluaran")}</p>
           <p className="font-semibold text-red-600 dark:text-red-400 text-sm">
             {formatRupiah(totalExpense)}
           </p>
         </div>
         <div className="bg-surface rounded-xl border border-surface-light p-4">
-          <p className="text-xs text-gray-400 mb-1">Saldo</p>
+          <p className="text-xs text-gray-400 mb-1">{t("Saldo")}</p>
           <p
             className={`font-semibold text-sm ${saldo >= 0 ? "text-gray-50" : "text-red-600 dark:text-red-400"}`}
           >
@@ -143,16 +143,13 @@ export default function MoneyRingkasanTab() {
 
       {!isCurrentMonth && (
         <p className="text-xs text-gray-400 text-center">
-          📅 Kamu sedang melihat data bulan lampau — saran otomatis hanya
-          tersedia untuk bulan berjalan.
-        </p>
+          {t("📅 Kamu sedang melihat data bulan lampau — saran otomatis hanya tersedia untuk bulan berjalan.")}</p>
       )}
 
       {isCurrentMonth && !targetSaving && suggestion.hasEnoughHistory && (
         <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
           <p className="text-sm text-blue-900 dark:text-blue-200 mb-2">
-            💡 Berdasarkan rata-rata 3 bulan terakhir, saran target nabung bulan
-            ini:{" "}
+            {t("💡 Berdasarkan rata-rata 3 bulan terakhir, saran target nabung bulan ini:")}{" "}
             <span className="font-semibold">
               {formatRupiah(suggestion.suggestedSaving ?? 0)}
             </span>
@@ -162,14 +159,12 @@ export default function MoneyRingkasanTab() {
               onClick={handleAcceptSuggestion}
               className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
             >
-              Pakai Saran Ini
-            </button>
+              {t("Pakai Saran Ini")}</button>
             <button
               onClick={() => setEditingSaving(true)}
               className="text-sm text-blue-600 dark:text-blue-300 px-3 py-1.5"
             >
-              Set Manual
-            </button>
+              {t("Set Manual")}</button>
           </div>
         </div>
       )}
@@ -177,15 +172,14 @@ export default function MoneyRingkasanTab() {
       <div className="bg-surface rounded-xl border border-surface-light p-5">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-gray-50">
-            Target Nabung — {formatBulan(selectedMonth)}
+            {t("Target Nabung —")}{formatBulan(selectedMonth)}
           </h3>
           {targetSaving && (
             <button
               onClick={() => setEditingSaving(true)}
               className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
-              Edit
-            </button>
+              {t("Edit")}</button>
           )}
         </div>
 
@@ -194,15 +188,14 @@ export default function MoneyRingkasanTab() {
             <CurrencyInput
               value={savingInput}
               onChange={setSavingInput}
-              placeholder="Target nabung"
+              placeholder={t("Target nabung")}
               className="flex-1 px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
             />
             <button
               onClick={() => savingInput && handleSetTarget(savingInput)}
               className="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm"
             >
-              Simpan
-            </button>
+              {t("Simpan")}</button>
           </div>
         ) : (
           <>
@@ -213,8 +206,8 @@ export default function MoneyRingkasanTab() {
               />
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {formatRupiah(saldo)} dari target {formatRupiah(targetSaving)} (
-              {savingProgress}%)
+              {formatRupiah(saldo)}  {t("dari target")} {formatRupiah(targetSaving)} (
+              {tx(savingProgress)}%)
             </p>
           </>
         )}
@@ -222,8 +215,7 @@ export default function MoneyRingkasanTab() {
 
       <div className="bg-surface rounded-xl border border-surface-light p-5">
         <h3 className="font-semibold text-gray-50 mb-3">
-          Breakdown Pengeluaran per Kategori
-        </h3>
+          {t("Breakdown Pengeluaran per Kategori")}</h3>
         <CategoryPieChart data={expensePerKategori} />
       </div>
 
@@ -231,8 +223,7 @@ export default function MoneyRingkasanTab() {
         Object.keys(target.budget_kategori).length > 0 && (
           <div className="bg-surface rounded-xl border border-surface-light p-5">
             <h3 className="font-semibold text-gray-50 mb-3">
-              Budget per Kategori
-            </h3>
+              {t("Budget per Kategori")}</h3>
             <div className="space-y-3">
               {Object.entries(target.budget_kategori).map(
                 ([kategori, budget]) => {
@@ -245,7 +236,7 @@ export default function MoneyRingkasanTab() {
                     <div key={kategori}>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-gray-700 dark:text-gray-300">
-                          {kategori}
+                          {tx(kategori)}
                         </span>
                         <span className="text-gray-400">
                           {formatRupiah(used)} / {formatRupiah(budget)}

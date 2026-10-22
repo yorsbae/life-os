@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { LANGUAGES } from "../../lib/i18n";
+import { LANGUAGES, tx } from "../../lib/i18n";
 import { useLanguage } from "../../context/LanguageContext";
 
 /** Daftar pilihan bahasa (nama asli tiap bahasa agar selalu terbaca). */
@@ -17,7 +17,7 @@ export default function LanguagePicker() {
               : "border-surface-light bg-surface text-gray-100"
           }`}
         >
-          <span>{l.native}</span>
+          <span>{tx(l.native)}</span>
           {lang === l.code && <Check size={18} />}
         </button>
       ))}

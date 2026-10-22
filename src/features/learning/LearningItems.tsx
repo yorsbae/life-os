@@ -209,7 +209,7 @@ function ItemSheet({
         </Field>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-400">{tx(error)}</p>}
       <PrimaryButton onClick={save} disabled={saving}>
         {saving ? t("Menyimpan...") : t("Simpan")}
       </PrimaryButton>

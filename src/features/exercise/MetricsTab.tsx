@@ -61,7 +61,7 @@ export default function MetricsTab() {
           <input className="input-field min-w-0" inputMode="decimal" placeholder={t("Berat (kg)")} value={berat} onChange={(e) => setBerat(e.target.value)} />
           <input className="input-field min-w-0" type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} />
         </div>
-        {msg && <p className="text-xs text-red-400">{msg}</p>}
+        {msg && <p className="text-xs text-red-400">{tx(msg)}</p>}
         <PrimaryButton onClick={submitWeight}>{t("Catat Berat")}</PrimaryButton>
       </Card>
 

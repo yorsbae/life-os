@@ -138,8 +138,8 @@ export default function AchievementsPage() {
                       {done ? <Award size={22} /> : <Icon size={22} />}
                     </span>
                     <div className="flex-1 min-w-0 space-y-1.5">
-                      <p className="text-sm font-semibold text-gray-50 truncate">{b.title}</p>
-                      <p className="text-[11px] text-gray-400 break-words">{b.desc}</p>
+                      <p className="text-sm font-semibold text-gray-50 truncate">{tx(b.title)}</p>
+                      <p className="text-[11px] text-gray-400 break-words">{tx(b.desc)}</p>
                       <ProgressBar value={b.current} max={b.target} />
                     </div>
                     <span className="text-[11px] text-gray-400 shrink-0 text-right">
@@ -162,7 +162,7 @@ export default function AchievementsPage() {
                     <Card key={a.id} className="!py-3 flex items-start gap-3">
                       <Icon size={18} className="text-primary mt-0.5 shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-100 break-words">{a.title}</p>
+                        <p className="text-sm text-gray-100 break-words">{tx(a.title)}</p>
                         {a.detail && <p className="text-xs text-gray-400 mt-0.5 break-words">{tx(a.detail)}</p>}
                         <p className="text-[11px] text-gray-500 mt-1">{fmtDate(a.tanggal, "d MMMM yyyy")}</p>
                       </div>
@@ -181,8 +181,8 @@ export default function AchievementsPage() {
                   <span className="w-10 h-10 shrink-0 rounded-xl bg-surface-light text-primary flex items-center justify-center">
                     <Icon size={18} />
                   </span>
-                  <p className="flex-1 min-w-0 text-sm text-gray-200 break-words">{r.label}</p>
-                  <p className="text-sm font-semibold text-primary shrink-0 text-right">{r.value}</p>
+                  <p className="flex-1 min-w-0 text-sm text-gray-200 break-words">{tx(r.label)}</p>
+                  <p className="text-sm font-semibold text-primary shrink-0 text-right">{tx(r.value)}</p>
                 </Card>
               );
             })}

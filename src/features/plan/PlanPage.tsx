@@ -53,7 +53,7 @@ export default function PlanPage() {
     <Card key={task.id} className="!py-3 flex items-center gap-3">
       <CheckCircle checked={task.status === "Selesai"} onClick={() => toggleDone(task)} />
       <button className="flex-1 min-w-0 text-left" onClick={() => navigate(`/plan/${task.id}`)}>
-        <p className={`text-sm truncate ${task.status === "Selesai" ? "text-gray-500 line-through" : "text-gray-100"}`}>{task.judul}</p>
+        <p className={`text-sm truncate ${task.status === "Selesai" ? "text-gray-500 line-through" : "text-gray-100"}`}>{tx(task.judul)}</p>
         <p className="text-[11px] text-gray-400 truncate">
           {formatRange(task)}
           {task.kategori ? ` · ${tx(task.kategori)}` : ""}
@@ -73,7 +73,7 @@ export default function PlanPage() {
         <Segmented
           options={[
             { key: "hari", label: t("Hari Ini") },
-            { key: "minggu", label: t("Minggu") },
+            { key: "minggu", label: t("Pekan") },
             { key: "bulan", label: t("Bulan") },
           ]}
           value={range}
@@ -84,7 +84,7 @@ export default function PlanPage() {
           <button aria-label={t("Sebelumnya")} onClick={() => setOffset((o) => o - 1)} className="p-1.5 text-gray-300">
             <ChevronLeft size={18} />
           </button>
-          <p className="flex-1 text-center text-sm font-medium text-gray-200">{heading}</p>
+          <p className="flex-1 text-center text-sm font-medium text-gray-200">{tx(heading)}</p>
           <button aria-label={t("Berikutnya")} onClick={() => setOffset((o) => o + 1)} className="p-1.5 text-gray-300">
             <ChevronRight size={18} />
           </button>

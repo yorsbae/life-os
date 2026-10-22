@@ -54,7 +54,7 @@ export default function EventModal({ onClose, onSubmit, onDelete, editingEvent, 
   return (
     <Sheet title={editingEvent ? t("Edit Jadwal") : t("Tambah Jadwal")} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm">{error}</div>}
+        {error && <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm">{tx(error)}</div>}
         <input
           className="input-field"
           required

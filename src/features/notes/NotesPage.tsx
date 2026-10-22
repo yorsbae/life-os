@@ -70,7 +70,7 @@ export default function NotesPage() {
                 <span className="flex-1 min-w-0">
                   <span className="flex items-center gap-1.5">
                     {n.is_pinned && <Pin size={12} className="text-primary shrink-0" />}
-                    <span className="text-sm text-gray-50 truncate">{n.judul}</span>
+                    <span className="text-sm text-gray-50 truncate">{tx(n.judul)}</span>
                   </span>
                   <span className="block text-[11px] text-gray-400 truncate">
                     {fmtDate(n.created_at, "d MMM yyyy")} · {tx(n.kategori)}

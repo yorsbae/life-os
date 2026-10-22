@@ -18,7 +18,7 @@ export default function CategoryPieChart({ data, emptyText }: CategoryPieChartPr
   const total = entries.reduce((s, [, v]) => s + v, 0);
 
   if (entries.length === 0) {
-    return <p className="text-gray-400 text-sm py-8 text-center">{emptyText ?? t("Belum ada data pengeluaran.")}</p>;
+    return <p className="text-gray-400 text-sm py-8 text-center">{tx(emptyText) ?? t("Belum ada data pengeluaran.")}</p>;
   }
 
   const r = 42;

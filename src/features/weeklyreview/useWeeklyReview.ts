@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
+import { t } from "../../lib/i18n";
 export interface WeeklyReview {
   id: string;
   user_id: string;
@@ -47,7 +48,7 @@ export function useWeeklyReview(weekOf: Date = new Date()) {
   const saveReview = async (
     input: Partial<Omit<WeeklyReview, "id" | "user_id" | "minggu_mulai">>,
   ) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("weekly_reviews")
       .upsert(

@@ -1,3 +1,4 @@
+import { intlLocale } from "../../lib/i18n";
 interface CurrencyInputProps {
   value: number | null;
   onChange: (value: number | null) => void;
@@ -18,7 +19,7 @@ export default function CurrencyInput({
 }: CurrencyInputProps) {
   const displayValue =
     value !== null && value !== undefined
-      ? new Intl.NumberFormat("id-ID").format(value)
+      ? new Intl.NumberFormat(intlLocale()).format(value)
       : "";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

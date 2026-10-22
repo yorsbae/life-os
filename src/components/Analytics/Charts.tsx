@@ -1,6 +1,7 @@
 // Grafik SVG ringan bertema Life OS (tanpa dependensi). Viewbox tetap, skala otomatis.
 import { num } from "../../utils/format";
 
+import { tx } from "../../lib/i18n";
 export interface ChartPoint {
   label: string;
   value: number;
@@ -87,7 +88,7 @@ export function LineChart({
             fontSize="9"
             fill={TEXT}
           >
-            {d.label}
+            {tx(d.label)}
           </text>
         ) : null,
       )}
@@ -130,7 +131,7 @@ export function BarChart({
             <rect x={cx - bw / 2} y={y(d.value)} width={bw} height={Math.max(h, d.value > 0 ? 2 : 0)} rx="3" fill={PRIMARY} fillOpacity="0.85" />
             {labels.has(i) && (
               <text x={cx} y={height - 6} textAnchor="middle" fontSize="9" fill={TEXT}>
-                {d.label}
+                {tx(d.label)}
               </text>
             )}
           </g>
@@ -181,7 +182,7 @@ export function DualLineChart({
       {a.map((d, i) =>
         labels.has(i) ? (
           <text key={i} x={x(i)} y={height - 6} textAnchor={i === 0 ? "start" : i === a.length - 1 ? "end" : "middle"} fontSize="9" fill={TEXT}>
-            {d.label}
+            {tx(d.label)}
           </text>
         ) : null,
       )}

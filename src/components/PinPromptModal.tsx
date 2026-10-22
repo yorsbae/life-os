@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { t, tx } from "../lib/i18n";
 interface PinPromptModalProps {
   title: string;
   onSubmit: (pin: string) => void;
@@ -25,9 +26,9 @@ export default function PinPromptModal({
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-sm font-medium text-gray-50">
-          {title}
+          {tx(title)}
         </p>
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="text-xs text-red-500">{tx(error)}</p>}
         <input
           type="password"
           inputMode="numeric"
@@ -51,8 +52,7 @@ export default function PinPromptModal({
             onClick={onCancel}
             className="px-4 py-2 border border-surface-light text-gray-700 dark:text-gray-300 rounded-lg text-sm"
           >
-            Batal
-          </button>
+            {t("Batal")}</button>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import {
   type PlanTipe,
 } from "./trainingTemplates";
 
+import { t } from "../../lib/i18n";
 export interface TrainingPlan {
   id: string;
   user_id: string;
@@ -96,7 +97,7 @@ export function useTrainingPlan() {
     durasiMinggu: number,
     hariIstirahat: number[],
   ) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
 
     const tanggalMulai = startOfWeekMonday(new Date());
     const judul = PLAN_LABELS[tipe].label;
@@ -116,7 +117,7 @@ export function useTrainingPlan() {
       .single();
 
     if (error || !newPlan)
-      return { error: error?.message ?? "Gagal membuat plan" };
+      return { error: error?.message ?? t("Gagal membuat plan") };
 
     await generateWeekSessions(newPlan as TrainingPlan, 1, 1.0);
     await fetchActivePlan();

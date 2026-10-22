@@ -6,6 +6,7 @@ import {
 } from "../../types";
 import { useCreativeProjects } from "./useCreativeProjects";
 
+import { t, tx } from "../../lib/i18n";
 interface ProjectModalProps {
   project: CreativeProject;
   onClose: () => void;
@@ -47,7 +48,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   const handleArchive = async () => {
     if (
       confirm(
-        'Arsipkan konten ini? Bisa dibuka lagi nanti dari filter "Diarsipkan".',
+        t("Arsipkan konten ini? Bisa dibuka lagi nanti dari filter \"Diarsipkan\"."),
       )
     ) {
       await archiveProject(project.id);
@@ -56,7 +57,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   };
 
   const handleDelete = async () => {
-    if (confirm("Hapus permanen? Ini tidak bisa dibatalkan.")) {
+    if (confirm(t("Hapus permanen? Ini tidak bisa dibatalkan."))) {
       await deleteProject(project.id);
       onClose();
     }
@@ -65,9 +66,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   const field = (label: string, node: React.ReactNode) => (
     <div>
       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-        {label}
+        {tx(label)}
       </label>
-      {node}
+      {tx(node)}
     </div>
   );
 
@@ -97,7 +98,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                       : "bg-surface-light text-gray-400"
                 }`}
               >
-                {s.label}
+                {tx(s.label)}
               </span>
             ))}
           </div>
@@ -111,7 +112,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
         {error && (
           <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-            {error}
+            {tx(error)}
           </div>
         )}
 
@@ -142,8 +143,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         {/* Section Idea */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-400 uppercase">
-            💡 Idea
-          </p>
+            {t("💡 Idea")}</p>
           {field(
             "Catatan Ide",
             <textarea
@@ -160,13 +160,12 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         {/* Section Planning */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-400 uppercase">
-            📋 Planning
-          </p>
+            {t("📋 Planning")}</p>
           {field(
             "Shot List",
             <textarea
               rows={2}
-              placeholder="1. Alarm berbunyi&#10;2. Buka jendela&#10;3. Seduh kopi"
+              placeholder={t("1. Alarm berbunyi\n2. Buka jendela\n3. Seduh kopi")}
               value={form.shot_list ?? ""}
               onChange={(e) => setForm({ ...form, shot_list: e.target.value })}
               className={inputClass}
@@ -209,8 +208,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         {/* Section Shooting */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-400 uppercase">
-            🎥 Shooting
-          </p>
+            {t("🎥 Shooting")}</p>
           <div className="grid grid-cols-2 gap-3">
             {field(
               "Tanggal Shooting",
@@ -240,14 +238,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         {/* Section Editing */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-400 uppercase">
-            ✂️ Editing
-          </p>
+            {t("✂️ Editing")}</p>
           <div className="grid grid-cols-2 gap-3">
             {field(
               "Software",
               <input
                 type="text"
-                placeholder="CapCut, DaVinci..."
+                placeholder={t("CapCut, DaVinci...")}
                 value={form.software_edit ?? ""}
                 onChange={(e) =>
                   setForm({ ...form, software_edit: e.target.value })
@@ -279,8 +276,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         {/* Section Uploaded */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-400 uppercase">
-            ✅ Uploaded
-          </p>
+            {t("✅ Uploaded")}</p>
           <div className="grid grid-cols-2 gap-3">
             {field(
               "Tanggal Upload",
@@ -297,7 +293,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               "Platform",
               <input
                 type="text"
-                placeholder="YouTube, TikTok..."
+                placeholder={t("YouTube, TikTok...")}
                 value={form.platform ?? ""}
                 onChange={(e) => setForm({ ...form, platform: e.target.value })}
                 className={inputClass}
@@ -318,8 +314,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         {/* Section Analisa */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-400 uppercase">
-            📈 Analisa
-          </p>
+            {t("📈 Analisa")}</p>
           <div className="grid grid-cols-2 gap-3">
             {field(
               "Views",
@@ -354,7 +349,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             "Catatan Analisa",
             <textarea
               rows={2}
-              placeholder="Apa yang berhasil, apa yang perlu diperbaiki..."
+              placeholder={t("Apa yang berhasil, apa yang perlu diperbaiki...")}
               value={form.catatan_analisa ?? ""}
               onChange={(e) =>
                 setForm({ ...form, catatan_analisa: e.target.value })
@@ -369,7 +364,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           disabled={isSaving}
           className="w-full bg-gray-100 dark:bg-gray-700 text-gray-50 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
         >
-          {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+          {isSaving ? t("Menyimpan...") : t("Simpan Perubahan")}
         </button>
 
         {/* Kontrol perpindahan tahap */}
@@ -379,7 +374,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               onClick={handleNext}
               className="w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
             >
-              Lanjut ke {nextStage.icon} {nextStage.label} →
+              {t("Lanjut ke")}{nextStage.icon} {tx(nextStage.label)} →
             </button>
           )}
 
@@ -391,7 +386,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   onClick={() => handleBack(s.key)}
                   className="text-xs px-3 py-1.5 rounded-lg border border-surface-light text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
-                  ← Kembali ke {s.label}
+                  {t("← Kembali ke")}{tx(s.label)}
                 </button>
               ))}
             </div>
@@ -402,20 +397,17 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               onClick={handleArchive}
               className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              📦 Arsipkan
-            </button>
+              {t("📦 Arsipkan")}</button>
             <button
               onClick={handleDelete}
               className="flex-1 text-sm text-red-500 border border-red-200 dark:border-red-900 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950"
             >
-              Hapus
-            </button>
+              {t("Hapus")}</button>
             <button
               onClick={onClose}
               className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              Tutup
-            </button>
+              {t("Tutup")}</button>
           </div>
         </div>
       </div>

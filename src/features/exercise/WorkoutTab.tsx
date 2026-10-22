@@ -52,8 +52,8 @@ export default function WorkoutTab() {
                       <p className="text-sm text-gray-100 truncate">
                         {tx(e.tipe)}{e.sub_kategori && e.sub_kategori !== e.tipe ? ` · ${tx(e.sub_kategori)}` : ""}
                       </p>
-                      <p className="text-[11px] text-gray-400 truncate">{meta}</p>
-                      {e.catatan && <p className="text-[11px] text-gray-500 truncate">{e.catatan}</p>}
+                      <p className="text-[11px] text-gray-400 truncate">{tx(meta)}</p>
+                      {e.catatan && <p className="text-[11px] text-gray-500 truncate">{tx(e.catatan)}</p>}
                     </div>
                     <button aria-label={t("Edit")} className="text-gray-400 p-1" onClick={() => setForm({ editing: e })}>
                       <Pencil size={15} />

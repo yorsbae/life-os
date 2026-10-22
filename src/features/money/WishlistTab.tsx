@@ -9,8 +9,9 @@ import {
 } from "../../types";
 import CurrencyInput from "../../components/ui/CurrencyInput";
 
+import { t, tx, intlLocale } from "../../lib/i18n";
 function formatRupiah(n: number) {
-  return new Intl.NumberFormat("id-ID", {
+  return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
@@ -73,21 +74,19 @@ export default function WishlistTab() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Yakin hapus wishlist ini?")) deleteWishlist(id);
+    if (confirm(t("Yakin hapus wishlist ini?"))) deleteWishlist(id);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="font-semibold text-gray-50">
-          Wishlist / Goals
-        </h2>
+          {t("Wishlist / Goals")}</h2>
         <button
           onClick={() => setShowForm(true)}
           className="text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
         >
-          + Tambah
-        </button>
+          {t("+ Tambah")}</button>
       </div>
 
       {showForm && (
@@ -98,7 +97,7 @@ export default function WishlistTab() {
           <input
             type="text"
             required
-            placeholder="Judul (misal: Kamera Sony A7C)"
+            placeholder={t("Judul (misal: Kamera Sony A7C)")}
             value={form.judul}
             onChange={(e) => setForm({ ...form, judul: e.target.value })}
             className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
@@ -112,7 +111,7 @@ export default function WishlistTab() {
             >
               {WISHLIST_KATEGORI.map((k) => (
                 <option key={k} value={k}>
-                  {k}
+                  {tx(k)}
                 </option>
               ))}
             </select>
@@ -129,7 +128,7 @@ export default function WishlistTab() {
             >
               {WISHLIST_PRIORITAS.map((p) => (
                 <option key={p} value={p}>
-                  {p}
+                  {tx(p)}
                 </option>
               ))}
             </select>
@@ -138,14 +137,14 @@ export default function WishlistTab() {
               value={form.estimasi_biaya}
               onChange={(val) => setForm({ ...form, estimasi_biaya: val })}
               className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-              placeholder="Estimasi biaya (opsional)"
+              placeholder={t("Estimasi biaya (opsional)")}
             />
 
             <CurrencyInput
               value={form.terkumpul}
               onChange={(val) => setForm({ ...form, terkumpul: val ?? 0 })}
               className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
-              placeholder="Sudah terkumpul"
+              placeholder={t("Sudah terkumpul")}
             />
 
             <select
@@ -160,7 +159,7 @@ export default function WishlistTab() {
             >
               {WISHLIST_STATUS.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {tx(s)}
                 </option>
               ))}
             </select>
@@ -172,25 +171,23 @@ export default function WishlistTab() {
               disabled={isSubmitting}
               className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-medium"
             >
-              {isSubmitting ? "Menyimpan..." : editing ? "Update" : "Simpan"}
+              {isSubmitting ? t("Menyimpan...") : editing ? t("Update") : t("Simpan")}
             </button>
             <button
               type="button"
               onClick={cancelForm}
               className="px-4 py-2.5 rounded-lg border border-surface-light dark:text-gray-300 text-sm"
             >
-              Batal
-            </button>
+              {t("Batal")}</button>
           </div>
         </form>
       )}
 
       {loading ? (
-        <p className="text-gray-400 text-sm py-8 text-center">Memuat...</p>
+        <p className="text-gray-400 text-sm py-8 text-center">{t("Memuat...")}</p>
       ) : wishlists.length === 0 ? (
         <p className="text-gray-400 text-sm py-8 text-center">
-          Belum ada wishlist.
-        </p>
+          {t("Belum ada wishlist.")}</p>
       ) : (
         <div className="space-y-3">
           {wishlists.map((w) => {
@@ -208,19 +205,19 @@ export default function WishlistTab() {
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div className="flex-1 min-w-0">
                     <span className="font-medium text-gray-50 wrap-break-word">
-                      {w.judul}
+                      {tx(w.judul)}
                     </span>
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
-                        {w.kategori}
+                        {tx(w.kategori)}
                       </span>
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${PRIORITAS_COLOR[w.prioritas]}`}
                       >
-                        {w.prioritas}
+                        {tx(w.prioritas)}
                       </span>
                       <span className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 rounded-full">
-                        {w.status}
+                        {tx(w.status)}
                       </span>
                     </div>
                   </div>
@@ -229,14 +226,12 @@ export default function WishlistTab() {
                       onClick={() => startEdit(w)}
                       className="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white"
                     >
-                      Edit
-                    </button>
+                      {t("Edit")}</button>
                     <button
                       onClick={() => handleDelete(w.id)}
                       className="text-xs text-red-500 hover:text-red-700"
                     >
-                      Hapus
-                    </button>
+                      {t("Hapus")}</button>
                   </div>
                 </div>
 

@@ -3,7 +3,7 @@ import { CheckCircle2, ChevronLeft, ChevronRight, CircleOff, Target } from "luci
 import { useWeeklyReview } from "./useWeeklyReview";
 import Field from "../../components/ui/Field";
 import { Card, PrimaryButton } from "../../components/ui/Controls";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 import { fmtDate } from "../../utils/format";
 
 function rentangMinggu(mingguMulai: string) {
@@ -84,7 +84,7 @@ export default function WeeklyReviewTab() {
           <PrimaryButton onClick={handleSave} disabled={isSaving}>
             {isSaving ? t("Menyimpan...") : t("Simpan Review")}
           </PrimaryButton>
-          {saveMsg && <p className="text-xs text-center text-gray-400">{saveMsg}</p>}
+          {saveMsg && <p className="text-xs text-center text-gray-400">{tx(saveMsg)}</p>}
         </Card>
       )}
     </div>

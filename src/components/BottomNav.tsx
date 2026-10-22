@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { TAB_MENU } from "../hooks/usePrimaryMenu";
 
+import { tx } from "../lib/i18n";
 export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 bg-surface/95 backdrop-blur border-t border-surface-light pb-[env(safe-area-inset-bottom)]">
@@ -17,7 +18,7 @@ export default function BottomNav() {
             }
           >
             <Icon size={20} />
-            <span>{label}</span>
+            <span>{tx(label)}</span>
           </NavLink>
         ))}
       </div>

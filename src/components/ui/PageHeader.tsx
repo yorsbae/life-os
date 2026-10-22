@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Menu, Search } from "lucide-react";
 import { useShell } from "../../context/ShellContext";
 
+import { t, tx } from "../../lib/i18n";
 interface PageHeaderProps {
   title: string;
   /** "menu" = hamburger buka drawer modul, "back" = kembali, "none" = tanpa ikon kiri */
@@ -30,7 +31,7 @@ export default function PageHeader({
       {left === "menu" && (
         <button
           onClick={openDrawer}
-          aria-label="Buka menu"
+          aria-label={t("Buka menu")}
           className="p-1 -ml-1 text-gray-100"
         >
           <Menu size={22} />
@@ -39,17 +40,16 @@ export default function PageHeader({
       {left === "back" && (
         <button
           onClick={onBack ?? (() => navigate(-1))}
-          aria-label="Kembali"
+          aria-label={t("Kembali")}
           className="p-1 -ml-1 text-gray-100"
         >
           <ArrowLeft size={22} />
         </button>
       )}
       <h1 className="flex-1 text-lg font-semibold text-gray-50 truncate">
-        {title}
+        {tx(title)}
       </h1>
-      {right ??
-        (search && (
+      {tx(right) ?? (search && (
           <button
             onClick={openSearch}
             aria-label="Cari"

@@ -3,7 +3,7 @@ import { Trash2, Moon, Lightbulb } from "lucide-react";
 import { subDays } from "date-fns";
 import { Card, PrimaryButton, SectionTitle } from "../../components/ui/Controls";
 import { BarChart } from "../../components/Analytics/Charts";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 import { fmtDate, num } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
 import { useSleepLogs } from "./useSleepLogs";
@@ -64,7 +64,7 @@ export default function RecoveryTab() {
           <input className="input-field min-w-0" inputMode="decimal" placeholder={t("Jam tidur")} value={jam} onChange={(e) => setJam(e.target.value)} />
           <input className="input-field min-w-0" type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} />
         </div>
-        {msg && <p className="text-xs text-red-400">{msg}</p>}
+        {msg && <p className="text-xs text-red-400">{tx(msg)}</p>}
         <PrimaryButton onClick={submit}>{t("Simpan Tidur")}</PrimaryButton>
       </Card>
 
@@ -79,7 +79,7 @@ export default function RecoveryTab() {
       <Card className="flex gap-3">
         <Lightbulb size={18} className="text-primary shrink-0 mt-0.5" />
         <div className="min-w-0 space-y-1">
-          <p className="text-sm text-gray-100">{tip}</p>
+          <p className="text-sm text-gray-100">{tx(tip)}</p>
           <p className="text-[11px] text-gray-400">{t("Hari istirahat terjadwal: {0} per minggu", [restDays])}</p>
         </div>
       </Card>

@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { Note, NoteInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useNotes() {
   const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
@@ -27,7 +28,7 @@ export function useNotes() {
   }, [fetchNotes]);
 
   const addNote = async (input: NoteInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("notes")
       .insert({ ...input, user_id: user.id });

@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Check, Inbox, Plus, type LucideIcon } from "lucide-react";
 
+import { tx } from "../../lib/i18n";
 export function Card({
   children,
   className = "",
@@ -155,7 +156,7 @@ export function SectionTitle({
   return (
     <div className="flex items-center justify-between px-1">
       <h2 className="text-sm font-semibold text-gray-100">{children}</h2>
-      {action}
+      {tx(action)}
     </div>
   );
 }
@@ -174,9 +175,9 @@ export function EmptyState({
   return (
     <div className="card p-6 text-center flex flex-col items-center gap-2">
       <Icon size={28} className="text-gray-500" strokeWidth={1.5} />
-      <p className="text-sm font-medium text-gray-200">{title}</p>
-      {hint && <p className="text-xs text-gray-400">{hint}</p>}
-      {action}
+      <p className="text-sm font-medium text-gray-200">{tx(title)}</p>
+      {hint && <p className="text-xs text-gray-400">{tx(hint)}</p>}
+      {tx(action)}
     </div>
   );
 }
@@ -201,7 +202,7 @@ export function Sheet({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto -mt-1" />
-        <h2 className="text-base font-semibold text-gray-50">{title}</h2>
+        <h2 className="text-base font-semibold text-gray-50">{tx(title)}</h2>
         {children}
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Database, type BackupFile } from "../lib/db/query";
 import { db } from "../lib/db";
 import { resyncRemindersFromDb } from "./reminders";
 
+import { t } from "../lib/i18n";
 // Backup manual ke file JSON berversi. Tidak ada cloud: file dibagikan lewat
 // menu Share Android (simpan ke Files, kirim ke diri sendiri, Drive, dll — pilihan pengguna).
 
@@ -39,7 +40,7 @@ export async function exportAllData(): Promise<{ error: string | null }> {
   } catch (err) {
     // Pengguna menutup dialog Share bukan kesalahan.
     if (err instanceof Error && /cancel/i.test(err.message)) return { error: null };
-    return { error: err instanceof Error ? err.message : "Gagal export data" };
+    return { error: err instanceof Error ? err.message : t("Gagal export data") };
   }
 }
 

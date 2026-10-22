@@ -5,6 +5,7 @@ import { useReadings } from "../reading/useReadings";
 import { useExercises } from "../exercise/useExercises";
 import { useCreativeProjects } from "../creative/useCreativeProjects";
 
+import { t } from "../../lib/i18n";
 export type GoalTipe =
   | "reading_count"
   | "exercise_count"
@@ -57,7 +58,7 @@ export function useGoals() {
   }, [fetchGoals]);
 
   const addGoal = async (input: GoalInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("goals")
       .insert({ ...input, user_id: user.id });

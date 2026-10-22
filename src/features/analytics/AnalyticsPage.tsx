@@ -139,16 +139,16 @@ export default function AnalyticsPage() {
               <SectionTitle>{t("Rangkuman")}</SectionTitle>
               <div className="flex items-center gap-5">
                 <Ring value={overall} max={100} size={104} stroke={10}>
-                  <span className="text-xl font-bold text-gray-50">{overall}%</span>
+                  <span className="text-xl font-bold text-gray-50">{tx(overall)}%</span>
                 </Ring>
                 <ul className="flex-1 min-w-0 space-y-1.5">
                   {legend.map((l) => (
                     <li key={l.label} className="flex items-center justify-between gap-2 text-xs">
                       <span className="flex items-center gap-2 text-gray-300 min-w-0">
                         <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                        <span className="truncate">{l.label}</span>
+                        <span className="truncate">{tx(l.label)}</span>
                       </span>
-                      <span className="text-gray-100 shrink-0">{l.value}</span>
+                      <span className="text-gray-100 shrink-0">{tx(l.value)}</span>
                     </li>
                   ))}
                 </ul>
@@ -196,7 +196,7 @@ export default function AnalyticsPage() {
                 { l: t("Olahraga"), v: exerciseMinutes },
               ].map((s) => (
                 <Card key={s.l} className="text-center !px-2">
-                  <p className="text-[11px] text-gray-400">{s.l}</p>
+                  <p className="text-[11px] text-gray-400">{tx(s.l)}</p>
                   <p className="text-base font-bold text-gray-50 mt-1">{num(s.v, 0)}</p>
                   <p className="text-[10px] text-gray-500">{t("menit")}</p>
                 </Card>

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import type { Reminder } from "./useReminders";
 
+import { tx } from "../../../lib/i18n";
 export default function ReminderBanners({ reminders }: { reminders: Reminder[] }) {
   if (reminders.length === 0) return null;
   return (
@@ -19,7 +20,7 @@ export default function ReminderBanners({ reminders }: { reminders: Reminder[] }
             }`}
           >
             <Icon size={18} className={r.severity === "warning" ? "text-amber-300 shrink-0" : "text-primary shrink-0"} />
-            <span className="flex-1 min-w-0 break-words">{r.message}</span>
+            <span className="flex-1 min-w-0 break-words">{tx(r.message)}</span>
             <ChevronRight size={16} className="opacity-60 shrink-0" />
           </Link>
         );

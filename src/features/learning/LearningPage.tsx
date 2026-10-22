@@ -5,7 +5,7 @@ import Field from "../../components/ui/Field";
 import { Card, EmptyState, GhostButton, PrimaryButton, Sheet } from "../../components/ui/Controls";
 import { useLearnings } from "./useLearnings";
 import type { Learning, LearningInput } from "../../types";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 import { fmtDate } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
 
@@ -48,7 +48,7 @@ function LogSheet({ editing, onClose }: { editing: Learning | null; onClose: () 
       <Field label={t("Catatan")}>
         <textarea className="input-field min-h-16" value={form.catatan ?? ""} onChange={(e) => setForm({ ...form, catatan: e.target.value })} placeholder={t("Opsional...")} />
       </Field>
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-400">{tx(error)}</p>}
       <PrimaryButton onClick={submit} disabled={saving}>
         {saving ? t("Menyimpan...") : t("Simpan")}
       </PrimaryButton>
@@ -83,10 +83,10 @@ export default function LearningPage({ embedded = false }: { embedded?: boolean 
         learnings.map((l) => (
           <Card key={l.id} onClick={() => setSheet({ editing: l })} className="space-y-1">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-sm font-medium text-gray-50 truncate">{l.topik}</span>
+              <span className="text-sm font-medium text-gray-50 truncate">{tx(l.topik)}</span>
               <span className="text-[11px] text-gray-400 shrink-0">{fmtDate(l.tanggal, "d MMM")}</span>
             </div>
-            {l.materi && <p className="text-xs text-gray-300 line-clamp-2">{l.materi}</p>}
+            {l.materi && <p className="text-xs text-gray-300 line-clamp-2">{tx(l.materi)}</p>}
             {l.durasi ? <span className="inline-block text-[11px] px-2 py-0.5 rounded-full bg-surface-light text-gray-300">{t("{0} menit", [l.durasi])}</span> : null}
           </Card>
         ))
@@ -100,7 +100,7 @@ export default function LearningPage({ embedded = false }: { embedded?: boolean 
   return (
     <div>
       <PageHeader title={t("Catatan Belajar")} />
-      <div className="px-4">{body}</div>
+      <div className="px-4">{tx(body)}</div>
     </div>
   );
 }

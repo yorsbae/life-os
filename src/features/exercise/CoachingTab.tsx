@@ -134,7 +134,7 @@ export default function CoachingTab() {
                 <Moon size={18} className="text-gray-400 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm text-gray-300">{t("Hari istirahat")}</p>
-                  <p className="text-[11px] text-gray-500 truncate">{dateLabel}</p>
+                  <p className="text-[11px] text-gray-500 truncate">{tx(dateLabel)}</p>
                 </div>
               </Card>
             );
@@ -145,7 +145,7 @@ export default function CoachingTab() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-gray-50 truncate">{tx(s.sub_kategori)}</p>
                 <p className="text-[11px] text-gray-400">
-                  {dateLabel}
+                  {tx(dateLabel)}
                   {s.target_durasi ? ` · ${t("{0} menit", [s.target_durasi])}` : ""}
                   {s.target_jarak ? ` · ${t("{0} km", [num(s.target_jarak, 1)])}` : ""}
                 </p>

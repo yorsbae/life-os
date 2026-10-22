@@ -31,6 +31,7 @@ import SocialAccountsPage from "./features/socialaccounts/SocialAccountsPage";
 import AchievementsPage from "./features/achievements/AchievementsPage";
 import ProfilePage from "./features/profile/ProfilePage";
 
+import { tx } from "./lib/i18n";
 // Pengguna baru diarahkan ke alur Welcome (splash + onboarding) satu kali saja.
 // Status dibaca sekali dari database lalu disimpan di ShellContext; WelcomeFlow
 // mengubahnya langsung saat selesai sehingga tidak ada pembacaan ulang yang bisa balapan.
@@ -59,14 +60,14 @@ function FirstRunGate({ children }: { children: ReactNode }) {
 function withLayout(element: ReactNode) {
   return (
     <ProtectedRoute>
-      <Layout>{element}</Layout>
+      <Layout>{tx(element)}</Layout>
     </ProtectedRoute>
   );
 }
 
 // Halaman layar penuh tanpa navigasi bawah (form, fokus, welcome).
 function bare(element: ReactNode) {
-  return <ProtectedRoute>{element}</ProtectedRoute>;
+  return <ProtectedRoute>{tx(element)}</ProtectedRoute>;
 }
 
 function AppContent() {

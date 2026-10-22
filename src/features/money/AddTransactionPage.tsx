@@ -12,7 +12,7 @@ import { useTransfers } from "./useTransfers";
 import { useAccounts } from "./useAccounts";
 import { EXPENSE_CATS, INCOME_CATS } from "./categories";
 import type { Expense } from "../../types";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 import { rupiah } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
 
@@ -185,7 +185,7 @@ function Form({ initial, editId, accounts, balances, onSave, navigate }: {
           </div>
         )}
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red-400">{tx(error)}</p>}
         <PrimaryButton onClick={save} disabled={saving}>{saving ? t("Menyimpan...") : t("Simpan")}</PrimaryButton>
       </div>
     </div>

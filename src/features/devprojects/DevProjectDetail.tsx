@@ -95,7 +95,7 @@ export default function DevProjectDetail({ project, onBack, onUpdate }: DevProje
                   <Card key={l.id} className="!py-3 flex items-start gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] text-gray-400">{fmtDate(l.tanggal, "d MMM yyyy")}</p>
-                      <p className="text-sm text-gray-50 break-words">{l.catatan}</p>
+                      <p className="text-sm text-gray-50 break-words">{tx(l.catatan)}</p>
                     </div>
                     <button aria-label={t("Hapus")} className="text-gray-500" onClick={() => deleteLog(l.id)}>
                       <Trash2 size={15} />
@@ -112,7 +112,7 @@ export default function DevProjectDetail({ project, onBack, onUpdate }: DevProje
                 {todos.map((x) => (
                   <Card key={x.id} className="!py-3 flex items-center gap-3">
                     <CheckCircle size={22} checked={x.is_done} onClick={() => toggleTodo(x)} />
-                    <span className={`flex-1 min-w-0 text-sm break-words ${x.is_done ? "line-through text-gray-500" : "text-gray-50"}`}>{x.judul}</span>
+                    <span className={`flex-1 min-w-0 text-sm break-words ${x.is_done ? "line-through text-gray-500" : "text-gray-50"}`}>{tx(x.judul)}</span>
                     <button aria-label={t("Hapus")} className="text-gray-500" onClick={() => deleteTodo(x.id)}>
                       <Trash2 size={15} />
                     </button>
@@ -130,11 +130,11 @@ export default function DevProjectDetail({ project, onBack, onUpdate }: DevProje
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0 space-y-1">
                         <Chip tone={i.status === "Open" ? "danger" : "primary"}>{tx(i.status)}</Chip>
-                        <p className="text-sm text-gray-50 break-words">{i.masalah}</p>
+                        <p className="text-sm text-gray-50 break-words">{tx(i.masalah)}</p>
                         {i.solusi && (
                           <p className="text-sm text-gray-400 flex gap-1.5 break-words">
                             <Lightbulb size={14} className="text-primary shrink-0 mt-0.5" />
-                            <span className="min-w-0">{i.solusi}</span>
+                            <span className="min-w-0">{tx(i.solusi)}</span>
                           </p>
                         )}
                       </div>

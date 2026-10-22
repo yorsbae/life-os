@@ -50,7 +50,7 @@ function AccountsSheet({ onClose }: { onClose: () => void }) {
             <div key={a.id} className="flex items-center gap-3 p-3 rounded-2xl bg-bg border border-surface-light">
               <span className="w-9 h-9 rounded-full bg-surface-light text-primary flex items-center justify-center shrink-0"><Icon size={16} /></span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-50 truncate">{a.nama}</p>
+                <p className="text-sm text-gray-50 truncate">{tx(a.nama)}</p>
                 <p className="text-[11px] text-gray-400">{tx(a.tipe)} · {rupiah(balances[a.nama] ?? 0)}</p>
               </div>
               <button
@@ -73,7 +73,7 @@ function AccountsSheet({ onClose }: { onClose: () => void }) {
         <Field label={t("Saldo awal")}>
           <CurrencyInput value={saldo} onChange={setSaldo} placeholder="0" className="input-field" />
         </Field>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-xs text-red-400">{tx(error)}</p>}
         <PrimaryButton onClick={add} disabled={!nama.trim()}>{t("Tambah Akun")}</PrimaryButton>
       </div>
     </Sheet>
@@ -123,7 +123,7 @@ function Overview() {
             return (
               <div key={a.id} className="card shrink-0 w-36 p-3 space-y-1">
                 <Icon size={16} className="text-primary" />
-                <p className="text-xs text-gray-400 truncate">{a.nama}</p>
+                <p className="text-xs text-gray-400 truncate">{tx(a.nama)}</p>
                 <p className="text-sm font-semibold text-gray-50 truncate">{rupiah(balances[a.nama] ?? 0)}</p>
               </div>
             );
@@ -214,7 +214,7 @@ function Transactions() {
         <input className="input-field !pl-10" placeholder={t("Cari transaksi...")} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1">
-        {filters.map((f) => <Chip key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)}>{f.label}</Chip>)}
+        {filters.map((f) => <Chip key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)}>{tx(f.label)}</Chip>)}
       </div>
       {groups.length === 0 ? (
         <EmptyState title={t("Belum ada transaksi")} hint={t("Tekan + untuk menambah transaksi pertama.")} />
@@ -226,8 +226,8 @@ function Transactions() {
               <Card key={r.kind + r.id} className="!py-3 flex items-center gap-3">
                 <CatBadge meta={r.meta} />
                 <button className="flex-1 min-w-0 text-left" onClick={() => navigate(`/money/add?kind=${r.kind}&id=${r.id}`)}>
-                  <p className="text-sm text-gray-100 truncate">{r.title}</p>
-                  <p className="text-[11px] text-gray-400 truncate">{r.sub}</p>
+                  <p className="text-sm text-gray-100 truncate">{tx(r.title)}</p>
+                  <p className="text-[11px] text-gray-400 truncate">{tx(r.sub)}</p>
                 </button>
                 <span className={`text-sm font-semibold shrink-0 ${r.kind === "in" ? "text-primary" : r.kind === "out" ? "text-red-400" : "text-gray-200"}`}>
                   {r.kind === "in" ? "+" : r.kind === "out" ? "-" : ""}{rupiah(r.nominal)}

@@ -146,12 +146,12 @@ export default function JournalPage() {
                 setCustomTag("");
               }}
             >
-              <input className="input-field" placeholder={t("Tag baru")} value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
-              <GhostButton type="submit" className="!w-auto px-4">{t("Tambah")}</GhostButton>
+              <input className="input-field min-w-0 flex-1" placeholder={t("Tag baru")} value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
+              <GhostButton type="submit" className="!w-auto px-4 shrink-0 whitespace-nowrap">{t("Tambah")}</GhostButton>
             </form>
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-400">{tx(error)}</p>}
           <PrimaryButton onClick={submit} disabled={saving}>{saving ? t("Menyimpan...") : t("Simpan")}</PrimaryButton>
         </Card>
 
@@ -167,8 +167,8 @@ export default function JournalPage() {
                   <div className="flex items-start gap-3">
                     <button className="flex-1 min-w-0 text-left" onClick={() => startEdit(j)}>
                       <p className="text-[11px] text-gray-400">{fmtDate(j.tanggal, "EEE, d MMM yyyy")}</p>
-                      <p className="text-sm font-medium text-gray-50 truncate">{j.judul || j.konten.slice(0, 40)}</p>
-                      <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">{j.konten}</p>
+                      <p className="text-sm font-medium text-gray-50 truncate">{tx(j.judul) || j.konten.slice(0, 40)}</p>
+                      <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">{tx(j.konten)}</p>
                     </button>
                     <Icon size={18} className="text-primary shrink-0 mt-1" />
                     <button

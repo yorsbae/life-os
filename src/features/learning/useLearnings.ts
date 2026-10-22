@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { Learning, LearningInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useLearnings() {
   const { user } = useAuth();
   const [learnings, setLearnings] = useState<Learning[]>([]);
@@ -28,7 +29,7 @@ export function useLearnings() {
   }, [fetchLearnings]);
 
   const addLearning = async (input: LearningInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("learnings")
       .insert({ ...input, user_id: user.id });

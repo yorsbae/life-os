@@ -7,6 +7,7 @@ import {
 } from "react";
 import { initDb, LOCAL_USER_ID } from "../lib/db";
 
+import { t } from "../lib/i18n";
 // Life OS berjalan sepenuhnya lokal dan single-user: tidak ada login/akun.
 // Konteks ini tetap bernama "Auth" agar seluruh hook yang memakai `useAuth()`
 // tidak perlu diubah. Fungsinya sekarang:
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(() => !cancelled && setReady(true))
       .catch((e: unknown) => {
         if (!cancelled)
-          setDbError(e instanceof Error ? e.message : "Database gagal dibuka");
+          setDbError(e instanceof Error ? e.message : t("Database gagal dibuka"));
       });
     return () => {
       cancelled = true;

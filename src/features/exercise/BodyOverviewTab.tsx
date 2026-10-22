@@ -4,7 +4,7 @@ import { endOfWeek, startOfWeek } from "date-fns";
 import { Card, GhostButton, PrimaryButton, SectionTitle, Sheet, EmptyState } from "../../components/ui/Controls";
 import { Ring } from "../../components/ui/Progress";
 import { LineChart } from "../../components/Analytics/Charts";
-import { t } from "../../lib/i18n";
+import { t, tx } from "../../lib/i18n";
 import { fmtDate, num } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
 import { useExercises } from "./useExercises";
@@ -51,13 +51,13 @@ export default function BodyOverviewTab({ onGo }: { onGo: (t: Tab) => void }) {
     <div className="space-y-4">
       <Card className="flex items-center gap-4">
         <Ring value={weekCount} max={target} size={104} stroke={10}>
-          <span className="text-2xl font-bold text-gray-50 leading-none">{weekCount}x</span>
+          <span className="text-2xl font-bold text-gray-50 leading-none">{tx(weekCount)}x</span>
           <span className="text-[10px] text-gray-400 mt-1">{t("Minggu ini")}</span>
         </Ring>
         <div className="flex-1 min-w-0 space-y-1">
           <p className="text-xs text-gray-400">{t("Target")}</p>
           <button onClick={() => { setDraft(String(target)); setEditTarget(true); }} className="flex items-center gap-1 text-lg font-semibold text-gray-50">
-            {target}x <ChevronRight size={16} className="text-gray-400" />
+            {tx(target)}x <ChevronRight size={16} className="text-gray-400" />
           </button>
           <p className="text-[11px] text-gray-400">
             {weekCount >= target ? t("Target minggu ini tercapai!") : t("{0} sesi lagi untuk mencapai target", [target - weekCount])}
@@ -70,13 +70,13 @@ export default function BodyOverviewTab({ onGo }: { onGo: (t: Tab) => void }) {
           <Scale size={18} className="text-primary" />
           <p className="text-[11px] text-gray-400">{t("Berat Badan")}</p>
           <p className="text-xl font-bold text-gray-50 truncate">{weights[0] ? t("{0} kg", [num(weights[0].berat, 1)]) : "—"}</p>
-          {wDelta && <p className="text-[11px] text-gray-400">{wDelta}</p>}
+          {wDelta && <p className="text-[11px] text-gray-400">{tx(wDelta)}</p>}
         </Card>
         <Card onClick={() => onGo("pemulihan")} className="space-y-2">
           <Moon size={18} className="text-primary" />
           <p className="text-[11px] text-gray-400">{t("Tidur")}</p>
           <p className="text-xl font-bold text-gray-50 truncate">{sleeps[0] ? t("{0} jam", [num(sleeps[0].jam, 1)]) : "—"}</p>
-          {sDelta && <p className="text-[11px] text-gray-400">{sDelta}</p>}
+          {sDelta && <p className="text-[11px] text-gray-400">{tx(sDelta)}</p>}
         </Card>
       </div>
 

@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 import type { Exercise, ExerciseInput } from "../../types";
 
+import { t } from "../../lib/i18n";
 export function useExercises() {
   const { user } = useAuth();
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -28,7 +29,7 @@ export function useExercises() {
   }, [fetchExercises]);
 
   const addExercise = async (input: ExerciseInput) => {
-    if (!user) return { error: "Belum login" };
+    if (!user) return { error: t("Belum login") };
     const { error } = await db
       .from("exercises")
       .insert({ ...input, user_id: user.id });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSetting } from "../../../utils/appSettings";
-import { t } from "../../../lib/i18n";
+import { t, tx } from "../../../lib/i18n";
 
 interface WeatherData {
   suhu: number;
@@ -80,7 +80,7 @@ export default function WeatherBadge() {
 
   return (
     <span className="text-xs text-gray-400 inline-flex items-center gap-1">
-      {icon} {weather.suhu}°C, {t(label)}
+      {tx(icon)} {tx(weather.suhu)}{t("°C,")} {t(label)}
     </span>
   );
 }

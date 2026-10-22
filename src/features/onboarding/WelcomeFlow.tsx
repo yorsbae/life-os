@@ -21,6 +21,7 @@ import { useBudgetTarget } from "../money/useBudgetTarget";
 import CurrencyInput from "../../components/ui/CurrencyInput";
 import { PrimaryButton, GhostButton, Chip } from "../../components/ui/Controls";
 
+import { t, tx } from "../../lib/i18n";
 type Step = "splash" | "intro1" | "intro2" | "intro3" | "setup";
 const INTRO_STEPS: Step[] = ["intro1", "intro2", "intro3"];
 
@@ -52,10 +53,10 @@ function Slide({
 }) {
   return (
     <div className="min-h-screen flex flex-col px-6 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] max-w-md mx-auto">
-      <h1 className="text-[26px] leading-tight font-bold text-gray-50">{title}</h1>
-      <p className="text-sm text-gray-400 mt-2">{body}</p>
+      <h1 className="text-[26px] leading-tight font-bold text-gray-50">{tx(title)}</h1>
+      <p className="text-sm text-gray-400 mt-2">{tx(body)}</p>
       <div className="flex-1 flex items-center justify-center py-6">{children}</div>
-      {footer}
+      {tx(footer)}
     </div>
   );
 }
@@ -121,12 +122,10 @@ export default function WelcomeFlow() {
           <Leaf size={44} className="text-primary mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-[44px] font-bold tracking-tight text-gray-50">Life OS</p>
           <p className="text-xs text-gray-300 mt-2 tracking-wide">
-            Better Habits
-            <br />A Greater You
-          </p>
+            {t("Better Habits")}<br />{t("A Greater You")}</p>
         </div>
         <div className="relative w-full max-w-sm">
-          <GhostButton onClick={() => setStep("intro1")}>Mulai</GhostButton>
+          <GhostButton onClick={() => setStep("intro1")}>{t("Mulai")}</GhostButton>
         </div>
       </div>
     );
@@ -136,15 +135,14 @@ export default function WelcomeFlow() {
     const tiles = [Wallet, CalendarCheck, Dumbbell, BookOpen, Target, Sparkles];
     return (
       <Slide
-        title="Kelola hidupmu dalam satu tempat"
+        title={t("Kelola hidupmu dalam satu tempat")}
         body="Uang, kegiatan, kebiasaan, tujuan, dan banyak lagi."
         footer={
           <>
             <Dots step={step} />
-            <PrimaryButton onClick={() => setStep("intro2")}>Lanjut</PrimaryButton>
+            <PrimaryButton onClick={() => setStep("intro2")}>{t("Lanjut")}</PrimaryButton>
             <button onClick={skip} className="mt-3 text-xs text-gray-500">
-              Lewati
-            </button>
+              {t("Lewati")}</button>
           </>
         }
       >
@@ -172,12 +170,12 @@ export default function WelcomeFlow() {
     ];
     return (
       <Slide
-        title="Bangun kebiasaan baik setiap hari"
+        title={t("Bangun kebiasaan baik setiap hari")}
         body="Mulai dari langkah kecil, untuk perubahan besar."
         footer={
           <>
             <Dots step={step} />
-            <PrimaryButton onClick={() => setStep("intro3")}>Lanjut</PrimaryButton>
+            <PrimaryButton onClick={() => setStep("intro3")}>{t("Lanjut")}</PrimaryButton>
           </>
         }
       >
@@ -187,7 +185,7 @@ export default function WelcomeFlow() {
               <span className="w-10 h-10 rounded-xl bg-surface-light text-primary flex items-center justify-center">
                 <Icon size={20} />
               </span>
-              <span className="text-sm text-gray-100">{label}</span>
+              <span className="text-sm text-gray-100">{tx(label)}</span>
             </div>
           ))}
         </div>
@@ -198,12 +196,12 @@ export default function WelcomeFlow() {
   if (step === "intro3") {
     return (
       <Slide
-        title="Siap memulai perjalananmu?"
+        title={t("Siap memulai perjalananmu?")}
         body="Life OS akan membantumu menjadi versi terbaik setiap hari."
         footer={
           <>
             <Dots step={step} />
-            <PrimaryButton onClick={() => setStep("setup")}>Mulai Sekarang</PrimaryButton>
+            <PrimaryButton onClick={() => setStep("setup")}>{t("Mulai Sekarang")}</PrimaryButton>
           </>
         }
       >
@@ -229,35 +227,34 @@ export default function WelcomeFlow() {
 
   return (
     <div className="min-h-screen max-w-md mx-auto px-6 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col">
-      <h1 className="text-[26px] leading-tight font-bold text-gray-50">Kenalan dulu, yuk</h1>
+      <h1 className="text-[26px] leading-tight font-bold text-gray-50">{t("Kenalan dulu, yuk")}</h1>
       <p className="text-sm text-gray-400 mt-2">
-        Semua opsional dan bisa diubah nanti di Profil.
-      </p>
+        {t("Semua opsional dan bisa diubah nanti di Profil.")}</p>
 
       <div className="flex-1 space-y-5 py-6">
         <label className="block space-y-1.5">
-          <span className="text-xs text-gray-400">Nama panggilan</span>
+          <span className="text-xs text-gray-400">{t("Nama panggilan")}</span>
           <input
             className="input-field"
             value={nama}
             onChange={(e) => setNama(e.target.value)}
-            placeholder="mis. Andi"
+            placeholder={t("mis. Andi")}
           />
         </label>
 
         <div className="space-y-2">
-          <span className="text-xs text-gray-400">Hari olahraga biasanya</span>
+          <span className="text-xs text-gray-400">{t("Hari olahraga biasanya")}</span>
           <div className="flex flex-wrap gap-2">
             {HARI_LABEL.map((label, hari) => (
               <Chip key={hari} active={activeDays.has(hari)} onClick={() => toggleDay(hari)}>
-                {label}
+                {tx(label)}
               </Chip>
             ))}
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <span className="text-xs text-gray-400">Target nabung bulan ini</span>
+          <span className="text-xs text-gray-400">{t("Target nabung bulan ini")}</span>
           <CurrencyInput
             value={targetSaving}
             onChange={setTargetSaving}
@@ -267,13 +264,12 @@ export default function WelcomeFlow() {
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
+      {error && <p className="text-xs text-red-400 mb-2">{tx(error)}</p>}
       <PrimaryButton onClick={() => finish(true)} disabled={saving}>
-        {saving ? "Menyimpan..." : "Selesai, masuk ke Home"}
+        {saving ? t("Menyimpan...") : t("Selesai, masuk ke Home")}
       </PrimaryButton>
       <button onClick={skip} className="mt-3 text-xs text-gray-500">
-        Lewati
-      </button>
+        {t("Lewati")}</button>
     </div>
   );
 }
