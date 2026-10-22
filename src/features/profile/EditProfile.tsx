@@ -7,6 +7,7 @@ import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE, ACTIVITY_LEV
 import WeightHistorySection from "./WeightHistorySection";
 import { useWeightLogs } from "./useWeightLogs";
 import { t, tx } from "../../lib/i18n";
+import Select from "../../components/ui/Select";
 
 const initialForm: ProfileInput = {
   nama: "", username: null, umur: null, jenis_kelamin: "Pria", tinggi_badan: null,
@@ -56,18 +57,18 @@ export default function EditProfile() {
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("Umur")}><input type="number" inputMode="numeric" className="input-field" value={form.umur ?? ""} onChange={(e) => setForm({ ...form, umur: numOrNull(e.target.value) })} /></Field>
             <Field label={t("Jenis kelamin")}>
-              <select className="input-field" value={form.jenis_kelamin ?? "Pria"} onChange={(e) => setForm({ ...form, jenis_kelamin: e.target.value })}>
+              <Select className="input-field" value={form.jenis_kelamin ?? "Pria"} onChange={(e) => setForm({ ...form, jenis_kelamin: e.target.value })}>
                 <option value="Pria">{t("Pria")}</option>
                 <option value="Wanita">{t("Wanita")}</option>
-              </select>
+              </Select>
             </Field>
             <Field label={t("Tinggi (cm)")}><input type="number" inputMode="decimal" className="input-field" value={form.tinggi_badan ?? ""} onChange={(e) => setForm({ ...form, tinggi_badan: numOrNull(e.target.value) })} /></Field>
             <Field label={t("Berat (kg)")}><input type="number" inputMode="decimal" className="input-field" value={form.berat_badan ?? ""} onChange={(e) => setForm({ ...form, berat_badan: numOrNull(e.target.value) })} /></Field>
             <Field label={t("Target berat (kg)")}><input type="number" inputMode="decimal" className="input-field" value={form.target_berat_badan ?? ""} onChange={(e) => setForm({ ...form, target_berat_badan: numOrNull(e.target.value) })} /></Field>
             <Field label={t("Aktivitas")}>
-              <select className="input-field" value={form.aktivitas_level ?? "Sedang"} onChange={(e) => setForm({ ...form, aktivitas_level: e.target.value })}>
+              <Select className="input-field" value={form.aktivitas_level ?? "Sedang"} onChange={(e) => setForm({ ...form, aktivitas_level: e.target.value })}>
                 {ACTIVITY_LEVELS.map((l) => <option key={l} value={l}>{tx(l)}</option>)}
-              </select>
+              </Select>
             </Field>
           </div>
           <PrimaryButton onClick={save} disabled={saving}>{saving ? t("Menyimpan...") : t("Simpan")}</PrimaryButton>

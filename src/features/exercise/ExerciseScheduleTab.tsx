@@ -4,6 +4,7 @@ import { useExerciseSchedule } from "./useExerciseSchedule";
 import { EXERCISE_TIPE_PRESETS, SUB_KATEGORI_RUNNING, SUB_KATEGORI_STRENGTH } from "../../types";
 import { DAY_ORDER, dayName } from "./bodyUi";
 import { CalendarX } from "lucide-react";
+import Select from "../../components/ui/Select";
 
 const TIPE_OPTIONS = ["Rest", ...EXERCISE_TIPE_PRESETS];
 
@@ -35,7 +36,7 @@ export default function ExerciseScheduleTab() {
           <Card key={hari} className="space-y-2">
             <p className="text-sm font-medium text-gray-100">{dayName(hari)}</p>
             <div className="grid grid-cols-2 gap-2">
-              <select
+              <Select
                 className="input-field min-w-0"
                 value={tipe}
                 onChange={(e) => saveDaySchedule(hari, e.target.value, null, null)}
@@ -43,15 +44,15 @@ export default function ExerciseScheduleTab() {
                 {TIPE_OPTIONS.map((o) => (
                   <option key={o} value={o}>{tx(o)}</option>
                 ))}
-              </select>
+              </Select>
               {tipe !== "Rest" &&
                 (presets ? (
-                  <select className="input-field min-w-0" value={sub} onChange={(e) => saveDaySchedule(hari, tipe, e.target.value || null, null)}>
+                  <Select className="input-field min-w-0" value={sub} onChange={(e) => saveDaySchedule(hari, tipe, e.target.value || null, null)}>
                     <option value="">{t("Pilih jenis...")}</option>
                     {presets.map((p) => (
                       <option key={p} value={p}>{tx(p)}</option>
                     ))}
-                  </select>
+                  </Select>
                 ) : (
                   <input
                     key={tipe + sub}

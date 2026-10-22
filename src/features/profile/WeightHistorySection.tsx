@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useWeightLogs } from "./useWeightLogs";
 
 import { t, intlLocale } from "../../lib/i18n";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 export default function WeightHistorySection() {
   const { logs, loading, addLog, deleteLog } = useWeightLogs();
   const [berat, setBerat] = useState<number | null>(null);
@@ -53,7 +54,7 @@ export default function WeightHistorySection() {
       </div>
 
       {trend !== null && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-gray-400">
           {trend > 0 ? t("📈 Naik {0} kg", [trend.toFixed(1)]) : trend < 0 ? t("📉 Turun {0} kg", [Math.abs(trend).toFixed(1)]) : t("➡️ Tidak berubah")}{" "}
           {t("dari catatan sebelumnya")}</p>
       )}
@@ -69,7 +70,7 @@ export default function WeightHistorySection() {
               key={l.id}
               className="flex items-center justify-between text-sm py-1"
             >
-              <span className="text-gray-500 dark:text-gray-400">
+              <span className="text-gray-400">
                 {new Date(l.tanggal).toLocaleDateString(intlLocale(), {
                   day: "numeric",
                   month: "short",
@@ -79,11 +80,7 @@ export default function WeightHistorySection() {
               <span className="text-gray-50 font-medium">
                 {Math.round(l.berat * 10) / 10} kg
               </span>
-              <button
-                onClick={() => deleteLog(l.id)}
-                className="text-xs text-red-500"
-              >
-                {t("Hapus")}</button>
+              <DeleteButton label={t("Hapus")} confirmMessage={t("Yakin hapus data ini?")} onConfirm={() => deleteLog(l.id)} />
             </div>
           ))}
         </div>

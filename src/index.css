@@ -58,10 +58,57 @@
   --color-red-700: #b84848;
 }
 
-/* Aplikasi dark-only */
+/* Tema gelap (default). Tema terang meng-override token di bawah lewat kelas `light` pada <html>. */
 :root {
   color-scheme: dark;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+html.light {
+  color-scheme: light;
+  --color-bg: #f3f6f2;
+  --color-surface: #ffffff;
+  --color-surface-light: #dde4de;
+  --color-on-primary: #ffffff;
+  --color-text: #1c231f;
+  --color-secondary: #5b645e;
+  /* Skala abu dibalik: 50 = teks paling kuat, 950 = paling terang. Teks sekunder (400) lolos kontras 4.5:1. */
+  --color-gray-50: #131814;
+  --color-gray-100: #1c231f;
+  --color-gray-200: #29322c;
+  --color-gray-300: #3d4841;
+  --color-gray-400: #566059;
+  --color-gray-500: #66716a;
+  --color-gray-600: #a9b4ac;
+  --color-gray-700: #d0d8d2;
+  --color-gray-800: #e4eae5;
+  --color-gray-900: #f3f6f2;
+  --color-gray-950: #ffffff;
+  --color-red-400: #c0392b;
+  --color-red-500: #b03527;
+  --color-red-600: #9a2d21;
+  --color-blue-50: #1b2e26;
+  --color-blue-100: #24473a;
+  --color-blue-200: #2e5a46;
+  --color-blue-300: #2f7d58;
+  --color-blue-400: #2f7d58;
+  --color-blue-500: #2f7d58;
+  --color-blue-600: #276b49;
+  --color-blue-700: #4f9a78;
+  --color-blue-800: #b3dfc7;
+  --color-blue-900: #d3ecdf;
+  --color-blue-950: #e8f5ee;
+  --color-green-50: #1b2e26;
+  --color-green-200: #2e5a46;
+  --color-green-300: #2f7d58;
+  --color-green-800: #b3dfc7;
+  --color-green-950: #e8f5ee;
+  --color-green-400: #2f7d58;
+  --color-green-500: #2f7d58;
+  --color-green-600: #276b49;
+}
+html.light .card {
+  border-color: rgb(205 214 207 / 0.9);
+  box-shadow: 0 1px 2px rgb(20 30 24 / 0.05);
 }
 @custom-variant dark (&:where(.dark, .dark *));
 

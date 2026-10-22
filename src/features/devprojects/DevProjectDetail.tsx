@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lightbulb, Trash2, Plus } from "lucide-react";
+import { Lightbulb, Plus } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
 import { ProgressBar } from "../../components/ui/Progress";
@@ -9,6 +9,7 @@ import type { DevProject } from "./useDevProjects";
 import { t, tx } from "../../lib/i18n";
 import { fmtDate } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 interface DevProjectDetailProps {
   project: DevProject;
@@ -97,9 +98,7 @@ export default function DevProjectDetail({ project, onBack, onUpdate }: DevProje
                       <p className="text-[11px] text-gray-400">{fmtDate(l.tanggal, "d MMM yyyy")}</p>
                       <p className="text-sm text-gray-50 break-words">{tx(l.catatan)}</p>
                     </div>
-                    <button aria-label={t("Hapus")} className="text-gray-500" onClick={() => deleteLog(l.id)}>
-                      <Trash2 size={15} />
-                    </button>
+                    <DeleteButton size={15} onConfirm={() => deleteLog(l.id)} />
                   </Card>
                 ))}
                 {logs.length === 0 && <EmptyState title={t("Belum ada log.")} />}
@@ -113,9 +112,7 @@ export default function DevProjectDetail({ project, onBack, onUpdate }: DevProje
                   <Card key={x.id} className="!py-3 flex items-center gap-3">
                     <CheckCircle size={22} checked={x.is_done} onClick={() => toggleTodo(x)} />
                     <span className={`flex-1 min-w-0 text-sm break-words ${x.is_done ? "line-through text-gray-500" : "text-gray-50"}`}>{tx(x.judul)}</span>
-                    <button aria-label={t("Hapus")} className="text-gray-500" onClick={() => deleteTodo(x.id)}>
-                      <Trash2 size={15} />
-                    </button>
+                    <DeleteButton size={15} onConfirm={() => deleteTodo(x.id)} />
                   </Card>
                 ))}
                 {todos.length === 0 && <EmptyState title={t("Belum ada to-do.")} />}
@@ -138,9 +135,7 @@ export default function DevProjectDetail({ project, onBack, onUpdate }: DevProje
                           </p>
                         )}
                       </div>
-                      <button aria-label={t("Hapus")} className="text-gray-500" onClick={() => deleteIssue(i.id)}>
-                        <Trash2 size={15} />
-                      </button>
+                      <DeleteButton size={15} onConfirm={() => deleteIssue(i.id)} />
                     </div>
                     {i.status === "Open" &&
                       (resolvingId === i.id ? (

@@ -18,5 +18,21 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Baseline: aturan React Compiler/Fast Refresh ini melanggar pola lama (fetch saat mount di hook data,
+      // konteks + hook dalam satu file). Diturunkan ke warn agar `npm run lint` bisa jadi gerbang CI;
+      // kurangi jumlah peringatan bertahap, jangan menambah.
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': 'warn',
+      'no-useless-assignment': 'warn',
+    },
+  },
+  {
+    // Berkas tes tidak ikut aturan React.
+    files: ['**/*.test.{ts,tsx}'],
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
   },
 ])

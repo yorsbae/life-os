@@ -1,8 +1,10 @@
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { LockProvider } from "./context/LockContext";
+import LockGate from "./components/LockScreen";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ShellProvider, useShell } from "./context/ShellContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -12,24 +14,24 @@ import { getSetting } from "./utils/appSettings";
 
 import WelcomeFlow from "./features/onboarding/WelcomeFlow";
 import DashboardPage from "./features/dashboard/DashboardPage";
-import MoneyPage from "./features/money/MoneyPage";
-import AddTransactionPage from "./features/money/AddTransactionPage";
-import PlanPage from "./features/plan/PlanPage";
-import TaskDetailPage from "./features/plan/TaskDetailPage";
-import HabitPage from "./features/habit/HabitPage";
-import CalendarPage from "./features/calendar/CalendarPage";
-import FocusModePage from "./features/focus/FocusModePage";
-import ExercisePage from "./features/exercise/ExercisePage";
-import AnalyticsPage from "./features/analytics/AnalyticsPage";
-import GoalsPage from "./features/goals/GoalsPage";
-import MindGrowthPage from "./features/mindgrowth/MindGrowthPage";
-import JournalPage from "./features/journal/JournalPage";
-import NotesPage from "./features/notes/NotesPage";
-import CreativeBrainPage from "./features/creative/CreativeBrainPage";
-import DevProjectsPage from "./features/devprojects/DevProjectsPage";
-import SocialAccountsPage from "./features/socialaccounts/SocialAccountsPage";
-import AchievementsPage from "./features/achievements/AchievementsPage";
-import ProfilePage from "./features/profile/ProfilePage";
+const MoneyPage = lazy(() => import("./features/money/MoneyPage"));
+const AddTransactionPage = lazy(() => import("./features/money/AddTransactionPage"));
+const PlanPage = lazy(() => import("./features/plan/PlanPage"));
+const TaskDetailPage = lazy(() => import("./features/plan/TaskDetailPage"));
+const HabitPage = lazy(() => import("./features/habit/HabitPage"));
+const CalendarPage = lazy(() => import("./features/calendar/CalendarPage"));
+const FocusModePage = lazy(() => import("./features/focus/FocusModePage"));
+const ExercisePage = lazy(() => import("./features/exercise/ExercisePage"));
+const AnalyticsPage = lazy(() => import("./features/analytics/AnalyticsPage"));
+const GoalsPage = lazy(() => import("./features/goals/GoalsPage"));
+const MindGrowthPage = lazy(() => import("./features/mindgrowth/MindGrowthPage"));
+const JournalPage = lazy(() => import("./features/journal/JournalPage"));
+const NotesPage = lazy(() => import("./features/notes/NotesPage"));
+const CreativeBrainPage = lazy(() => import("./features/creative/CreativeBrainPage"));
+const DevProjectsPage = lazy(() => import("./features/devprojects/DevProjectsPage"));
+const SocialAccountsPage = lazy(() => import("./features/socialaccounts/SocialAccountsPage"));
+const AchievementsPage = lazy(() => import("./features/achievements/AchievementsPage"));
+const ProfilePage = lazy(() => import("./features/profile/ProfilePage"));
 
 import { tx } from "./lib/i18n";
 // Pengguna baru diarahkan ke alur Welcome (splash + onboarding) satu kali saja.
@@ -76,6 +78,7 @@ function AppContent() {
       <BackButtonHandler />
       <ProtectedRoute>
         <FirstRunGate>
+          <Suspense fallback={<div className="min-h-screen bg-bg" />}>
           <Routes>
             <Route path="/welcome" element={bare(<WelcomeFlow />)} />
 
@@ -112,6 +115,7 @@ function AppContent() {
             <Route path="/incomes" element={<Navigate to="/money" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </FirstRunGate>
       </ProtectedRoute>
     </BrowserRouter>
@@ -123,11 +127,16 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <ShellProvider>
-          <LanguageProvider>
-            <ErrorBoundary>
-              <AppContent />
-            </ErrorBoundary>
-          </LanguageProvider>
+          {/* LockProvider di luar LanguageProvider: ganti bahasa me-remount pohon dan tidak boleh mengunci ulang. */}
+          <LockProvider>
+            <LanguageProvider>
+              <ErrorBoundary>
+                <LockGate>
+                  <AppContent />
+                </LockGate>
+              </ErrorBoundary>
+            </LanguageProvider>
+          </LockProvider>
         </ShellProvider>
       </AuthProvider>
     </ThemeProvider>

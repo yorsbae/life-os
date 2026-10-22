@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
-import { BookOpen, GraduationCap, Flame, Minus, Plus, Trash2 } from "lucide-react";
+import { BookOpen, GraduationCap, Flame, Minus, Plus } from "lucide-react";
 import ItemRow from "../../components/ui/ItemRow";
 import Field from "../../components/ui/Field";
 import Segmented from "../../components/ui/Segmented";
-import { Chip, EmptyState, GhostButton, PrimaryButton, Sheet } from "../../components/ui/Controls";
+import { Chip, EmptyState, PrimaryButton, Sheet } from "../../components/ui/Controls";
 import { useReadings, type Reading, type ReadingInput } from "../reading/useReadings";
 import { useStudyItems, type StudyItem, type StudyTipe } from "./useStudyItems";
 import { t, tx } from "../../lib/i18n";
 import { toDateStr } from "../../utils/dates";
+import { DangerButton } from "../../components/ui/DeleteButton";
 
 export type ItemFilter = "all" | "book" | "course";
 
@@ -135,7 +136,7 @@ function ItemSheet({
   };
 
   const remove = async () => {
-    if (!target || !confirm(t("Yakin hapus data ini?"))) return;
+    if (!target) return;
     if (target.kind === "book") await readings.deleteReading(target.reading.id);
     else await courses.deleteItem(target.item.id);
     onClose();
@@ -214,10 +215,7 @@ function ItemSheet({
         {saving ? t("Menyimpan...") : t("Simpan")}
       </PrimaryButton>
       {editing && (
-        <GhostButton onClick={remove} className="!border-red-500/40 !text-red-400 flex items-center justify-center gap-2">
-          <Trash2 size={15} />
-          {t("Hapus")}
-        </GhostButton>
+        <DangerButton label={t("Hapus")} confirmMessage={t("Yakin hapus data ini?")} onConfirm={remove} />
       )}
     </Sheet>
   );

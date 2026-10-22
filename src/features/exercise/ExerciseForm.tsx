@@ -10,6 +10,7 @@ import {
   type ExerciseInput,
 } from "../../types";
 import { toDateStr } from "../../utils/dates";
+import Select from "../../components/ui/Select";
 
 const CUSTOM = "__custom__";
 
@@ -97,13 +98,13 @@ export default function ExerciseForm({
         <label className="block space-y-1.5">
           <span className="text-xs text-gray-400">{t("Jenis")}</span>
           {presets ? (
-            <select className="input-field" value={sub} onChange={(e) => setSub(e.target.value)}>
+            <Select className="input-field" value={sub} onChange={(e) => setSub(e.target.value)}>
               {presets.map((p) => (
                 <option key={p} value={p}>
                   {tx(p)}
                 </option>
               ))}
-            </select>
+            </Select>
           ) : (
             <input className="input-field" placeholder={t("Opsional")} value={sub} onChange={(e) => setSub(e.target.value)} />
           )}

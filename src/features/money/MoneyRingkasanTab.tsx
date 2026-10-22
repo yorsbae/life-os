@@ -93,7 +93,7 @@ export default function MoneyRingkasanTab() {
       <div className="flex items-center justify-between bg-surface rounded-xl border border-surface-light px-3 py-2">
         <button
           onClick={goToPreviousMonth}
-          className="text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1"
+          className="text-gray-400 hover:text-gray-50 px-2 py-1"
         >
           ←
         </button>
@@ -111,7 +111,7 @@ export default function MoneyRingkasanTab() {
         </div>
         <button
           onClick={goToNextMonth}
-          className="text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1"
+          className="text-gray-400 hover:text-gray-50 px-2 py-1"
         >
           →
         </button>
@@ -121,20 +121,20 @@ export default function MoneyRingkasanTab() {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400 mb-1">{t("Pemasukan")}</p>
-          <p className="font-semibold text-green-600 dark:text-green-400 text-sm">
+          <p className="font-semibold text-green-400 text-sm">
             {formatRupiah(totalIncome)}
           </p>
         </div>
         <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400 mb-1">{t("Pengeluaran")}</p>
-          <p className="font-semibold text-red-600 dark:text-red-400 text-sm">
+          <p className="font-semibold text-red-400 text-sm">
             {formatRupiah(totalExpense)}
           </p>
         </div>
         <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400 mb-1">{t("Saldo")}</p>
           <p
-            className={`font-semibold text-sm ${saldo >= 0 ? "text-gray-50" : "text-red-600 dark:text-red-400"}`}
+            className={`font-semibold text-sm ${saldo >= 0 ? "text-gray-50" : "text-red-400"}`}
           >
             {formatRupiah(saldo)}
           </p>
@@ -147,8 +147,8 @@ export default function MoneyRingkasanTab() {
       )}
 
       {isCurrentMonth && !targetSaving && suggestion.hasEnoughHistory && (
-        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-          <p className="text-sm text-blue-900 dark:text-blue-200 mb-2">
+        <div className="bg-blue-950 border border-blue-800 rounded-xl p-4">
+          <p className="text-sm text-blue-200 mb-2">
             {t("💡 Berdasarkan rata-rata 3 bulan terakhir, saran target nabung bulan ini:")}{" "}
             <span className="font-semibold">
               {formatRupiah(suggestion.suggestedSaving ?? 0)}
@@ -162,7 +162,7 @@ export default function MoneyRingkasanTab() {
               {t("Pakai Saran Ini")}</button>
             <button
               onClick={() => setEditingSaving(true)}
-              className="text-sm text-blue-600 dark:text-blue-300 px-3 py-1.5"
+              className="text-sm text-blue-300 px-3 py-1.5"
             >
               {t("Set Manual")}</button>
           </div>
@@ -177,7 +177,7 @@ export default function MoneyRingkasanTab() {
           {targetSaving && (
             <button
               onClick={() => setEditingSaving(true)}
-              className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              className="text-xs text-gray-400 hover:text-gray-200"
             >
               {t("Edit")}</button>
           )}
@@ -199,13 +199,13 @@ export default function MoneyRingkasanTab() {
           </div>
         ) : (
           <>
-            <div className="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
+            <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden mb-2">
               <div
                 className={`h-full ${saldo >= 0 ? "bg-green-500" : "bg-red-500"}`}
                 style={{ width: `${Math.max(0, savingProgress ?? 0)}%` }}
               />
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-400">
               {formatRupiah(saldo)}  {t("dari target")} {formatRupiah(targetSaving)} (
               {tx(savingProgress)}%)
             </p>
@@ -235,14 +235,14 @@ export default function MoneyRingkasanTab() {
                   return (
                     <div key={kategori}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-700 dark:text-gray-300">
+                        <span className="text-gray-300">
                           {tx(kategori)}
                         </span>
                         <span className="text-gray-400">
                           {formatRupiah(used)} / {formatRupiah(budget)}
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${percent >= 100 ? "bg-red-500" : percent >= 80 ? "bg-yellow-500" : "bg-green-500"}`}
                           style={{ width: `${percent}%` }}

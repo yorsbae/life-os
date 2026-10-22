@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRightLeft, Plus, Search, Trash2 } from "lucide-react";
+import { ArrowRightLeft, Plus, Search } from "lucide-react";
 import { addDays, format } from "date-fns";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
@@ -20,6 +20,7 @@ import RecurringExpenseTab from "./RecurringExpenseTab";
 import { t, tx } from "../../lib/i18n";
 import { fmtDate, rupiah } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 type Tab = "ringkasan" | "transaksi" | "anggaran" | "rutin" | "wishlist";
 type Filter = "all" | "out" | "in" | "transfer";
@@ -53,13 +54,7 @@ function AccountsSheet({ onClose }: { onClose: () => void }) {
                 <p className="text-sm text-gray-50 truncate">{tx(a.nama)}</p>
                 <p className="text-[11px] text-gray-400">{tx(a.tipe)} · {rupiah(balances[a.nama] ?? 0)}</p>
               </div>
-              <button
-                aria-label={t("Hapus")}
-                className="text-gray-500 p-1"
-                onClick={() => confirm(t("Hapus akun \"{0}\"? Transaksi tidak ikut terhapus.", [a.nama])) && deleteAccount(a.id)}
-              >
-                <Trash2 size={16} />
-              </button>
+              <DeleteButton size={16} confirmMessage={t("Hapus akun \"{0}\"? Transaksi tidak ikut terhapus.", [a.nama])} onConfirm={() => deleteAccount(a.id)} />
             </div>
           );
         })}
@@ -197,7 +192,6 @@ function Transactions() {
   }, [rows]);
 
   const remove = (r: (typeof rows)[number]) => {
-    if (!confirm(t("Hapus transaksi ini?"))) return;
     if (r.kind === "in") deleteIncome(r.id);
     else if (r.kind === "out") deleteExpense(r.id);
     else deleteTransfer(r.id);
@@ -232,7 +226,7 @@ function Transactions() {
                 <span className={`text-sm font-semibold shrink-0 ${r.kind === "in" ? "text-primary" : r.kind === "out" ? "text-red-400" : "text-gray-200"}`}>
                   {r.kind === "in" ? "+" : r.kind === "out" ? "-" : ""}{rupiah(r.nominal)}
                 </span>
-                <button aria-label={t("Hapus")} className="text-gray-600 shrink-0" onClick={() => remove(r)}><Trash2 size={15} /></button>
+                <DeleteButton size={15} confirmMessage={t("Hapus transaksi ini?")} onConfirm={() => remove(r)} />
               </Card>
             ))}
           </div>

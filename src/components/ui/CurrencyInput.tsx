@@ -43,7 +43,10 @@ export default function CurrencyInput({
         value={displayValue}
         onChange={handleChange}
         placeholder={placeholder?.replace(/^\s*Rp\s*/i, "")}
-        className={`pl-9 ${className}`}
+        // Inline style, bukan class `pl-9`: `.input-field` (CSS tanpa layer) menimpa utilitas Tailwind
+        // sehingga angka/placeholder bertumpuk dengan prefix "Rp" (tampak seperti "Rp" dobel).
+        style={{ paddingLeft: "2.5rem" }}
+        className={className}
       />
     </div>
   );

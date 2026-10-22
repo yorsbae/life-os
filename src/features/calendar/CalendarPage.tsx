@@ -220,10 +220,8 @@ export default function CalendarPage() {
           onDelete={
             modal.event
               ? async () => {
-                  if (confirm(t("Yakin hapus jadwal ini?"))) {
-                    await deleteEvent(modal.event!.id);
-                    setModal(null);
-                  }
+                  await deleteEvent(modal.event!.id);
+                  setModal(null);
                 }
               : undefined
           }

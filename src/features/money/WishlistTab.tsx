@@ -10,6 +10,8 @@ import {
 import CurrencyInput from "../../components/ui/CurrencyInput";
 
 import { t, tx, intlLocale } from "../../lib/i18n";
+import Select from "../../components/ui/Select";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 function formatRupiah(n: number) {
   return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
@@ -74,7 +76,7 @@ export default function WishlistTab() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm(t("Yakin hapus wishlist ini?"))) deleteWishlist(id);
+    deleteWishlist(id);
   };
 
   return (
@@ -104,7 +106,7 @@ export default function WishlistTab() {
           />
 
           <div className="grid grid-cols-2 gap-3">
-            <select
+            <Select
               value={form.kategori}
               onChange={(e) => setForm({ ...form, kategori: e.target.value })}
               className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg"
@@ -114,9 +116,9 @@ export default function WishlistTab() {
                   {tx(k)}
                 </option>
               ))}
-            </select>
+            </Select>
 
-            <select
+            <Select
               value={form.prioritas}
               onChange={(e) =>
                 setForm({
@@ -131,7 +133,7 @@ export default function WishlistTab() {
                   {tx(p)}
                 </option>
               ))}
-            </select>
+            </Select>
 
             <CurrencyInput
               value={form.estimasi_biaya}
@@ -147,7 +149,7 @@ export default function WishlistTab() {
               placeholder={t("Sudah terkumpul")}
             />
 
-            <select
+            <Select
               value={form.status}
               onChange={(e) =>
                 setForm({
@@ -162,7 +164,7 @@ export default function WishlistTab() {
                   {tx(s)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div className="flex gap-2">
@@ -176,7 +178,7 @@ export default function WishlistTab() {
             <button
               type="button"
               onClick={cancelForm}
-              className="px-4 py-2.5 rounded-lg border border-surface-light dark:text-gray-300 text-sm"
+              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-300 text-sm"
             >
               {t("Batal")}</button>
           </div>
@@ -208,7 +210,7 @@ export default function WishlistTab() {
                       {tx(w.judul)}
                     </span>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">
                         {tx(w.kategori)}
                       </span>
                       <span
@@ -216,7 +218,7 @@ export default function WishlistTab() {
                       >
                         {tx(w.prioritas)}
                       </span>
-                      <span className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-blue-950 text-blue-300 rounded-full">
                         {tx(w.status)}
                       </span>
                     </div>
@@ -224,20 +226,16 @@ export default function WishlistTab() {
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => startEdit(w)}
-                      className="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                      className="text-xs text-gray-500 hover:text-gray-50"
                     >
                       {t("Edit")}</button>
-                    <button
-                      onClick={() => handleDelete(w.id)}
-                      className="text-xs text-red-500 hover:text-red-700"
-                    >
-                      {t("Hapus")}</button>
+                    <DeleteButton label={t("Hapus")} confirmMessage={t("Yakin hapus wishlist ini?")} onConfirm={() => handleDelete(w.id)} />
                   </div>
                 </div>
 
                 {w.estimasi_biaya && (
                   <>
-                    <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-1">
+                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mb-1">
                       <div
                         className="h-full bg-blue-500"
                         style={{ width: `${progress}%` }}

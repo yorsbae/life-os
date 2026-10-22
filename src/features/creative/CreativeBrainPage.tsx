@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Archive, ExternalLink, Lightbulb, Link2, Trash2, Video } from "lucide-react";
+import { Archive, ExternalLink, Lightbulb, Link2, Video } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
 import Field from "../../components/ui/Field";
@@ -11,6 +11,8 @@ import ProjectModal from "./ProjectModal";
 import { CREATIVE_STAGES, CREATIVE_KATEGORI, type CreativeProject } from "../../types";
 import { t, tx } from "../../lib/i18n";
 import { fmtDate } from "../../utils/format";
+import Select from "../../components/ui/Select";
+import { DangerButton } from "../../components/ui/DeleteButton";
 
 type Tab = "ide" | "konten" | "referensi";
 
@@ -148,9 +150,9 @@ export default function CreativeBrainPage() {
             <input className="input-field" placeholder={t("mis. Rutinitas pagi")} value={judul} onChange={(e) => setJudul(e.target.value)} autoFocus />
           </Field>
           <Field label={t("Kategori")}>
-            <select className="input-field" value={kategori} onChange={(e) => setKategori(e.target.value)}>
+            <Select className="input-field" value={kategori} onChange={(e) => setKategori(e.target.value)}>
               {CREATIVE_KATEGORI.map((k) => <option key={k} value={k}>{tx(k)}</option>)}
-            </select>
+            </Select>
           </Field>
           <PrimaryButton onClick={saveIdea} disabled={!judul.trim()}>{t("Simpan")}</PrimaryButton>
         </Sheet>
@@ -163,16 +165,14 @@ export default function CreativeBrainPage() {
           <Field label={t("Catatan")}><textarea className="input-field min-h-20" value={refForm.catatan} onChange={(e) => setRefForm({ ...refForm, catatan: e.target.value })} /></Field>
           <PrimaryButton onClick={saveRef} disabled={!refForm.judul.trim()}>{t("Simpan")}</PrimaryButton>
           {refSheet.ref && (
-            <button
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-500/40 text-sm text-red-400"
-              onClick={async () => {
-                if (!confirm(t("Hapus referensi ini?"))) return;
+            <DangerButton
+              label={t("Hapus")}
+              confirmMessage={t("Hapus referensi ini?")}
+              onConfirm={async () => {
                 await deleteRef(refSheet.ref!.id);
                 setRefSheet(null);
               }}
-            >
-              <Trash2 size={15} /> {t("Hapus")}
-            </button>
+            />
           )}
         </Sheet>
       )}

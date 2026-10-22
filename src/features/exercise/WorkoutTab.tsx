@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2, Dumbbell } from "lucide-react";
+import { Pencil, Dumbbell } from "lucide-react";
 import { Card, Chip, EmptyState, Fab } from "../../components/ui/Controls";
 import { t, tx } from "../../lib/i18n";
 import { fmtDate, num } from "../../utils/format";
@@ -9,6 +9,7 @@ import { exerciseIcon } from "./bodyUi";
 import ExerciseForm from "./ExerciseForm";
 import ExerciseScheduleTab from "./ExerciseScheduleTab";
 import CoachingTab from "./CoachingTab";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 type Sub = "riwayat" | "jadwal" | "program";
 
@@ -58,9 +59,7 @@ export default function WorkoutTab() {
                     <button aria-label={t("Edit")} className="text-gray-400 p-1" onClick={() => setForm({ editing: e })}>
                       <Pencil size={15} />
                     </button>
-                    <button aria-label={t("Hapus")} className="text-gray-500 p-1" onClick={() => confirm(t("Yakin hapus data ini?")) && deleteExercise(e.id)}>
-                      <Trash2 size={15} />
-                    </button>
+                    <DeleteButton size={15} confirmMessage={t("Yakin hapus data ini?")} onConfirm={() => deleteExercise(e.id)} />
                   </Card>
                 );
               })}

@@ -6,6 +6,8 @@ import { encryptText, decryptText } from "../../utils/cryptoUtils";
 import PinPromptModal from "../../components/PinPromptModal";
 
 import { t, tx, intlLocale } from "../../lib/i18n";
+import Select from "../../components/ui/Select";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 interface DetailProps {
   account: SocialAccount;
   onBack: () => void;
@@ -88,7 +90,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
     <div className="max-w-2xl mx-auto p-4 space-y-4">
       <button
         onClick={onBack}
-        className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+        className="text-sm text-gray-400 hover:text-gray-50"
       >
         {t("← Semua Akun")}</button>
 
@@ -96,7 +98,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
         <h1 className="text-xl font-semibold text-gray-50 break-words">
           @{tx(account.username)}
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-400">
           {tx(account.platform)} · {tx(account.niche)}
         </p>
       </div>
@@ -110,7 +112,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
         </div>
         <div className="bg-surface rounded-xl border border-surface-light p-4">
           <p className="text-xs text-gray-400">{t("Total Earnings")}</p>
-          <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+          <p className="text-lg font-semibold text-green-400">
             {formatRupiah(totalEarnings)}
           </p>
         </div>
@@ -147,14 +149,14 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
             <button
               onClick={handleViewPassword}
               disabled={!account.password_encrypted}
-              className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-50 px-3 py-2 rounded-lg disabled:opacity-40"
+              className="text-sm bg-gray-700 text-gray-50 px-3 py-2 rounded-lg disabled:opacity-40"
             >
               {account.password_encrypted ? t("👁 Lihat Password (butuh PIN)") : t("Belum ada password tersimpan")}
             </button>
           )}
 
           <div className="border-t border-surface-light pt-3 space-y-2">
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
+            <label className="block text-xs font-medium text-gray-400">
               {account.password_encrypted ? t("Ganti Password") : t("Set Password Baru")}
             </label>
             <div className="flex gap-2">
@@ -230,11 +232,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                     {m.insight_note && `· ${m.insight_note}`}
                   </p>
                 </div>
-                <button
-                  onClick={() => deleteMetric(m.id)}
-                  className="text-xs text-red-500"
-                >
-                  {t("Hapus")}</button>
+                <DeleteButton label={t("Hapus")} confirmMessage={t("Yakin hapus data ini?")} onConfirm={() => deleteMetric(m.id)} />
               </div>
             ))
           )}
@@ -259,7 +257,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                 onChange={(e) => setEarningNominal(e.target.value)}
                 className={inputClass}
               />
-              <select
+              <Select
                 value={earningTipe}
                 onChange={(e) => setEarningTipe(e.target.value)}
                 className={`${inputClass} col-span-2`}
@@ -269,7 +267,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                     {tx(t)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <button
               onClick={() => {
@@ -310,14 +308,10 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                  <span className="text-sm font-medium text-green-400">
                     {formatRupiah(e.nominal)}
                   </span>
-                  <button
-                    onClick={() => deleteEarning(e.id)}
-                    className="text-xs text-red-500"
-                  >
-                    {t("Hapus")}</button>
+                  <DeleteButton label={t("Hapus")} confirmMessage={t("Yakin hapus data ini?")} onConfirm={() => deleteEarning(e.id)} />
                 </div>
               </div>
             ))

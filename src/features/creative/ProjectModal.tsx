@@ -7,6 +7,7 @@ import {
 import { useCreativeProjects } from "./useCreativeProjects";
 
 import { t, tx } from "../../lib/i18n";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 interface ProjectModalProps {
   project: CreativeProject;
   onClose: () => void;
@@ -57,15 +58,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   };
 
   const handleDelete = async () => {
-    if (confirm(t("Hapus permanen? Ini tidak bisa dibatalkan."))) {
-      await deleteProject(project.id);
-      onClose();
-    }
+    await deleteProject(project.id);
+    onClose();
   };
 
   const field = (label: string, node: React.ReactNode) => (
     <div>
-      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+      <label className="block text-xs font-medium text-gray-400 mb-1">
         {tx(label)}
       </label>
       {tx(node)}
@@ -362,7 +361,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full bg-gray-100 dark:bg-gray-700 text-gray-50 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
+          className="w-full bg-gray-700 text-gray-50 py-2 rounded-lg text-sm font-medium hover:bg-gray-600"
         >
           {isSaving ? t("Menyimpan...") : t("Simpan Perubahan")}
         </button>
@@ -384,7 +383,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 <button
                   key={s.key}
                   onClick={() => handleBack(s.key)}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-surface-light text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-surface-light text-gray-300 hover:bg-gray-700"
                 >
                   {t("← Kembali ke")}{tx(s.label)}
                 </button>
@@ -395,17 +394,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           <div className="flex gap-2 pt-2">
             <button
               onClick={handleArchive}
-              className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 text-sm text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-700"
             >
               {t("📦 Arsipkan")}</button>
-            <button
-              onClick={handleDelete}
-              className="flex-1 text-sm text-red-500 border border-red-200 dark:border-red-900 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950"
-            >
-              {t("Hapus")}</button>
+            <DeleteButton label={t("Hapus")} confirmMessage={t("Hapus permanen? Ini tidak bisa dibatalkan.")} onConfirm={handleDelete} className="flex-1 border border-red-400/40 !min-h-0 py-2 rounded-lg" />
             <button
               onClick={onClose}
-              className="flex-1 text-sm text-gray-500 dark:text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 text-sm text-gray-400 border border-surface-light py-2 rounded-lg hover:bg-gray-700"
             >
               {t("Tutup")}</button>
           </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Card, PrimaryButton, GhostButton, SectionTitle, Sheet, Chip } from "../../components/ui/Controls";
 import { ProgressBar } from "../../components/ui/Progress";
 import { t, tx } from "../../lib/i18n";
@@ -8,6 +8,8 @@ import { toDateStr } from "../../utils/dates";
 import { useProfile } from "../profile/useProfile";
 import { useWeightLogs } from "../profile/useWeightLogs";
 import { ACTIVITY_LEVELS, calculateBMI, calculateBMR, calculateTDEE, getBMICategory } from "../../utils/bodyCalculations";
+import Select from "../../components/ui/Select";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 export default function MetricsTab() {
   const { profile, saveProfile } = useProfile();
@@ -121,9 +123,7 @@ export default function MetricsTab() {
             <Card key={l.id} className="!py-3 flex items-center justify-between gap-3">
               <span className="text-sm text-gray-100">{t("{0} kg", [num(l.berat, 1)])}</span>
               <span className="flex-1 text-right text-[11px] text-gray-400">{fmtDate(l.tanggal, "d MMM yyyy")}</span>
-              <button aria-label={t("Hapus")} className="text-gray-500" onClick={() => confirm(t("Yakin hapus data ini?")) && deleteLog(l.id)}>
-                <Trash2 size={15} />
-              </button>
+              <DeleteButton size={15} confirmMessage={t("Yakin hapus data ini?")} onConfirm={() => deleteLog(l.id)} />
             </Card>
           ))
         )}
@@ -144,9 +144,9 @@ export default function MetricsTab() {
             </div>
           </div>
           <label className="block space-y-1"><span className="text-xs text-gray-400">{t("Tingkat aktivitas")}</span>
-            <select className="input-field" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })}>
+            <Select className="input-field" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })}>
               {ACTIVITY_LEVELS.map((a) => <option key={a} value={a}>{tx(a)}</option>)}
-            </select></label>
+            </Select></label>
           <label className="block space-y-1"><span className="text-xs text-gray-400">{t("Target berat (kg)")}</span>
             <input className="input-field" inputMode="decimal" value={form.target} onChange={(e) => setForm({ ...form, target: e.target.value })} /></label>
           <PrimaryButton

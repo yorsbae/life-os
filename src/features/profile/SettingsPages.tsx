@@ -3,12 +3,15 @@ import PageHeader from "../../components/ui/PageHeader";
 import LanguagePicker from "../../components/ui/LanguagePicker";
 import { Card, Chip, GhostButton, SectionTitle, Toggle } from "../../components/ui/Controls";
 import { ACCENTS, useTheme, type FontSize } from "../../context/ThemeContext";
+import Segmented from "../../components/ui/Segmented";
 import { useLanguage } from "../../context/LanguageContext";
 import { HOME_SECTIONS, loadHomeSections, saveHomeSections, type HomeSection } from "../../utils/homeSections";
 import { MODULE_MENU } from "../../hooks/usePrimaryMenu";
 import { exportAllData, readBackupFile, restoreBackup } from "../../utils/exportData";
+import { MIN_PASSWORD_LENGTH, PasswordRequiredError } from "../../utils/backupCrypto";
 import { hideAmounts, setHideAmounts } from "../../lib/privacy";
 import NotificationSettings from "./NotificationSettings";
+import LockSettings from "./LockSettings";
 import WeatherSettings from "./WeatherSettings";
 import { t, tx } from "../../lib/i18n";
 
@@ -24,7 +27,7 @@ export function SubPage({ title, children }: { title: string; children: ReactNod
 }
 
 export function AppearancePage() {
-  const { accent, setAccent, fontSize, setFontSize } = useTheme();
+  const { accent, setAccent, fontSize, setFontSize, mode, setMode } = useTheme();
   const sizes: { key: FontSize; label: string }[] = [
     { key: "small", label: t("Kecil") }, { key: "normal", label: t("Normal") }, { key: "large", label: t("Besar") },
   ];
@@ -32,7 +35,15 @@ export function AppearancePage() {
     <SubPage title={t("Tampilan")}>
       <Card className="space-y-3">
         <SectionTitle>{t("Tema")}</SectionTitle>
-        <p className="text-xs text-gray-400">{t("Life OS memakai tema gelap hijau agar nyaman di mata.")}</p>
+        <Segmented
+          value={mode}
+          onChange={setMode}
+          options={[
+            { key: "dark", label: t("Gelap") },
+            { key: "light", label: t("Terang") },
+            { key: "system", label: t("Ikuti sistem") },
+          ]}
+        />
       </Card>
       <Card className="space-y-3">
         <SectionTitle>{t("Warna aksen")}</SectionTitle>
@@ -109,23 +120,42 @@ export function DataPage() {
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [encrypt, setEncrypt] = useState(true);
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  // File terenkripsi yang menunggu kata sandi untuk dipulihkan.
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [importPw, setImportPw] = useState("");
 
   const doExport = async () => {
-    setExporting(true);
     setError("");
-    const res = await exportAllData();
+    if (encrypt) {
+      if (pw.length < MIN_PASSWORD_LENGTH) {
+        setError(t("Kata sandi minimal {0} karakter.", [MIN_PASSWORD_LENGTH]));
+        return;
+      }
+      if (pw !== pw2) {
+        setError(t("Konfirmasi kata sandi tidak cocok."));
+        return;
+      }
+    }
+    setExporting(true);
+    const res = await exportAllData(encrypt ? pw : undefined);
     if (res.error) setError(res.error);
+    else {
+      setPw("");
+      setPw2("");
+    }
     setExporting(false);
   };
 
-  const doImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  const restoreFrom = async (file: File, password?: string) => {
     setMsg(null);
     setImporting(true);
     try {
-      const preview = await readBackupFile(file);
+      const preview = await readBackupFile(file, password);
+      setPendingFile(null);
+      setImportPw("");
       const when = new Date(preview.exportedAt).toLocaleString();
       if (!confirm(t("Pulihkan backup ini?\n\nDibuat: {0}\nTotal data: {1} baris\n\nSEMUA data yang ada sekarang akan DIGANTI dengan isi backup. Tindakan ini tidak bisa dibatalkan.", [when, preview.totalRows]))) return;
       const res = await restoreBackup(preview.backup);
@@ -135,24 +165,59 @@ export function DataPage() {
         setTimeout(() => window.location.reload(), 800);
       }
     } catch (err) {
-      setMsg({ ok: false, text: err instanceof Error ? err.message : t("Gagal membaca file backup") });
+      if (err instanceof PasswordRequiredError) {
+        setPendingFile(file);
+        setMsg({ ok: false, text: err.message });
+      } else {
+        setMsg({ ok: false, text: err instanceof Error ? err.message : t("Gagal membaca file backup") });
+      }
     } finally {
       setImporting(false);
     }
   };
 
+  const doImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPendingFile(null);
+    setImportPw("");
+    await restoreFrom(file);
+  };
+
+  const inputCls = "w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm";
+
   return (
     <SubPage title={t("Data & Backup")}>
       <Card className="space-y-3">
         <p className="text-xs text-gray-400">
-          {t("Data hanya tersimpan di HP ini. Jika aplikasi dihapus atau HP hilang, data ikut hilang, jadi simpan backup secara berkala. File backup berisi semua datamu dalam bentuk teks biasa (JSON), simpan di tempat yang aman.")}
+          {t("Data hanya tersimpan di HP ini. Jika aplikasi dihapus atau HP hilang, data ikut hilang, jadi simpan backup secara berkala.")}{" "}
+          {encrypt
+            ? t("Backup akan dienkripsi dengan kata sandi. Jika kata sandi hilang, backup tidak bisa dibuka siapa pun, termasuk kamu.")
+            : t("Tanpa enkripsi, file backup berisi semua datamu dalam bentuk teks biasa (JSON). Simpan di tempat yang aman.")}
         </p>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-200">{t("Enkripsi dengan kata sandi")}</span>
+          <Toggle checked={encrypt} onChange={setEncrypt} />
+        </div>
+        {encrypt && (
+          <div className="space-y-2">
+            <input type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder={t("Kata sandi backup")} className={inputCls} />
+            <input type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder={t("Ulangi kata sandi")} className={inputCls} />
+          </div>
+        )}
         {error && <p className="text-xs text-red-400">{tx(error)}</p>}
         <GhostButton onClick={doExport} disabled={exporting}>{exporting ? t("Menyiapkan file...") : t("Buat Backup")}</GhostButton>
         <label className={`block w-full text-center border border-surface-light text-gray-200 py-3 rounded-xl text-sm font-medium ${importing ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}>
           {importing ? t("Memproses...") : t("Pulihkan dari Backup")}
           <input type="file" accept="application/json,.json" className="hidden" onChange={doImport} />
         </label>
+        {pendingFile && (
+          <div className="space-y-2">
+            <input type="password" autoComplete="current-password" autoFocus value={importPw} onChange={(e) => setImportPw(e.target.value)} placeholder={t("Kata sandi backup")} className={inputCls} />
+            <GhostButton onClick={() => restoreFrom(pendingFile, importPw)} disabled={importing || !importPw}>{t("Buka Backup")}</GhostButton>
+          </div>
+        )}
         {msg && <p className={`text-xs ${msg.ok ? "text-primary" : "text-red-400"}`}>{tx(msg.text)}</p>}
       </Card>
     </SubPage>
@@ -173,6 +238,7 @@ export function PrivacyPage() {
           <Toggle checked={hide} onChange={(v) => { setHide(v); setHideAmounts(v); remount(); }} />
         </div>
       </Card>
+      <LockSettings />
       <Card className="space-y-2">
         <SectionTitle>{t("Data tetap di HP kamu")}</SectionTitle>
         <p className="text-xs text-gray-400">{t("Life OS tidak memakai akun, server, atau cloud. Semua data disimpan di penyimpanan privat aplikasi dan tidak dikirim ke mana pun. Satu-satunya fitur yang memakai internet adalah Cuaca (opsional, mati secara default).")}</p>

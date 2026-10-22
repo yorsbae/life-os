@@ -8,6 +8,8 @@ import CurrencyInput from "../../components/ui/CurrencyInput";
 import { KATEGORI_EXPENSE } from "../../types";
 
 import { t, tx, intlLocale } from "../../lib/i18n";
+import Select from "../../components/ui/Select";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 function formatRupiah(n: number) {
   return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
@@ -123,7 +125,7 @@ export default function RecurringExpenseTab() {
               className="px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
             />
           </div>
-          <select
+          <Select
             value={form.kategori ?? ""}
             onChange={(e) => setForm({ ...form, kategori: e.target.value })}
             className="w-full px-3 py-2 border border-surface-light bg-bg text-gray-100 rounded-lg text-sm"
@@ -133,7 +135,7 @@ export default function RecurringExpenseTab() {
                 {tx(k)}
               </option>
             ))}
-          </select>
+          </Select>
           <div className="flex gap-2">
             <button
               type="submit"
@@ -145,7 +147,7 @@ export default function RecurringExpenseTab() {
             <button
               type="button"
               onClick={cancelForm}
-              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 text-sm"
+              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-300 text-sm"
             >
               {t("Batal")}</button>
           </div>
@@ -170,7 +172,7 @@ export default function RecurringExpenseTab() {
                     {tx(i.nama)}
                   </span>
                   {!i.aktif && (
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-400 rounded-full">
+                    <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-400 rounded-full">
                       {t("Nonaktif")}</span>
                   )}
                 </div>
@@ -184,20 +186,16 @@ export default function RecurringExpenseTab() {
                 </span>
                 <button
                   onClick={() => updateItem(i.id, { aktif: !i.aktif })}
-                  className="text-xs text-gray-500 dark:text-gray-400"
+                  className="text-xs text-gray-400"
                 >
                   {i.aktif ? t("Matikan") : t("Aktifkan")}
                 </button>
                 <button
                   onClick={() => startEdit(i)}
-                  className="text-xs text-gray-500 dark:text-gray-400"
+                  className="text-xs text-gray-400"
                 >
                   {t("Edit")}</button>
-                <button
-                  onClick={() => deleteItem(i.id)}
-                  className="text-xs text-red-500"
-                >
-                  {t("Hapus")}</button>
+                <DeleteButton label={t("Hapus")} confirmMessage={t("Yakin hapus data ini?")} onConfirm={() => deleteItem(i.id)} />
               </div>
             </div>
           ))}

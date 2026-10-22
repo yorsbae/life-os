@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ChevronRight, Pin, PinOff, Search, Trash2 } from "lucide-react";
+import { ChevronRight, Pin, PinOff, Search } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Field from "../../components/ui/Field";
 import { Card, Chip, EmptyState, Fab, PrimaryButton, Sheet } from "../../components/ui/Controls";
@@ -7,6 +7,7 @@ import { useNotes } from "./useNotes";
 import { NOTE_KATEGORI_DEFAULT, type Note, type NoteInput } from "../../types";
 import { t, tx } from "../../lib/i18n";
 import { fmtDate } from "../../utils/format";
+import { DangerButton } from "../../components/ui/DeleteButton";
 
 const emptyForm = (): NoteInput => ({ judul: "", kategori: NOTE_KATEGORI_DEFAULT[0], konten: "", tags: [], is_pinned: false });
 
@@ -113,16 +114,14 @@ export default function NotesPage() {
                 {sheet.note.is_pinned ? <PinOff size={15} /> : <Pin size={15} />}
                 {sheet.note.is_pinned ? t("Lepas sematan") : t("Sematkan")}
               </button>
-              <button
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-500/40 text-sm text-red-400"
-                onClick={async () => {
-                  if (!confirm(t("Hapus catatan ini?"))) return;
+              <DangerButton
+                label={t("Hapus")}
+                confirmMessage={t("Hapus catatan ini?")}
+                onConfirm={async () => {
                   await deleteNote(sheet.note!.id);
                   setSheet(null);
                 }}
-              >
-                <Trash2 size={15} /> {t("Hapus")}
-              </button>
+              />
             </div>
           )}
         </Sheet>

@@ -22,14 +22,14 @@ export default function WeatherSettings() {
       <p className="text-xs text-gray-400">
         {t("Satu-satunya fitur yang memakai internet. Jika aktif, koordinat lokasimu dikirim ke layanan cuaca Open-Meteo. Seluruh data lain tetap hanya ada di HP ini.")}</p>
       <div className="flex items-center justify-between pt-2">
-        <p className="text-sm text-gray-700 dark:text-gray-300">
+        <p className="text-sm text-gray-300">
           {enabled ? t("Aktif") : t("Mati")}
         </p>
         <button
           onClick={toggle}
           className={
             enabled
-              ? "text-sm text-red-500 border border-red-200 dark:border-red-900 px-3 py-1.5 rounded-lg"
+              ? "text-sm text-red-500 border border-red-900 px-3 py-1.5 rounded-lg"
               : "text-sm bg-primary text-on-primary px-3 py-1.5 rounded-lg"
           }
         >

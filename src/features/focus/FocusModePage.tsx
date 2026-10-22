@@ -8,6 +8,7 @@ import { useTasks } from "../plan/useTasks";
 import { useFocusSessions } from "./useFocusSessions";
 import { t, tx } from "../../lib/i18n";
 import { num } from "../../utils/format";
+import Select from "../../components/ui/Select";
 
 type Mode = "pomodoro" | "50/10" | "timer";
 const MODE_MIN: Record<Mode, number> = { pomodoro: 25, "50/10": 50, timer: 15 };
@@ -104,10 +105,10 @@ export default function FocusModePage() {
 
         <label className="block space-y-1.5">
           <span className="text-xs text-gray-400">{t("Tugas")}</span>
-          <select className="input-field" value={taskId} onChange={(e) => setTaskId(e.target.value)} disabled={running}>
+          <Select className="input-field" value={taskId} onChange={(e) => setTaskId(e.target.value)} disabled={running}>
             <option value="">{t("Tanpa tugas")}</option>
             {open.map((t) => <option key={t.id} value={t.id}>{tx(t.judul)}</option>)}
-          </select>
+          </Select>
         </label>
 
         {running ? <GhostButton onClick={stop}>{t("Berhenti")}</GhostButton> : <PrimaryButton onClick={start}>{secondsLeft < total && secondsLeft > 0 ? t("Lanjutkan") : t("Mulai")}</PrimaryButton>}

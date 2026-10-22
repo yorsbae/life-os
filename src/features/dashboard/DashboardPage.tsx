@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, ChevronRight, Search, Wallet, CheckSquare, Dumbbell, Repeat, Timer } from "lucide-react";
+import { Bell, ChevronRight, Eye, EyeOff, Search, Wallet, CheckSquare, Dumbbell, Repeat, Timer } from "lucide-react";
 import { addDays, startOfWeek } from "date-fns";
 import { useProfile } from "../profile/useProfile";
 import { useTasks } from "../plan/useTasks";
@@ -14,6 +14,8 @@ import { fmtDate } from "../../utils/format";
 import { rupiahCompact } from "../../utils/compactMoney";
 import { HOME_SECTIONS, loadHomeSections, type HomeSection } from "../../utils/homeSections";
 import { t, tx } from "../../lib/i18n";
+import { hideAmounts, setHideAmounts } from "../../lib/privacy";
+import { useLanguage } from "../../context/LanguageContext";
 import { useReminders } from "./reminders/useReminders";
 import ReminderBanners from "./reminders/ReminderBanners";
 import WeatherBadge from "./widgets/WeatherBadge";
@@ -31,6 +33,7 @@ function greeting() {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { remount } = useLanguage();
   const { openSearch } = useShell();
   const { profile } = useProfile();
   const { tasks } = useTasks();
@@ -105,6 +108,17 @@ export default function DashboardPage() {
             )}
           </button>
         )}
+        <button
+          onClick={() => {
+            setHideAmounts(!hideAmounts());
+            remount();
+          }}
+          aria-label={hideAmounts() ? t("Tampilkan nominal") : t("Sembunyikan nominal")}
+          aria-pressed={hideAmounts()}
+          className="p-1.5 text-gray-300"
+        >
+          {hideAmounts() ? <EyeOff size={20} /> : <Eye size={20} />}
+        </button>
         <button onClick={openSearch} aria-label={t("Cari")} className="p-1.5 text-gray-300">
           <Search size={20} />
         </button>

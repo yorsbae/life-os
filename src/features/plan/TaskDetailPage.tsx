@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Calendar, Clock, Pencil, Trash2 } from "lucide-react";
+import { Calendar, Clock, Pencil } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
-import { Card, Chip, CheckCircle, PrimaryButton, GhostButton, EmptyState } from "../../components/ui/Controls";
+import { Card, Chip, CheckCircle, PrimaryButton, EmptyState } from "../../components/ui/Controls";
 import { ProgressBar } from "../../components/ui/Progress";
 import { fmtDate } from "../../utils/format";
 import { t, tx } from "../../lib/i18n";
 import { useTasks, useSubtasks, formatRange, priorityLabel, statusLabel, type TaskStatus } from "./useTasks";
 import TaskForm from "./TaskForm";
+import { DeleteButton, DangerButton } from "../../components/ui/DeleteButton";
 
 const STATUSES: TaskStatus[] = ["Todo", "In Progress", "Selesai"];
 
@@ -100,9 +101,7 @@ export default function TaskDetailPage() {
             <div key={s.id} className="flex items-center gap-3">
               <CheckCircle size={20} checked={s.is_done} onClick={() => toggleSubtask(s)} />
               <span className={`flex-1 min-w-0 break-words text-sm ${s.is_done ? "text-gray-500 line-through" : "text-gray-100"}`}>{tx(s.judul)}</span>
-              <button aria-label={t("Hapus subtugas")} className="text-gray-600 shrink-0" onClick={() => deleteSubtask(s.id)}>
-                <Trash2 size={14} />
-              </button>
+              <DeleteButton size={14} aria-label={t("Hapus subtugas")} onConfirm={() => deleteSubtask(s.id)} />
             </div>
           ))}
           <form
@@ -119,16 +118,14 @@ export default function TaskDetailPage() {
         </Card>
 
         <PrimaryButton onClick={() => navigate("/focus", { state: { taskId: task.id } })}>{t("Mulai Fokus")}</PrimaryButton>
-        <GhostButton
-          className="!border-red-500/40 !text-red-400"
-          onClick={async () => {
-            if (!confirm(t("Hapus tugas ini?"))) return;
+        <DangerButton
+          label={t("Hapus Tugas")}
+          confirmMessage={t("Hapus tugas ini?")}
+          onConfirm={async () => {
             await deleteTask(task.id);
             navigate("/plan", { replace: true });
           }}
-        >
-          {t("Hapus Tugas")}
-        </GhostButton>
+        />
       </div>
       {editing && (
         <TaskForm

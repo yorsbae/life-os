@@ -15,6 +15,7 @@ import type { Expense } from "../../types";
 import { t, tx } from "../../lib/i18n";
 import { rupiah } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
+import Select from "../../components/ui/Select";
 
 type Kind = "out" | "in" | "transfer";
 
@@ -117,9 +118,9 @@ function Form({ initial, editId, accounts, balances, onSave, navigate }: {
   };
 
   const accountSelect = (value: string, onChange: (v: string) => void) => (
-    <select className="input-field" value={value} onChange={(e) => onChange(e.target.value)}>
+    <Select className="input-field" value={value} onChange={(e) => onChange(e.target.value)}>
       {names.map((n) => <option key={n} value={n}>{n}</option>)}
-    </select>
+    </Select>
   );
 
   return (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flame, Trash2, Droplets, BookOpen, Moon, Dumbbell, Check, Plus, Minus, type LucideIcon } from "lucide-react";
+import { Flame, Droplets, BookOpen, Moon, Dumbbell, Check, Plus, Minus, type LucideIcon } from "lucide-react";
 import { addDays, startOfWeek } from "date-fns";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
@@ -9,6 +9,7 @@ import { toDateStr } from "../../utils/dates";
 import { fmtDate, num } from "../../utils/format";
 import { t, tx } from "../../lib/i18n";
 import { useHabits, type Habit } from "./useHabits";
+import { DangerButton } from "../../components/ui/DeleteButton";
 
 type View = "hari" | "mingguan" | "bulan";
 
@@ -98,17 +99,14 @@ function ValueSheet({ habit, value, onSave, onDelete, onClose }: { habit: Habit;
           </PrimaryButton>
         </>
       )}
-      <button
-        className="w-full py-3 rounded-xl border border-red-500/40 text-red-400 text-sm font-medium flex items-center justify-center gap-2"
-        onClick={() => {
-          if (confirm(t('Hapus "{0}" beserta riwayatnya?', [habit.nama]))) {
-            onDelete();
-            onClose();
-          }
+      <DangerButton
+        label={t("Hapus kebiasaan")}
+        confirmMessage={t('Hapus "{0}" beserta riwayatnya?', [habit.nama])}
+        onConfirm={() => {
+          onDelete();
+          onClose();
         }}
-      >
-        <Trash2 size={15} /> {t("Hapus kebiasaan")}
-      </button>
+      />
     </Sheet>
   );
 }

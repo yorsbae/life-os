@@ -4,16 +4,25 @@ import { Share } from "@capacitor/share";
 import { Database, type BackupFile } from "../lib/db/query";
 import { db } from "../lib/db";
 import { resyncRemindersFromDb } from "./reminders";
+import {
+  decryptBackup,
+  encryptBackup,
+  isEncryptedBackup,
+  PasswordRequiredError,
+} from "./backupCrypto";
 
 import { t } from "../lib/i18n";
 // Backup manual ke file JSON berversi. Tidak ada cloud: file dibagikan lewat
 // menu Share Android (simpan ke Files, kirim ke diri sendiri, Drive, dll — pilihan pengguna).
 
-export async function exportAllData(): Promise<{ error: string | null }> {
+/** Bila `password` diisi, file backup dienkripsi (AES-256-GCM). */
+export async function exportAllData(password?: string): Promise<{ error: string | null }> {
   try {
     const snapshot = await db.snapshot();
-    const json = JSON.stringify(snapshot, null, 2);
-    const filename = `lifeos-backup-${new Date().toISOString().split("T")[0]}.json`;
+    const json = password
+      ? await encryptBackup(JSON.stringify(snapshot), password)
+      : JSON.stringify(snapshot, null, 2);
+    const filename = `lifeos-backup-${new Date().toISOString().split("T")[0]}${password ? ".enc" : ""}.json`;
 
     if (Capacitor.isNativePlatform()) {
       const written = await Filesystem.writeFile({
@@ -51,12 +60,21 @@ export interface ImportPreview {
 }
 
 /** Baca & validasi file backup tanpa mengubah database. */
-export async function readBackupFile(file: File): Promise<ImportPreview> {
+export async function readBackupFile(file: File, password?: string): Promise<ImportPreview> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(await file.text());
   } catch {
     throw new Error("File bukan JSON yang valid.");
+  }
+  if (isEncryptedBackup(parsed)) {
+    if (!password) throw new PasswordRequiredError();
+    const plain = await decryptBackup(parsed, password);
+    try {
+      parsed = JSON.parse(plain);
+    } catch {
+      throw new Error("File bukan JSON yang valid.");
+    }
   }
   const backup = Database.validateBackup(parsed);
   const totalRows = Object.values(backup.tables).reduce((n, r) => n + r.length, 0);

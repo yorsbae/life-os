@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Pencil, Trash2, Target, CheckCircle2 } from "lucide-react";
+import { Pencil, Target, CheckCircle2 } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
 import { ProgressBar } from "../../components/ui/Progress";
@@ -8,6 +8,8 @@ import { useGoals, GOAL_TIPE_LABEL, type Goal, type GoalInput, type GoalTipe } f
 import { t, tx } from "../../lib/i18n";
 import { rupiah, num, fmtDate } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
+import Select from "../../components/ui/Select";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 type Tab = "aktif" | "selesai";
 
@@ -142,13 +144,7 @@ export default function GoalsPage() {
                     <button onClick={() => open(g)} aria-label={t("Edit")} className="text-gray-400 pt-2">
                       <Pencil size={15} />
                     </button>
-                    <button
-                      onClick={() => confirm(t("Hapus goal ini?")) && deleteGoal(g.id)}
-                      aria-label={t("Hapus")}
-                      className="text-gray-500 pt-2"
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                    <DeleteButton size={15} confirmMessage={t("Hapus goal ini?")} onConfirm={() => deleteGoal(g.id)} />
                   </div>
                 </Card>
               );
@@ -170,13 +166,13 @@ export default function GoalsPage() {
               value={form.judul}
               onChange={(e) => setForm({ ...form, judul: e.target.value })}
             />
-            <select className="input-field" value={form.tipe} onChange={(e) => setForm({ ...form, tipe: e.target.value as GoalTipe })}>
+            <Select className="input-field" value={form.tipe} onChange={(e) => setForm({ ...form, tipe: e.target.value as GoalTipe })}>
               {Object.entries(GOAL_TIPE_LABEL).map(([k, v]) => (
                 <option key={k} value={k}>
                   {tx(v)}
                 </option>
               ))}
-            </select>
+            </Select>
             <div className="grid grid-cols-2 gap-3">
               <label className="space-y-1 min-w-0">
                 <span className="text-xs text-gray-400">{t("Target")}</span>

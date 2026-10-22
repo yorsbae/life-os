@@ -29,13 +29,13 @@ export default function NotificationSettings() {
       {error && <p className="text-xs text-red-500">{tx(error)}</p>}
 
       <div className="flex items-center justify-between pt-2">
-        <p className="text-sm text-gray-700 dark:text-gray-300">
+        <p className="text-sm text-gray-300">
           {isEnabled ? t("Pengingat aktif") : t("Pengingat belum aktif")}
         </p>
         {isEnabled ? (
           <button
             onClick={disable}
-            className="text-sm text-red-500 border border-red-200 dark:border-red-900 px-3 py-1.5 rounded-lg"
+            className="text-sm text-red-500 border border-red-900 px-3 py-1.5 rounded-lg"
           >
             {t("Matikan")}</button>
         ) : (

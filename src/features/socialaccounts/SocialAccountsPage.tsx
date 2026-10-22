@@ -10,6 +10,8 @@ import {
 import SocialAccountDetail from "./SocialAccountDetail";
 
 import { t, tx } from "../../lib/i18n";
+import Select from "../../components/ui/Select";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 const initialForm = {
   platform: PLATFORM_OPTIONS[0],
   username: "",
@@ -36,12 +38,7 @@ export default function SocialAccountsPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (
-      confirm(
-        t("Hapus akun ini? Semua metrics/earnings di dalamnya ikut terhapus."),
-      )
-    )
-      deleteAccount(id);
+    deleteAccount(id);
   };
 
   if (openAccount) {
@@ -75,7 +72,7 @@ export default function SocialAccountsPage() {
           className="bg-surface p-5 rounded-xl border border-surface-light space-y-3"
         >
           <div className="grid grid-cols-2 gap-3">
-            <select
+            <Select
               value={form.platform}
               onChange={(e) => setForm({ ...form, platform: e.target.value })}
               className={inputClass}
@@ -85,7 +82,7 @@ export default function SocialAccountsPage() {
                   {tx(p)}
                 </option>
               ))}
-            </select>
+            </Select>
             <input
               type="text"
               required
@@ -94,7 +91,7 @@ export default function SocialAccountsPage() {
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               className={inputClass}
             />
-            <select
+            <Select
               value={form.niche ?? ""}
               onChange={(e) => setForm({ ...form, niche: e.target.value })}
               className={inputClass}
@@ -104,8 +101,8 @@ export default function SocialAccountsPage() {
                   {n}
                 </option>
               ))}
-            </select>
-            <select
+            </Select>
+            <Select
               value={form.tujuan ?? ""}
               onChange={(e) => setForm({ ...form, tujuan: e.target.value })}
               className={inputClass}
@@ -115,7 +112,7 @@ export default function SocialAccountsPage() {
                   {tx(t)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <p className="text-xs text-gray-400">
             {t("💡 Password bisa diisi nanti dari halaman detail (terenkripsi pakai PIN App Lock kamu).")}</p>
@@ -130,7 +127,7 @@ export default function SocialAccountsPage() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-700 dark:text-gray-300 text-sm"
+              className="px-4 py-2.5 rounded-lg border border-surface-light text-gray-300 text-sm"
             >
               {t("Batal")}</button>
           </div>
@@ -158,7 +155,7 @@ export default function SocialAccountsPage() {
                     <span className="font-medium text-gray-50 wrap-break-word">
                       @{tx(a.username)}
                     </span>
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
+                    <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">
                       {tx(a.platform)}
                     </span>
                   </div>
@@ -166,11 +163,7 @@ export default function SocialAccountsPage() {
                     {tx(a.niche)} · {tx(a.tujuan)}
                   </p>
                 </button>
-                <button
-                  onClick={() => handleDelete(a.id)}
-                  className="text-xs text-red-500 shrink-0"
-                >
-                  {t("Hapus")}</button>
+                <DeleteButton label={t("Hapus")} confirmMessage={t("Hapus akun ini? Semua metrics/earnings di dalamnya ikut terhapus.")} onConfirm={() => handleDelete(a.id)} />
               </div>
             </div>
           ))}

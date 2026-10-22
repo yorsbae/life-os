@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Trash2, Moon, Lightbulb } from "lucide-react";
+import { Moon, Lightbulb } from "lucide-react";
 import { subDays } from "date-fns";
 import { Card, PrimaryButton, SectionTitle } from "../../components/ui/Controls";
 import { BarChart } from "../../components/Analytics/Charts";
@@ -8,6 +8,7 @@ import { fmtDate, num } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
 import { useSleepLogs } from "./useSleepLogs";
 import { useExerciseSchedule } from "./useExerciseSchedule";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 const SLEEP_GOAL = 8;
 
@@ -91,9 +92,7 @@ export default function RecoveryTab() {
             <Card key={l.id} className="!py-3 flex items-center gap-3">
               <span className="text-sm text-gray-100">{t("{0} jam", [num(l.jam, 1)])}</span>
               <span className="flex-1 text-right text-[11px] text-gray-400">{fmtDate(l.tanggal, "EEE, d MMM yyyy")}</span>
-              <button aria-label={t("Hapus")} className="text-gray-500" onClick={() => confirm(t("Yakin hapus data ini?")) && deleteSleep(l.id)}>
-                <Trash2 size={15} />
-              </button>
+              <DeleteButton size={15} confirmMessage={t("Yakin hapus data ini?")} onConfirm={() => deleteSleep(l.id)} />
             </Card>
           ))}
         </div>

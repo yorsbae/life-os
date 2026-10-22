@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Archive, ArchiveRestore, FolderKanban, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, FolderKanban } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
 import { ProgressBar } from "../../components/ui/Progress";
@@ -7,6 +7,7 @@ import { Card, EmptyState, Sheet, PrimaryButton, GhostButton } from "../../compo
 import { useDevProjects, type DevProject } from "./useDevProjects";
 import DevProjectDetail from "./DevProjectDetail";
 import { t, tx } from "../../lib/i18n";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 type Tab = "aktif" | "arsip";
 
@@ -67,13 +68,7 @@ export default function DevProjectsPage() {
           >
             {p.status === "Aktif" ? <Archive size={16} /> : <ArchiveRestore size={16} />}
           </button>
-          <button
-            aria-label={t("Hapus")}
-            className="text-gray-500 p-0.5"
-            onClick={() => confirm(t("Hapus project ini? Semua log/todo/issue di dalamnya ikut terhapus.")) && deleteProject(p.id)}
-          >
-            <Trash2 size={16} />
-          </button>
+          <DeleteButton size={16} confirmMessage={t("Hapus project ini? Semua log/todo/issue di dalamnya ikut terhapus.")} onConfirm={() => deleteProject(p.id)} />
         </div>
         <ProgressBar value={pr.done} max={pr.total || 1} />
         {pr.total > 0 && (

@@ -50,7 +50,7 @@ export default function PinPromptModal({
           </button>
           <button
             onClick={onCancel}
-            className="px-4 py-2 border border-surface-light text-gray-700 dark:text-gray-300 rounded-lg text-sm"
+            className="px-4 py-2 border border-surface-light text-gray-300 rounded-lg text-sm"
           >
             {t("Batal")}</button>
         </div>

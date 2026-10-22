@@ -2,12 +2,13 @@ import { useState } from "react";
 import { NotebookPen } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Field from "../../components/ui/Field";
-import { Card, EmptyState, GhostButton, PrimaryButton, Sheet } from "../../components/ui/Controls";
+import { Card, EmptyState, PrimaryButton, Sheet } from "../../components/ui/Controls";
 import { useLearnings } from "./useLearnings";
 import type { Learning, LearningInput } from "../../types";
 import { t, tx } from "../../lib/i18n";
 import { fmtDate } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
+import { DangerButton } from "../../components/ui/DeleteButton";
 
 const blank = (): LearningInput => ({ topik: "", materi: "", catatan: "", durasi: null, tanggal: toDateStr() });
 
@@ -53,16 +54,14 @@ function LogSheet({ editing, onClose }: { editing: Learning | null; onClose: () 
         {saving ? t("Menyimpan...") : t("Simpan")}
       </PrimaryButton>
       {editing && (
-        <GhostButton
-          className="!border-red-500/40 !text-red-400"
-          onClick={async () => {
-            if (!confirm(t("Yakin hapus data ini?"))) return;
+        <DangerButton
+          label={t("Hapus")}
+          confirmMessage={t("Yakin hapus data ini?")}
+          onConfirm={async () => {
             await deleteLearning(editing.id);
             onClose();
           }}
-        >
-          {t("Hapus")}
-        </GhostButton>
+        />
       )}
     </Sheet>
   );

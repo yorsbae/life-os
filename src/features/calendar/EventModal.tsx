@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Sheet, PrimaryButton, Chip } from "../../components/ui/Controls";
 import { EVENT_TIPE_LABEL, type CalendarEvent, type CalendarEventInput, type EventTipe } from "../../types";
 import { t, tx } from "../../lib/i18n";
+import { DangerButton } from "../../components/ui/DeleteButton";
 
 interface EventModalProps {
   onClose: () => void;
@@ -85,9 +86,7 @@ export default function EventModal({ onClose, onSubmit, onDelete, editingEvent, 
           {saving ? t("Menyimpan...") : editingEvent ? t("Perbarui") : t("Simpan")}
         </PrimaryButton>
         {editingEvent && onDelete && (
-          <button type="button" onClick={onDelete} className="w-full py-3 rounded-xl border border-red-500/40 text-red-400 text-sm font-medium">
-            {t("Hapus")}
-          </button>
+          <DangerButton label={t("Hapus")} confirmMessage={t("Yakin hapus jadwal ini?")} onConfirm={onDelete} />
         )}
       </form>
     </Sheet>

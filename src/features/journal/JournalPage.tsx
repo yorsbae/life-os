@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Smile, Meh, Zap, BatteryLow, Frown, CloudRain, Flame, Trash2, X, type LucideIcon } from "lucide-react";
+import { Smile, Meh, Zap, BatteryLow, Frown, CloudRain, Flame, X, type LucideIcon } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Field from "../../components/ui/Field";
 import { Card, Chip, EmptyState, PrimaryButton, GhostButton, SectionTitle } from "../../components/ui/Controls";
@@ -8,6 +8,7 @@ import { MOOD_OPTIONS, type Journal, type JournalInput } from "../../types";
 import { t, tx } from "../../lib/i18n";
 import { fmtDate } from "../../utils/format";
 import { toDateStr } from "../../utils/dates";
+import { DeleteButton } from "../../components/ui/DeleteButton";
 
 const MOOD_ICON: Record<string, LucideIcon> = {
   Senang: Smile,
@@ -171,13 +172,7 @@ export default function JournalPage() {
                       <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">{tx(j.konten)}</p>
                     </button>
                     <Icon size={18} className="text-primary shrink-0 mt-1" />
-                    <button
-                      aria-label={t("Hapus")}
-                      className="text-gray-600 shrink-0 mt-1"
-                      onClick={() => confirm(t("Hapus entri ini?")) && deleteJournal(j.id)}
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                    <DeleteButton size={15} confirmMessage={t("Hapus entri ini?")} onConfirm={() => deleteJournal(j.id)} />
                   </div>
                   {(j.tags ?? []).length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
