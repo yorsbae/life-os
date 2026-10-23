@@ -75,7 +75,7 @@ export function LockProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    withTimeout(loadLockState(), 8000, "Penyimpanan aman")
+    withTimeout(loadLockState(), 12000, "Penyimpanan aman")
       .then((s) => {
         if (cancelled) return;
         stateRef.current = s;

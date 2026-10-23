@@ -3,6 +3,7 @@ import { Delete, Fingerprint, Lock } from "lucide-react";
 import { useLock } from "../context/LockContext";
 import { PIN_MAX, PIN_MIN } from "../lib/appLock/pin";
 import { t } from "../lib/i18n";
+import { lastLoadError } from "../lib/appLock/store";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "bio", "0", "del"] as const;
 
@@ -65,6 +66,7 @@ function LockScreen() {
     return (
       <Shell>
         <p className="text-sm text-gray-100 text-center">{t("Gagal membuka penyimpanan aman. Data kamu tidak diubah.")}</p>
+        {lastLoadError && <p className="mt-2 text-[11px] text-gray-500 text-center px-8 break-words">{lastLoadError}</p>}
         <button onClick={lock.retryLoad} className="mt-4 px-6 min-h-12 rounded-xl bg-primary text-on-primary font-semibold text-sm">
           {t("Coba lagi")}
         </button>
