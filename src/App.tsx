@@ -12,9 +12,11 @@ import BackButtonHandler from "./components/BackButtonHandler";
 import WidgetSync from "./components/WidgetSync";
 import Layout from "./components/Layout";
 import { getSetting } from "./utils/appSettings";
+import { withTimeout } from "./utils/withTimeout";
 
 import WelcomeFlow from "./features/onboarding/WelcomeFlow";
 import DashboardPage from "./features/dashboard/DashboardPage";
+const TodayPage = lazy(() => import("./features/today/TodayPage"));
 const MoneyPage = lazy(() => import("./features/money/MoneyPage"));
 const AddTransactionPage = lazy(() => import("./features/money/AddTransactionPage"));
 const PlanPage = lazy(() => import("./features/plan/PlanPage"));
@@ -34,7 +36,7 @@ const SocialAccountsPage = lazy(() => import("./features/socialaccounts/SocialAc
 const AchievementsPage = lazy(() => import("./features/achievements/AchievementsPage"));
 const ProfilePage = lazy(() => import("./features/profile/ProfilePage"));
 
-import { tx } from "./lib/i18n";
+import { t, tx } from "./lib/i18n";
 // Pengguna baru diarahkan ke alur Welcome (splash + onboarding) satu kali saja.
 // Status dibaca sekali dari database lalu disimpan di ShellContext; WelcomeFlow
 // mengubahnya langsung saat selesai sehingga tidak ada pembacaan ulang yang bisa balapan.
@@ -46,7 +48,7 @@ function FirstRunGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user || introDone !== null) return;
     let cancelled = false;
-    getSetting("intro_done")
+    withTimeout(getSetting("intro_done"), 8000, "Membaca pengaturan")
       .then((v) => !cancelled && setIntroDone(!!v))
       .catch(() => !cancelled && setIntroDone(true));
     return () => {
@@ -54,7 +56,12 @@ function FirstRunGate({ children }: { children: ReactNode }) {
     };
   }, [user, introDone, setIntroDone]);
 
-  if (introDone === null) return null;
+  if (introDone === null)
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="text-gray-400 text-sm">{t("Memuat...")}</p>
+      </div>
+    );
   if (!introDone && location.pathname !== "/welcome") return <Navigate to="/welcome" replace />;
   return <>{children}</>;
 }
@@ -85,6 +92,7 @@ function AppContent() {
             <Route path="/welcome" element={bare(<WelcomeFlow />)} />
 
             <Route path="/" element={withLayout(<DashboardPage />)} />
+            <Route path="/today" element={withLayout(<TodayPage />)} />
             <Route path="/money" element={withLayout(<MoneyPage />)} />
             <Route path="/money/add" element={bare(<AddTransactionPage />)} />
             <Route path="/plan" element={withLayout(<PlanPage />)} />

@@ -900,4 +900,13 @@ export const zh: Record<string, string> = {
   "Ekspor Transaksi (CSV)": "导出交易（CSV）",
   "CSV tidak dienkripsi. Simpan di tempat yang aman.": "CSV 未加密，请妥善保管。",
   "Sumber/Akun": "来源/账户",
+  "Skor Pekan Ini": "本周得分",
+  "Tugas hari ini": "今日任务",
+  "Tidak ada tugas hari ini": "今天没有任务",
+  "Habit hari ini": "今日习惯",
+  "Pengeluaran hari ini": "今日支出",
+  "Catat Cepat": "快速记录",
+  "Tulis catatan...": "写点笔记...",
+  "mis. kopi 25rb": "例如 咖啡 25k",
+  "mis. 65,5": "例如 65.5",
 };

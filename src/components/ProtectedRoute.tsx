@@ -16,6 +16,12 @@ export default function ProtectedRoute({
         <div className="space-y-2">
           <p className="text-red-500 font-medium">{t("Database gagal dibuka")}</p>
           <p className="text-xs text-gray-400 break-words">{tx(dbError)}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-3 px-6 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold"
+          >
+            {t("Coba Lagi")}
+          </button>
         </div>
       </div>
     );

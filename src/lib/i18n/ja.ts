@@ -901,4 +901,13 @@ export const ja: Record<string, string> = {
   "Ekspor Transaksi (CSV)": "取引をエクスポート（CSV）",
   "CSV tidak dienkripsi. Simpan di tempat yang aman.": "CSV は暗号化されません。安全な場所に保管してください。",
   "Sumber/Akun": "入出金元/口座",
+  "Skor Pekan Ini": "今週のスコア",
+  "Tugas hari ini": "今日のタスク",
+  "Tidak ada tugas hari ini": "今日のタスクはありません",
+  "Habit hari ini": "今日の習慣",
+  "Pengeluaran hari ini": "今日の支出",
+  "Catat Cepat": "クイック記録",
+  "Tulis catatan...": "メモを書く...",
+  "mis. kopi 25rb": "例: コーヒー 25k",
+  "mis. 65,5": "例: 65.5",
 };

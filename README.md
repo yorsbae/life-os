@@ -10,6 +10,12 @@ Dibangun dengan **React + Vite + TypeScript + Tailwind**, dibungkus **Capacitor*
 
 Tema hijau gelap (Background `#151815`, Surface `#202520`, Primary `#7DC7A0`, font Inter, ikon Lucide). Navigasi bawah 5 tab: **Home, Money, Plan, Body, Insights**; modul lain (Habit, Kalender, Focus, Goals, Learning, Journal, Notes, Creative Brain, Projects, Achievements, Profil) lewat ikon hamburger di header. Alur pertama kali: Splash → 3 slide onboarding → pengaturan singkat. Token desain ada di `src/index.css`, komponen bersama di `src/components/ui/`.
 
+## Baru di v4
+
+- **Hari Ini** (menu modul): tugas, habit, agenda, dan pengeluaran hari ini + **Skor Pekan Ini** (tugas, kebiasaan, fokus, refleksi) dihitung dari data yang sudah ada.
+- **Catat Cepat** (tombol petir di kiri bawah): ketik `kopi 25rb` untuk pengeluaran (nominal & kategori terdeteksi otomatis), tulis catatan, atau catat berat badan.
+- **Perbaikan layar hitam saat dibuka**: timeout + pesan error + tombol coba lagi pada pembukaan database/penyimpanan aman, koneksi SQLite yang rusak dibuat ulang, warna latar WebView, dan jaring pengaman error di `main.tsx`.
+
 ## Fitur
 
 Dashboard, Money (expense, income, budget, recurring, wishlist), Body (log latihan, jadwal, coaching), Mind & Growth (learning, reading, journal, weekly review), Creative Brain, Notes, Project Tracker, Social Accounts, Goals, Achievements, Calendar, Analytics, Focus Mode, Profile, Quick-Add, pencarian global, dark mode.

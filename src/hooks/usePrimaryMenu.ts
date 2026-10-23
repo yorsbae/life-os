@@ -1,5 +1,6 @@
 import {
   Home,
+  Sun,
   Wallet,
   CalendarCheck,
   Dumbbell,
@@ -36,6 +37,7 @@ export const TAB_MENU: MenuOption[] = [
 
 /** Modul lain, tampil di drawer (ikon hamburger). */
 export const MODULE_MENU: MenuOption[] = [
+  { path: "/today", label: "Hari Ini", icon: Sun },
   { path: "/habits", label: "Habit", icon: Repeat },
   { path: "/calendar", label: "Kalender", icon: CalendarDays },
   { path: "/focus", label: "Focus", icon: Timer },

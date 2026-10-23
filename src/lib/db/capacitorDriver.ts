@@ -32,16 +32,18 @@ export async function createCapacitorDriver(): Promise<SqlDriver> {
   const consistent = (await sqlite.checkConnectionsConsistency()).result;
   const exists = (await sqlite.isConnection(DB_NAME, false)).result;
   let conn: SQLiteDBConnection;
-  if (consistent && exists) {
-    conn = await sqlite.retrieveConnection(DB_NAME, false);
-  } else {
-    conn = await sqlite.createConnection(
-      DB_NAME,
-      false,
-      "no-encryption",
-      1,
-      false,
-    );
+  const create = () =>
+    sqlite.createConnection(DB_NAME, false, "no-encryption", 1, false);
+  try {
+    conn = consistent && exists ? await sqlite.retrieveConnection(DB_NAME, false) : await create();
+  } catch {
+    // Koneksi lama rusak/tertinggal (mis. setelah app dimatikan paksa): tutup lalu buat ulang.
+    try {
+      await sqlite.closeConnection(DB_NAME, false);
+    } catch {
+      /* abaikan */
+    }
+    conn = await create();
   }
   await conn.open();
 

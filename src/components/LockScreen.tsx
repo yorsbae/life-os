@@ -132,7 +132,12 @@ function Shell({ children }: { children: ReactNode }) {
 /** Membungkus aplikasi: konten tetap terpasang (state tidak hilang) tetapi `inert` saat terkunci. */
 export default function LockGate({ children }: { children: ReactNode }) {
   const lock = useLock();
-  if (!lock.ready) return <div className="fixed inset-0 bg-bg" />;
+  if (!lock.ready)
+    return (
+      <div className="fixed inset-0 bg-bg flex items-center justify-center">
+        <p className="text-gray-400 text-sm">{t("Memuat...")}</p>
+      </div>
+    );
   return (
     <>
       <div inert={lock.locked} aria-hidden={lock.locked}>

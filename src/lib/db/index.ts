@@ -9,6 +9,7 @@
 import { Database } from "./query";
 import { migrate } from "./migrate";
 import { createCapacitorDriver } from "./capacitorDriver";
+import { withTimeout } from "../../utils/withTimeout";
 import type { SqlDriver, SqlStatement, SqlValue } from "./types";
 
 export { LOCAL_USER_ID } from "./schema";
@@ -20,8 +21,8 @@ let ready: Promise<SqlDriver> | null = null;
 export function initDb(): Promise<SqlDriver> {
   if (!ready) {
     ready = (async () => {
-      const driver = await createCapacitorDriver();
-      await migrate(driver);
+      const driver = await withTimeout(createCapacitorDriver(), 20000, "Membuka database");
+      await withTimeout(migrate(driver), 20000, "Migrasi database");
       return driver;
     })();
     // Jika gagal, izinkan percobaan ulang.

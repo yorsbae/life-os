@@ -14,6 +14,7 @@ import {
 } from "../lib/appLock/pin";
 import { loadLockState, saveLockState } from "../lib/appLock/store";
 import { t } from "../lib/i18n";
+import { withTimeout } from "../utils/withTimeout";
 
 export type UnlockResult = { ok: true } | { ok: false; waitSec: number };
 
@@ -74,7 +75,7 @@ export function LockProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    loadLockState()
+    withTimeout(loadLockState(), 8000, "Penyimpanan aman")
       .then((s) => {
         if (cancelled) return;
         stateRef.current = s;

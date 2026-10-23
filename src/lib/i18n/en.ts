@@ -760,4 +760,13 @@ export const en: Record<string, string> = {
   "Ekspor Transaksi (CSV)": "Export Transactions (CSV)",
   "CSV tidak dienkripsi. Simpan di tempat yang aman.": "CSV is not encrypted. Keep it somewhere safe.",
   "Sumber/Akun": "Source/Account",
+  "Skor Pekan Ini": "This Week's Score",
+  "Tugas hari ini": "Today's tasks",
+  "Tidak ada tugas hari ini": "No tasks today",
+  "Habit hari ini": "Today's habits",
+  "Pengeluaran hari ini": "Spent today",
+  "Catat Cepat": "Quick Capture",
+  "Tulis catatan...": "Write a note...",
+  "mis. kopi 25rb": "e.g. coffee 25k",
+  "mis. 65,5": "e.g. 65.5",
 };
