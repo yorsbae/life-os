@@ -36,14 +36,17 @@ function notificationId(eventId: string): number {
     h ^= eventId.charCodeAt(i);
     h = Math.imul(h, 0x01000193);
   }
-  return (h & 0x7fffffff) || 1;
+  // >= 1000: ID di bawahnya dicadangkan (mis. notifikasi agenda pagi 10..16, lihat lib/widget/morning).
+  return Math.max(h & 0x7fffffff, 1000);
 }
 
 async function cancelAll() {
   const pending = await LocalNotifications.getPending();
-  if (pending.notifications.length > 0) {
+  // Hanya pengingat jadwal (ID >= 1000); jangan menyentuh notifikasi agenda pagi.
+  const mine = pending.notifications.filter((n) => n.id >= 1000);
+  if (mine.length > 0) {
     await LocalNotifications.cancel({
-      notifications: pending.notifications.map((n) => ({ id: n.id })),
+      notifications: mine.map((n) => ({ id: n.id })),
     });
   }
 }

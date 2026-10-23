@@ -9,6 +9,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ShellProvider, useShell } from "./context/ShellContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BackButtonHandler from "./components/BackButtonHandler";
+import WidgetSync from "./components/WidgetSync";
 import Layout from "./components/Layout";
 import { getSetting } from "./utils/appSettings";
 
@@ -76,6 +77,7 @@ function AppContent() {
   return (
     <BrowserRouter>
       <BackButtonHandler />
+      <WidgetSync />
       <ProtectedRoute>
         <FirstRunGate>
           <Suspense fallback={<div className="min-h-screen bg-bg" />}>

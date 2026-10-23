@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">Life OS の今日の予定・タスク・習慣。</string>
+    <string name="widget_setup">Life OS を開いて予定を表示します。</string>
+    <string name="widget_empty">今日の予定はありません。</string>
+    <string name="widget_label_event">予定</string>
+    <string name="widget_label_task">タスク</string>
+    <string name="shortcut_add_transaction_short">記録</string>
+    <string name="shortcut_add_transaction_long">取引を記録</string>
+    <string name="shortcut_tasks_short">タスク</string>
+    <string name="shortcut_tasks_long">タスクを見る</string>
+    <string name="shortcut_calendar_short">カレンダー</string>
+    <string name="shortcut_calendar_long">カレンダーを開く</string>
+</resources>

@@ -7,15 +7,16 @@ import Segmented from "../../components/ui/Segmented";
 import { useLanguage } from "../../context/LanguageContext";
 import { HOME_SECTIONS, loadHomeSections, saveHomeSections, type HomeSection } from "../../utils/homeSections";
 import { MODULE_MENU } from "../../hooks/usePrimaryMenu";
-import { exportAllData, readBackupFile, restoreBackup } from "../../utils/exportData";
+import { exportAllData, exportTransactionsCsv, readBackupFile, restoreBackup } from "../../utils/exportData";
 import { MIN_PASSWORD_LENGTH, PasswordRequiredError } from "../../utils/backupCrypto";
 import { hideAmounts, setHideAmounts } from "../../lib/privacy";
 import NotificationSettings from "./NotificationSettings";
 import LockSettings from "./LockSettings";
+import WidgetSettings from "./WidgetSettings";
 import WeatherSettings from "./WeatherSettings";
 import { t, tx } from "../../lib/i18n";
 
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "3.0.0";
 
 export function SubPage({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -110,6 +111,7 @@ export function RemindersPage() {
   return (
     <SubPage title={t("Pengingat")}>
       <NotificationSettings />
+      <WidgetSettings />
       <WeatherSettings />
     </SubPage>
   );
@@ -118,6 +120,7 @@ export function RemindersPage() {
 export function DataPage() {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [exportingCsv, setExportingCsv] = useState(false);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [encrypt, setEncrypt] = useState(true);
@@ -147,6 +150,14 @@ export function DataPage() {
       setPw2("");
     }
     setExporting(false);
+  };
+
+  const doCsv = async () => {
+    setError("");
+    setExportingCsv(true);
+    const res = await exportTransactionsCsv();
+    if (res.error) setError(res.error);
+    setExportingCsv(false);
   };
 
   const restoreFrom = async (file: File, password?: string) => {
@@ -212,6 +223,10 @@ export function DataPage() {
           {importing ? t("Memproses...") : t("Pulihkan dari Backup")}
           <input type="file" accept="application/json,.json" className="hidden" onChange={doImport} />
         </label>
+        <div className="space-y-1">
+          <GhostButton onClick={doCsv} disabled={exportingCsv}>{exportingCsv ? t("Menyiapkan file...") : t("Ekspor Transaksi (CSV)")}</GhostButton>
+          <p className="text-xs text-gray-400">{t("CSV tidak dienkripsi. Simpan di tempat yang aman.")}</p>
+        </div>
         {pendingFile && (
           <div className="space-y-2">
             <input type="password" autoComplete="current-password" autoFocus value={importPw} onChange={(e) => setImportPw(e.target.value)} placeholder={t("Kata sandi backup")} className={inputCls} />

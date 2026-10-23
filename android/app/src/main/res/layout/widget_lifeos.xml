@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/widget_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/lifeos_widget_accent"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_row1"
+        style="@style/LifeOsWidgetRow" />
+
+    <TextView
+        android:id="@+id/widget_row2"
+        style="@style/LifeOsWidgetRow" />
+
+    <TextView
+        android:id="@+id/widget_row3"
+        style="@style/LifeOsWidgetRow" />
+
+    <TextView
+        android:id="@+id/widget_row4"
+        style="@style/LifeOsWidgetRow" />
+
+    <TextView
+        android:id="@+id/widget_row5"
+        style="@style/LifeOsWidgetRow" />
+
+    <TextView
+        android:id="@+id/widget_row6"
+        style="@style/LifeOsWidgetRow" />
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="2"
+        android:textColor="@color/lifeos_widget_secondary"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/lifeos_widget_secondary"
+        android:textSize="12sp"
+        android:visibility="gone" />
+</LinearLayout>

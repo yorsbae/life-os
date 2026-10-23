@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">来自 Life OS 的今日日程、任务和习惯。</string>
+    <string name="widget_setup">打开 Life OS 以显示日程。</string>
+    <string name="widget_empty">今天没有日程。</string>
+    <string name="widget_label_event">日程</string>
+    <string name="widget_label_task">任务</string>
+    <string name="shortcut_add_transaction_short">记账</string>
+    <string name="shortcut_add_transaction_long">记一笔交易</string>
+    <string name="shortcut_tasks_short">任务</string>
+    <string name="shortcut_tasks_long">查看任务</string>
+    <string name="shortcut_calendar_short">日历</string>
+    <string name="shortcut_calendar_long">打开日历</string>
+</resources>

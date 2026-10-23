@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">Agenda hari ini, tugas, dan kebiasaan dari Life OS.</string>
+    <string name="widget_setup">Buka Life OS untuk menampilkan agenda.</string>
+    <string name="widget_empty">Tidak ada agenda hari ini.</string>
+    <string name="widget_label_event">Jadwal</string>
+    <string name="widget_label_task">Tugas</string>
+    <string name="shortcut_add_transaction_short">Catat</string>
+    <string name="shortcut_add_transaction_long">Catat transaksi</string>
+    <string name="shortcut_tasks_short">Tugas</string>
+    <string name="shortcut_tasks_long">Lihat tugas</string>
+    <string name="shortcut_calendar_short">Kalender</string>
+    <string name="shortcut_calendar_long">Buka kalender</string>
+</resources>

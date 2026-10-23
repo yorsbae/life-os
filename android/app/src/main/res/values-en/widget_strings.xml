@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">Today\'s agenda, tasks and habits from Life OS.</string>
+    <string name="widget_setup">Open Life OS to show your agenda.</string>
+    <string name="widget_empty">Nothing on the agenda today.</string>
+    <string name="widget_label_event">Event</string>
+    <string name="widget_label_task">Task</string>
+    <string name="shortcut_add_transaction_short">Add</string>
+    <string name="shortcut_add_transaction_long">Add transaction</string>
+    <string name="shortcut_tasks_short">Tasks</string>
+    <string name="shortcut_tasks_long">View tasks</string>
+    <string name="shortcut_calendar_short">Calendar</string>
+    <string name="shortcut_calendar_long">Open calendar</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lifeos_widget_bg">#202520</color>
+    <color name="lifeos_widget_text">#E6EAE5</color>
+    <color name="lifeos_widget_secondary">#A9B0AB</color>
+    <color name="lifeos_widget_accent">#7DC7A0</color>
+</resources>
