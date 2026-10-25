@@ -25,10 +25,30 @@
 
 
     <title>Life OS</title>
+
+    <!-- Terapkan tema tersimpan sebelum render pertama agar pengguna tema terang tidak melihat kilatan gelap. -->
+    <script>
+      try {
+        var m = localStorage.getItem("lifeos-theme");
+        var light = m === "light" || (m === "system" && window.matchMedia("(prefers-color-scheme: light)").matches);
+        if (light) {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.classList.add("light");
+          document.documentElement.style.setProperty("--boot-bg", "#f3f6f2");
+          document.documentElement.style.setProperty("--boot-fg", "#566059");
+          document.documentElement.style.background = "#f3f6f2";
+        }
+      } catch (e) {}
+    </script>
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- Layar boot statis: tampil seketika sebelum JavaScript selesai dimuat (React menggantikannya). -->
+    <div id="root">
+      <div id="boot" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--boot-bg,#151815);color:var(--boot-fg,#8b8f93);font:500 14px system-ui,sans-serif">
+        Life OS
+      </div>
+    </div>
 
     <script type="module" src="/src/main.tsx"></script>
   </body>

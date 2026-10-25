@@ -3,11 +3,12 @@ import { useWeightLogs } from "./useWeightLogs";
 
 import { t, intlLocale } from "../../lib/i18n";
 import { DeleteButton } from "../../components/ui/DeleteButton";
+import { toDateStr } from "../../utils/dates";
 export default function WeightHistorySection() {
   const { logs, loading, addLog, deleteLog } = useWeightLogs();
   const [berat, setBerat] = useState<number | null>(null);
   const [tanggal, setTanggal] = useState(
-    new Date().toISOString().split("T")[0],
+    toDateStr(),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 

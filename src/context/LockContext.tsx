@@ -12,7 +12,7 @@ import {
   verifyPin,
   type LockState,
 } from "../lib/appLock/pin";
-import { loadLockState, saveLockState } from "../lib/appLock/store";
+import { knownToHaveNoPin, loadLockState, saveLockState } from "../lib/appLock/store";
 import { t } from "../lib/i18n";
 import { withTimeout } from "../utils/withTimeout";
 
@@ -60,9 +60,11 @@ async function biometricAuth(): Promise<boolean> {
 export function LockProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<LockState>(DEFAULT_LOCK_STATE);
   const stateRef = useRef(state);
-  const [ready, setReady] = useState(false);
+  // Jalur cepat: perangkat ini diketahui tanpa PIN -> mulai terbuka & siap, tanpa menunggu Keystore.
+  const [fast] = useState(() => Capacitor.isNativePlatform() && knownToHaveNoPin());
+  const [ready, setReady] = useState(fast);
   const [loadError, setLoadError] = useState(false);
-  const [locked, setLocked] = useState(true); // aman sebelum status terbaca
+  const [locked, setLocked] = useState(!fast); // aman (terkunci) sebelum status terbaca, kecuali jalur cepat
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const backgroundedAt = useRef<number | null>(null);
   const [loadTick, setLoadTick] = useState(0);
@@ -75,6 +77,22 @@ export function LockProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+
+    // Jalur cepat: status sebenarnya tetap diverifikasi di latar belakang; bila ternyata ada PIN, langsung dikunci.
+    if (fast && loadTick === 0) {
+      loadLockState()
+        .then((s) => {
+          if (cancelled || !s.pin) return;
+          stateRef.current = s;
+          setState(s);
+          setLocked(true);
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }
+
     withTimeout(loadLockState(), 12000, "Penyimpanan aman")
       .then((s) => {
         if (cancelled) return;
@@ -92,7 +110,7 @@ export function LockProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [loadTick]);
+  }, [loadTick, fast]);
 
   // Ketersediaan biometrik (hanya Android).
   useEffect(() => {

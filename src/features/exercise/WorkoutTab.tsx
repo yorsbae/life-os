@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Pencil, Dumbbell } from "lucide-react";
 import { Card, Chip, EmptyState, Fab } from "../../components/ui/Controls";
 import { t, tx } from "../../lib/i18n";
@@ -15,7 +16,9 @@ type Sub = "riwayat" | "jadwal" | "program";
 
 export default function WorkoutTab() {
   const { exercises, loading, addExercise, updateExercise, deleteExercise } = useExercises();
-  const [sub, setSub] = useState<Sub>("riwayat");
+  const [params] = useSearchParams();
+  const asked = params.get("sub") as Sub | null;
+  const [sub, setSub] = useState<Sub>(asked === "jadwal" || asked === "program" ? asked : "riwayat");
   const [form, setForm] = useState<{ editing: Exercise | null } | null>(null);
 
   return (

@@ -8,11 +8,13 @@
 
 import { Database } from "./query";
 import { migrate } from "./migrate";
+import { coalesceReads } from "./coalesce";
 import { createCapacitorDriver } from "./capacitorDriver";
 import { withTimeout } from "../../utils/withTimeout";
 import type { SqlDriver, SqlStatement, SqlValue } from "./types";
 
 export { LOCAL_USER_ID } from "./schema";
+export { newId } from "./query";
 export type { DbResult, DbError, Row, BackupFile } from "./query";
 
 let ready: Promise<SqlDriver> | null = null;
@@ -33,14 +35,15 @@ export function initDb(): Promise<SqlDriver> {
   return ready;
 }
 
-// Driver "malas": menunggu initDb() sebelum meneruskan query.
-const lazyDriver: SqlDriver = {
+// Driver "malas": menunggu initDb() sebelum meneruskan query. SELECT identik yang berjalan
+// bersamaan digabung (lihat coalesce.ts) supaya layar dengan banyak hook tidak membanjiri jembatan SQLite.
+const lazyDriver: SqlDriver = coalesceReads({
   async all(sql: string, params?: SqlValue[]) {
     return (await initDb()).all(sql, params);
   },
   async batch(statements: SqlStatement[]) {
     return (await initDb()).batch(statements);
   },
-};
+});
 
 export const db = new Database(lazyDriver);

@@ -28,6 +28,16 @@ function setFlag(on: boolean) {
   }
 }
 
+/**
+ * true bila perangkat ini SUDAH PERNAH membaca status kunci dan hasilnya "tanpa PIN".
+ * Penanda diperbarui tiap status kunci dibaca/disimpan, jadi tidak berubah kecuali PIN diubah lewat
+ * aplikasi. Dipakai agar pengguna tanpa PIN tidak menunggu Keystore Android (yang kadang lambat
+ * saat start dingin) hanya untuk mengetahui bahwa tidak ada yang dikunci.
+ */
+export function knownToHaveNoPin(): boolean {
+  return flag() === false;
+}
+
 async function secure() {
   const { SecureStorage } = await import("@aparajita/capacitor-secure-storage");
   return SecureStorage;

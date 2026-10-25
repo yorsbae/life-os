@@ -1,14 +1,22 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { addDays } from "date-fns";
 import { Wallet, Dumbbell, BookOpen, Clapperboard, Repeat, Target, CalendarCheck, type LucideIcon } from "lucide-react";
-import { useMoneySummary } from "../../money/useMoneySummary";
-import { useExercises } from "../../exercise/useExercises";
-import { useJournals } from "../../journal/useJournals";
-import { useCreativeProjects } from "../../creative/useCreativeProjects";
+import { db } from "../../../lib/db";
+import { useAuth } from "../../../context/AuthContext";
 import { useRecurringExpenses } from "../../money/useRecurringExpenses";
-import { useGoals } from "../../goals/useGoals";
 import { useWeeklyReview } from "../../weeklyreview/useWeeklyReview";
 import { t, tx } from "../../../lib/i18n";
 import { rupiah } from "../../../utils/format";
+import { parseDateStr, toDateStr } from "../../../utils/dates";
+import { daysUntilPayday } from "../../money/pocketMath";
+
+/** Selisih hari kalender dari hari ini (negatif = sudah lewat). null bila tanggal tidak valid. */
+function daysFromToday(tanggal: string, now: Date): number | null {
+  const d = parseDateStr(tanggal.slice(0, 10));
+  if (Number.isNaN(d.getTime())) return null;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((d.getTime() - today.getTime()) / 86400000);
+}
 
 export interface Reminder {
   id: string;
@@ -18,32 +26,119 @@ export interface Reminder {
   link: string;
 }
 
-function isToday(tanggal: string) {
-  const d = new Date(tanggal);
+interface BudgetMap {
+  [kategori: string]: number;
+}
+interface UrgentGoal {
+  id: string;
+  judul: string;
+  tipe: string;
+  target_value: number;
+  current_value_manual: number;
+  tanggal_mulai: string;
+  tanggal_target: string;
+  progress: number;
+}
+interface CreativeLite {
+  id: string;
+  judul: string;
+  target_upload: string;
+}
+interface LightData {
+  budget: BudgetMap | null;
+  spentPerKategori: Record<string, number>;
+  exerciseToday: boolean;
+  journalToday: boolean;
+  projects: CreativeLite[];
+  goals: UrgentGoal[];
+}
+
+const EMPTY: LightData = { budget: null, spentPerKategori: {}, exerciseToday: true, journalToday: true, projects: [], goals: [] };
+
+// Pengingat hanya butuh beberapa fakta kecil (ada olahraga/jurnal hari ini? anggaran bulan ini?),
+// bukan seluruh isi tabel. Dulu Beranda memuat SEMUA pengeluaran, pemasukan, olahraga, jurnal, buku,
+// dan proyek kreatif (termasuk kolom teks panjang) setiap dibuka, sehingga makin lama makin lambat.
+// Semua query di sini kecil dan berfilter.
+async function loadLight(): Promise<LightData> {
   const now = new Date();
-  return (
-    d.getFullYear() === now.getFullYear() &&
-    d.getMonth() === now.getMonth() &&
-    d.getDate() === now.getDate()
-  );
+  const today = toDateStr(now);
+  const monthStart = toDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
+  const nextMonth = toDateStr(new Date(now.getFullYear(), now.getMonth() + 1, 1));
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const soon = toDateStr(addDays(now, 3));
+
+  const [bt, spent, ex, jr, cp, gl] = await Promise.all([
+    db.from("budget_targets").select("budget_kategori").eq("bulan", monthKey).maybeSingle(),
+    db.from("expenses").select("kategori, nominal").gte("tanggal", monthStart).lt("tanggal", nextMonth),
+    db.from("exercises").select("id").eq("tanggal", today).limit(1),
+    db.from("journals").select("id").eq("tanggal", today).limit(1),
+    db
+      .from("creative_projects")
+      .select("id, judul, target_upload")
+      .eq("is_archived", false)
+      .neq("status", "uploaded")
+      .neq("status", "analisa")
+      .neq("target_upload", null),
+    db
+      .from("goals")
+      .select("id, judul, tipe, target_value, current_value_manual, tanggal_mulai, tanggal_target")
+      .eq("status", "Aktif")
+      .gte("tanggal_target", today)
+      .lte("tanggal_target", soon),
+  ]);
+
+  const spentPerKategori: Record<string, number> = {};
+  for (const r of (spent.data ?? []) as { kategori: string; nominal: number }[])
+    spentPerKategori[r.kategori] = (spentPerKategori[r.kategori] ?? 0) + r.nominal;
+
+  // Progress target hanya dihitung untuk target yang tenggatnya <= 3 hari (biasanya tidak ada).
+  const goals: UrgentGoal[] = [];
+  for (const g of (gl.data ?? []) as Omit<UrgentGoal, "progress">[]) {
+    let progress = g.current_value_manual;
+    if (g.tipe === "reading_count") {
+      const r = await db.from("readings").select("id").eq("status", "Selesai").gte("tanggal", g.tanggal_mulai);
+      progress = ((r.data ?? []) as unknown[]).length;
+    } else if (g.tipe === "exercise_count") {
+      const r = await db.from("exercises").select("id").gte("tanggal", g.tanggal_mulai);
+      progress = ((r.data ?? []) as unknown[]).length;
+    } else if (g.tipe === "creative_upload_count") {
+      const r = await db.from("creative_projects").select("id").neq("tanggal_upload", null).gte("tanggal_upload", g.tanggal_mulai);
+      progress = ((r.data ?? []) as unknown[]).length;
+    }
+    goals.push({ ...g, progress });
+  }
+
+  return {
+    budget: ((bt.data as { budget_kategori: BudgetMap | null } | null)?.budget_kategori ?? null),
+    spentPerKategori,
+    exerciseToday: ((ex.data ?? []) as unknown[]).length > 0,
+    journalToday: ((jr.data ?? []) as unknown[]).length > 0,
+    projects: (cp.data ?? []) as CreativeLite[],
+    goals,
+  };
 }
 
 export function useReminders(): Reminder[] {
-  const { target, expensePerKategori } = useMoneySummary(new Date());
-  const { exercises } = useExercises();
-  const { journals } = useJournals();
-  const { projects } = useCreativeProjects();
+  const { user } = useAuth();
   const { items: recurringItems } = useRecurringExpenses();
-  const { goals, getProgress } = useGoals();
   const { review: weekReview } = useWeeklyReview();
+  const [light, setLight] = useState<LightData>(EMPTY);
+
+  const refresh = useCallback(() => {
+    loadLight().then(setLight).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (user) refresh();
+  }, [user, refresh]);
 
   return useMemo(() => {
     const reminders: Reminder[] = [];
 
     // 1. Anggaran kategori yang sudah >= 80%
-    if (target?.budget_kategori) {
-      for (const [kategori, budget] of Object.entries(target.budget_kategori)) {
-        const used = expensePerKategori[kategori] ?? 0;
+    if (light.budget) {
+      for (const [kategori, budget] of Object.entries(light.budget)) {
+        if (!(budget > 0)) continue;
+        const used = light.spentPerKategori[kategori] ?? 0;
         const percent = (used / budget) * 100;
         const name = String(tx(kategori));
         if (percent >= 100) {
@@ -67,7 +162,7 @@ export function useReminders(): Reminder[] {
     }
 
     // 2. Belum olahraga hari ini (dorongan lembut)
-    if (!exercises.some((e) => isToday(e.tanggal))) {
+    if (!light.exerciseToday) {
       reminders.push({
         id: "no-exercise-today",
         message: t("Belum ada catatan olahraga hari ini"),
@@ -78,7 +173,7 @@ export function useReminders(): Reminder[] {
     }
 
     // 3. Belum menulis jurnal hari ini
-    if (!journals.some((j) => isToday(j.tanggal))) {
+    if (!light.journalToday) {
       reminders.push({
         id: "no-journal-today",
         message: t("Belum menulis jurnal hari ini"),
@@ -90,10 +185,9 @@ export function useReminders(): Reminder[] {
 
     // 4. Target upload konten mendekati tenggat
     const now = new Date();
-    projects
-      .filter((p) => !p.is_archived && p.status !== "uploaded" && p.status !== "analisa" && p.target_upload)
-      .forEach((p) => {
-        const diffDays = Math.ceil((new Date(p.target_upload!).getTime() - now.getTime()) / 86400000);
+    light.projects.forEach((p) => {
+        const diffDays = daysFromToday(p.target_upload, now);
+        if (diffDays === null) return;
         if (diffDays <= 2 && diffDays >= 0) {
           reminders.push({
             id: `upload-${p.id}`,
@@ -114,15 +208,13 @@ export function useReminders(): Reminder[] {
             link: "/creative",
           });
         }
-      });
+    });
 
     // 5. Pengeluaran rutin yang jatuh tempo dalam 3 hari
-    const todayDate = new Date().getDate();
     recurringItems
       .filter((r) => r.aktif)
       .forEach((r) => {
-        let daysUntil = r.tanggal_jatuh_tempo - todayDate;
-        if (daysUntil < 0) daysUntil += 30;
+        const daysUntil = daysUntilPayday(r.tanggal_jatuh_tempo, now);
         if (daysUntil <= 3) {
           reminders.push({
             id: `recurring-${r.id}`,
@@ -138,12 +230,10 @@ export function useReminders(): Reminder[] {
       });
 
     // 6. Target mendekati tenggat (<= 3 hari)
-    goals
-      .filter((g) => g.status === "Aktif" && g.tanggal_target)
-      .forEach((g) => {
-        const diffDays = Math.ceil((new Date(g.tanggal_target!).getTime() - now.getTime()) / 86400000);
-        const current = getProgress(g);
-        if (current < g.target_value && diffDays <= 3 && diffDays >= 0) {
+    light.goals.forEach((g) => {
+        const diffDays = daysFromToday(g.tanggal_target, now);
+        const current = g.progress;
+        if (diffDays !== null && current < g.target_value && diffDays <= 3 && diffDays >= 0) {
           reminders.push({
             id: `goal-${g.id}`,
             message:
@@ -155,7 +245,7 @@ export function useReminders(): Reminder[] {
             link: "/goals",
           });
         }
-      });
+    });
 
     // 7. Review mingguan belum diisi (Jumat–Minggu)
     const hariIni = now.getDay();
@@ -170,5 +260,5 @@ export function useReminders(): Reminder[] {
     }
 
     return reminders;
-  }, [target, expensePerKategori, exercises, journals, projects, recurringItems, goals, getProgress, weekReview]);
+  }, [light, recurringItems, weekReview]);
 }

@@ -53,5 +53,5 @@ export function useIncomes() {
     return { error: null };
   };
 
-  return { incomes, loading, error, addIncome, updateIncome, deleteIncome };
+  return { incomes, loading, error, addIncome, updateIncome, deleteIncome, refetch: fetchIncomes };
 }

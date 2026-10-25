@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, CheckSquare, Repeat, Wallet } from "lucide-react";
+import { CalendarDays, CheckSquare, Dumbbell, Repeat, Wallet } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import { Card, SectionTitle } from "../../components/ui/Controls";
 import { fmtDate } from "../../utils/format";
@@ -8,6 +8,9 @@ import { hideAmounts } from "../../lib/privacy";
 import { t, tx } from "../../lib/i18n";
 import type { ScoreKey } from "../../utils/scorecard";
 import { useToday } from "./useToday";
+import { useWorkoutAgenda } from "../exercise/useWorkoutAgenda";
+import WorkoutRow from "../plan/WorkoutRow";
+import { toDateStr } from "../../utils/dates";
 
 const SCORE_LABEL: Record<ScoreKey, string> = {
   tasks: "Tugas",
@@ -26,6 +29,9 @@ function Bar({ value }: { value: number | null }) {
 
 export default function TodayPage() {
   const { data, error } = useToday();
+  const todayStr = toDateStr();
+  const agenda = useWorkoutAgenda(todayStr, todayStr);
+  const workout = agenda.forDate(todayStr);
 
   return (
     <div>
@@ -76,6 +82,16 @@ export default function TodayPage() {
                 )}
               </Card>
             </section>
+
+            {workout && (
+              <section className="space-y-2">
+                <SectionTitle action={<Link to="/plan" className="text-xs text-primary">{t("Buka")}</Link>}>
+                  <Dumbbell size={14} className="inline -mt-0.5 mr-1.5" />
+                  {t("Latihan hari ini")}
+                </SectionTitle>
+                <WorkoutRow item={workout} onDone={(i) => void agenda.markDone(i)} />
+              </section>
+            )}
 
             <section className="space-y-2">
               <SectionTitle action={<Link to="/habits" className="text-xs text-primary">{t("Buka")}</Link>}>

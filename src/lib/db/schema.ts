@@ -245,7 +245,30 @@ const v3: string[] = [
   `CREATE INDEX idx_sleep_tanggal ON sleep_logs(tanggal)`,
 ];
 
-export const MIGRATIONS: string[][] = [v1, v2, v3];
+// v4 — Money: kantong (pockets) + riwayat isi/keluar kantong, dan kolom expenses.pocket_id
+// untuk pengeluaran yang diambil dari sebuah kantong. Sengaja TANPA foreign key pada
+// expenses.pocket_id: urutan restore backup memasukkan expenses lebih dulu daripada pockets.
+//   pockets.tipe          : 'tabungan' (punya saldo) | 'pemberian' (hanya mencatat total yang diberikan)
+//   pockets.mode_alokasi  : 'manual' | 'persen' (% dari nominal yang dibagi) | 'nominal' (jumlah tetap)
+//   pocket_entries.jenis  : 'isi' (Saldo Utama -> kantong) | 'keluar' (kantong -> Saldo Utama)
+const v4: string[] = [
+  `CREATE TABLE pockets (
+    ${ID}, ${UID}, nama TEXT NOT NULL, ikon TEXT NOT NULL DEFAULT 'wallet',
+    tipe TEXT NOT NULL DEFAULT 'tabungan', target REAL NOT NULL DEFAULT 0,
+    mode_alokasi TEXT NOT NULL DEFAULT 'manual', nilai_alokasi REAL NOT NULL DEFAULT 0,
+    ${CREATED}
+  )`,
+  `CREATE TABLE pocket_entries (
+    ${ID}, ${UID}, pocket_id TEXT NOT NULL REFERENCES pockets(id) ON DELETE CASCADE,
+    jenis TEXT NOT NULL, nominal REAL NOT NULL, tanggal TEXT NOT NULL, catatan TEXT,
+    ${CREATED}
+  )`,
+  `ALTER TABLE expenses ADD COLUMN pocket_id TEXT`,
+  `CREATE INDEX idx_pocket_entries_pocket ON pocket_entries(pocket_id)`,
+  `CREATE INDEX idx_expenses_pocket ON expenses(pocket_id)`,
+];
+
+export const MIGRATIONS: string[][] = [v1, v2, v3, v4];
 
 export function migrationStatements(index: number): SqlStatement[] {
   return [
@@ -302,6 +325,8 @@ export const TABLE_META: Record<string, TableMeta> = {
   sleep_logs: { bool: [], json: [] },
   study_items: { bool: [], json: [] },
   creative_refs: { bool: [], json: [] },
+  pockets: { bool: [], json: [] },
+  pocket_entries: { bool: [], json: [] },
 };
 
 // Tabel dengan primary key bernama "id" yang dibuatkan UUID otomatis saat insert.
@@ -348,6 +373,8 @@ export const BACKUP_TABLES = [
   "sleep_logs",
   "study_items",
   "creative_refs",
+  "pockets",
+  "pocket_entries",
 ] as const;
 
 export const BACKUP_FORMAT = "lifeos-backup";

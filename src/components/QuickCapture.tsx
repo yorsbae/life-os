@@ -7,6 +7,7 @@ import { EXPENSE_CATS } from "../features/money/categories";
 import { NOTE_KATEGORI_DEFAULT } from "../types";
 import { toDateStr } from "../utils/dates";
 import { parseQuickExpense, parseWeight } from "../utils/quickParse";
+import { defaultAccountName } from "../features/money/defaultAccount";
 import { intlLocale, t, tx } from "../lib/i18n";
 
 type Kind = "expense" | "note" | "weight";
@@ -37,12 +38,14 @@ export default function QuickCapture() {
     const tanggal = toDateStr();
     let res;
     if (kind === "expense" && expense) {
+      // Tanpa sumber dana, pengeluaran cepat tidak memotong saldo akun mana pun.
+      const akun = await defaultAccountName();
       res = await db.from("expenses").insert({
         user_id: LOCAL_USER_ID,
         nominal: expense.nominal,
         kategori: expense.kategori,
         catatan: expense.catatan || null,
-        metode_pembayaran: null,
+        metode_pembayaran: akun,
         tanggal,
       });
     } else if (kind === "weight" && weight !== null) {

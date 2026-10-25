@@ -46,7 +46,7 @@ function ident(name: string): string {
   return `"${name}"`;
 }
 
-function newId(): string {
+export function newId(): string {
   if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
   // Cadangan untuk konteks tidak aman (mis. dev lewat http://IP-LAN): UUID v4 dari getRandomValues.
   const b = crypto.getRandomValues(new Uint8Array(16));
@@ -416,6 +416,20 @@ export class Database {
 
   from(table: string) {
     return new QueryBuilder(this.driver, table);
+  }
+
+  /**
+   * Jalankan beberapa statement SQL mentah dalam SATU transaksi (semua berhasil atau semua batal).
+   * Untuk perubahan lintas tabel yang harus atomik, mis. ganti nama akun di seluruh transaksi.
+   * Nilai selalu lewat parameter (?), jangan menyambung nilai ke teks SQL.
+   */
+  async transaction(statements: SqlStatement[]): Promise<{ error: DbError | null }> {
+    try {
+      if (statements.length > 0) await this.driver.batch(statements);
+      return { error: null };
+    } catch (e) {
+      return { error: { message: e instanceof Error ? e.message : String(e) } };
+    }
   }
 
   /** Ambil seluruh data pengguna sebagai objek backup berversi. */

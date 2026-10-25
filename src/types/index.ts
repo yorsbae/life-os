@@ -12,8 +12,10 @@ export interface Expense {
     | "Kesehatan"
     | "Hiburan"
     | "Tagihan"
+    | "Keluarga"
     | "Lainnya";
-  metode_pembayaran: string | null;
+  metode_pembayaran: string | null; // nama sumber dana (accounts.nama)
+  pocket_id?: string | null; // kantong yang dipakai membayar (pockets.id), null = dari Saldo Utama
   catatan: string | null;
   tanggal: string; // format 'YYYY-MM-DD'
   created_at: string;
@@ -30,6 +32,7 @@ export const KATEGORI_EXPENSE = [
   "Kesehatan",
   "Hiburan",
   "Tagihan",
+  "Keluarga",
   "Lainnya",
 ] as const;
 

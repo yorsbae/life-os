@@ -9,7 +9,8 @@ import { runWidgetSync } from "../lib/widget/sync";
 // Menjaga widget dan notifikasi agenda pagi tetap sesuai data, serta membuka halaman dari deep link
 // (ketukan pada widget / app shortcut). Dipasang di dalam BrowserRouter.
 
-let launchUrlHandled = false; // pohon bisa di-remount (ganti bahasa); URL peluncuran cukup diproses sekali
+let launchUrlHandled = false;
+let firstSyncDone = false; // sinkron pertama ditunda lebih lama agar tidak berebut jembatan SQLite dengan layar awal // pohon bisa di-remount (ganti bahasa); URL peluncuran cukup diproses sekali
 
 export default function WidgetSync() {
   const location = useLocation();
@@ -18,7 +19,10 @@ export default function WidgetSync() {
 
   // Sinkron setelah perpindahan halaman (biasanya sehabis menyimpan sesuatu) dan saat status kunci berubah.
   useEffect(() => {
-    const id = setTimeout(() => runWidgetSync({ lockEnabled }), 1200);
+    const id = setTimeout(() => {
+      firstSyncDone = true;
+      runWidgetSync({ lockEnabled });
+    }, firstSyncDone ? 1200 : 4000);
     return () => clearTimeout(id);
   }, [location.pathname, lockEnabled]);
 

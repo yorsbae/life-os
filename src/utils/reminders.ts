@@ -51,11 +51,26 @@ async function cancelAll() {
   }
 }
 
-/** Jadwalkan ulang pengingat sesuai daftar event terkini. Aman dipanggil kapan saja. */
-export async function syncEventReminders(events: ReminderEvent[]) {
-  if (!remindersSupported() || !(await remindersEnabled())) return;
+// Dijalankan berurutan (dua pemanggil bersamaan tidak boleh saling membatalkan jadwal) dan dilewati
+// bila daftar pengingat yang akan dijadwalkan sama dengan sinkron terakhir. Sebelumnya setiap kali
+// Beranda dimuat, hingga 60 notifikasi dibatalkan lalu dijadwalkan ulang lewat jembatan native.
+let chain: Promise<void> = Promise.resolve();
+let lastSignature: string | null = null;
 
-  await cancelAll();
+/** Lupakan sinkron terakhir (mis. setelah pengingat dimatikan atau backup dipulihkan). */
+function resetSignature() {
+  lastSignature = null;
+}
+
+/** Jadwalkan ulang pengingat sesuai daftar event terkini. Aman dipanggil kapan saja. */
+export function syncEventReminders(events: ReminderEvent[]): Promise<void> {
+  const run = chain.then(() => doSync(events));
+  chain = run.catch(() => {});
+  return run;
+}
+
+async function doSync(events: ReminderEvent[]) {
+  if (!remindersSupported() || !(await remindersEnabled())) return;
 
   const now = Date.now();
   const horizon = now + HORIZON_DAYS * 86_400_000;
@@ -65,7 +80,14 @@ export async function syncEventReminders(events: ReminderEvent[]) {
     .sort((a, b) => a.at - b.at)
     .slice(0, MAX_SCHEDULED);
 
-  if (upcoming.length === 0) return;
+  const signature = `${intlLocale()}|${upcoming.map(({ e, at }) => `${e.id}@${at}:${e.judul}`).join("|")}`;
+  if (signature === lastSignature) return;
+
+  await cancelAll();
+  if (upcoming.length === 0) {
+    lastSignature = signature;
+    return;
+  }
 
   await LocalNotifications.schedule({
     notifications: upcoming.map(({ e, at }) => ({
@@ -78,6 +100,7 @@ export async function syncEventReminders(events: ReminderEvent[]) {
       schedule: { at: new Date(at), allowWhileIdle: true },
     })),
   });
+  lastSignature = signature; // hanya setelah berhasil, agar kegagalan dicoba lagi
 }
 
 async function loadEvents(): Promise<ReminderEvent[]> {
@@ -95,16 +118,19 @@ export async function enableReminders(): Promise<{ error: string | null }> {
     return { error: t("Izin notifikasi ditolak. Aktifkan lewat Pengaturan Android → Aplikasi → Life OS → Notifikasi.") };
   }
   await setSetting(SETTING_KEY, "1");
+  resetSignature();
   await syncEventReminders(await loadEvents());
   return { error: null };
 }
 
 export async function disableReminders() {
   await setSetting(SETTING_KEY, "0");
+  resetSignature();
   if (remindersSupported()) await cancelAll();
 }
 
 /** Dipanggil setelah restore backup agar jadwal mengikuti data baru. */
 export async function resyncRemindersFromDb() {
+  resetSignature();
   await syncEventReminders(await loadEvents());
 }

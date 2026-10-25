@@ -57,5 +57,5 @@ export function useTransfers() {
     return { error: null };
   };
 
-  return { transfers, loading, addTransfer, updateTransfer, deleteTransfer };
+  return { transfers, loading, addTransfer, updateTransfer, deleteTransfer, refetch: fetchTransfers };
 }

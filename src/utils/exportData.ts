@@ -13,6 +13,7 @@ import {
 } from "./backupCrypto";
 
 import { t } from "../lib/i18n";
+import { toDateStr } from "./dates";
 // Backup manual ke file JSON berversi. Tidak ada cloud: file dibagikan lewat
 // menu Share Android (simpan ke Files, kirim ke diri sendiri, Drive, dll — pilihan pengguna).
 
@@ -44,7 +45,7 @@ export async function exportAllData(password?: string): Promise<{ error: string 
     const json = password
       ? await encryptBackup(JSON.stringify(snapshot), password)
       : JSON.stringify(snapshot, null, 2);
-    const filename = `lifeos-backup-${new Date().toISOString().split("T")[0]}${password ? ".enc" : ""}.json`;
+    const filename = `lifeos-backup-${toDateStr()}${password ? ".enc" : ""}.json`;
 
     await deliverFile(filename, json, "application/json", "Backup Life OS");
     return { error: null };
@@ -124,7 +125,7 @@ export async function exportTransactionsCsv(): Promise<{ error: string | null }>
         transfer: t("Transfer"),
       },
     );
-    const filename = `lifeos-transaksi-${new Date().toISOString().split("T")[0]}.csv`;
+    const filename = `lifeos-transaksi-${toDateStr()}.csv`;
     await deliverFile(filename, csv, "text/csv;charset=utf-8", "Transaksi Life OS");
     return { error: null };
   } catch (err) {

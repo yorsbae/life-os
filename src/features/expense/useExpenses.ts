@@ -77,5 +77,5 @@ export function useExpenses() {
     return { error: null };
   };
 
-  return { expenses, loading, error, addExpense, updateExpense, deleteExpense };
+  return { expenses, loading, error, addExpense, updateExpense, deleteExpense, refetch: fetchExpenses };
 }

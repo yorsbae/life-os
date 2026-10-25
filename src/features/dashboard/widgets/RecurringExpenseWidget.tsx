@@ -2,14 +2,10 @@ import { Link } from "react-router-dom";
 import { Repeat } from "lucide-react";
 import { useRecurringExpenses } from "../../money/useRecurringExpenses";
 import { rupiah } from "../../../utils/format";
+import { daysUntilPayday } from "../../money/pocketMath";
 import { t, tx } from "../../../lib/i18n";
 
-function daysUntilDue(tanggal: number) {
-  const now = new Date();
-  let due = new Date(now.getFullYear(), now.getMonth(), tanggal);
-  if (due < now) due = new Date(now.getFullYear(), now.getMonth() + 1, tanggal);
-  return Math.ceil((due.getTime() - now.getTime()) / 86400000);
-}
+const daysUntilDue = (tanggal: number) => daysUntilPayday(tanggal);
 
 export default function RecurringExpenseWidget() {
   const { items, loading, totalBulanan } = useRecurringExpenses();

@@ -8,6 +8,7 @@ import PinPromptModal from "../../components/PinPromptModal";
 import { t, tx, intlLocale } from "../../lib/i18n";
 import Select from "../../components/ui/Select";
 import { DeleteButton } from "../../components/ui/DeleteButton";
+import { toDateStr } from "../../utils/dates";
 interface DetailProps {
   account: SocialAccount;
   onBack: () => void;
@@ -204,7 +205,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                 addMetric(
                   followers ? Number(followers) : null,
                   insightNote,
-                  new Date().toISOString().split("T")[0],
+                  toDateStr(),
                 );
                 setFollowers("");
                 setInsightNote("");
@@ -276,7 +277,7 @@ export default function SocialAccountDetail({ account, onBack }: DetailProps) {
                     earningSumber,
                     Number(earningNominal),
                     earningTipe,
-                    new Date().toISOString().split("T")[0],
+                    toDateStr(),
                     "",
                   );
                   setEarningSumber("");

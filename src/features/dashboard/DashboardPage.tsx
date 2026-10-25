@@ -5,7 +5,7 @@ import { addDays, startOfWeek } from "date-fns";
 import { useProfile } from "../profile/useProfile";
 import { useTasks } from "../plan/useTasks";
 import { useHabits } from "../habit/useHabits";
-import { useExpenses } from "../expense/useExpenses";
+import { useDaySpent } from "./useDaySpent";
 import { useEvents } from "../calendar/useEvents";
 import { useShell } from "../../context/ShellContext";
 import { Card, SectionTitle } from "../../components/ui/Controls";
@@ -38,7 +38,6 @@ export default function DashboardPage() {
   const { profile } = useProfile();
   const { tasks } = useTasks();
   const { habits, isDone } = useHabits();
-  const { expenses } = useExpenses();
   const { events } = useEvents();
   const reminders = useReminders();
 
@@ -60,7 +59,7 @@ export default function DashboardPage() {
   const dayTasks = tasks.filter((x) => x.tanggal_mulai === selected);
   const tasksDone = dayTasks.filter((x) => x.status === "Selesai").length;
   const dayEvents = events.filter((e) => e.tanggal_mulai.slice(0, 10) === selected).length;
-  const spent = expenses.filter((e) => e.tanggal === selected).reduce((s, e) => s + e.nominal, 0);
+  const spent = useDaySpent(selected);
   const habitsDone = habits.filter((h) => isDone(h, selected)).length;
   const focusTask = dayTasks.find((x) => x.status === "In Progress") ?? dayTasks.find((x) => x.status === "Todo");
 

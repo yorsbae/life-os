@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { db } from "../../lib/db";
+import type { SqlStatement } from "../../lib/db/types";
 import { useAuth } from "../../context/AuthContext";
 import { getSetting, setSetting } from "../../utils/appSettings";
-import { useExpenses } from "../expense/useExpenses";
-import { useIncomes } from "../income/useIncomes";
-import { useTransfers } from "./useTransfers";
-
 import { t } from "../../lib/i18n";
-export const ACCOUNT_TYPES = ["Tunai", "Bank", "E-Wallet"] as const;
-export type AccountType = (typeof ACCOUNT_TYPES)[number];
+import { ACCOUNT_TYPES, type AccountType } from "./accountMath";
+
+export { ACCOUNT_TYPES };
+export type { AccountType };
 
 export interface Account {
   id: string;
@@ -19,24 +18,28 @@ export interface Account {
   created_at: string;
 }
 
+export interface AccountPatch {
+  nama?: string;
+  tipe?: string;
+  saldo_awal?: number;
+}
+
 // Akun default "Dompet" dibuat satu kali saja (flag di app_settings). Promise ini mencegah
 // dua hook yang aktif bersamaan membuatnya dobel.
 let seeding: Promise<void> | null = null;
 
-export function useAccounts() {
+/**
+ * Daftar sumber dana (cash, bank — bisa banyak rekening —, e-wallet, investasi) beserta CRUD-nya.
+ * Saldo dihitung di tempat lain (accountMath.computeBalances / useMoney) dari data transaksi.
+ */
+export function useAccountList() {
   const { user } = useAuth();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
-  const { expenses } = useExpenses();
-  const { incomes } = useIncomes();
-  const { transfers } = useTransfers();
 
   const fetchAccounts = useCallback(async () => {
     if (!user) return;
-    const { data, error } = await db
-      .from("accounts")
-      .select("*")
-      .order("created_at", { ascending: true });
+    const { data, error } = await db.from("accounts").select("*").order("created_at", { ascending: true });
     if (error) {
       setLoading(false);
       return;
@@ -79,36 +82,64 @@ export function useAccounts() {
     return { error: null };
   };
 
-  const updateAccount = async (id: string, input: { tipe?: string; saldo_awal?: number }) => {
-    const { error } = await db.from("accounts").update(input).eq("id", id);
+  /**
+   * Ubah nama/jenis/saldo awal. Transaksi menyimpan akun berdasarkan NAMA, jadi mengganti nama
+   * ikut memperbarui seluruh pengeluaran, pemasukan, dan transfer dalam satu transaksi database.
+   * Mengembalikan `renamed` agar pemanggil memuat ulang data transaksi.
+   */
+  const updateAccount = async (id: string, patch: AccountPatch) => {
+    const cur = accounts.find((a) => a.id === id);
+    if (!cur) return { error: t("Akun tidak ditemukan"), renamed: false };
+    const sets: string[] = [];
+    const vals: (string | number)[] = [];
+    let renamed = false;
+    let nextName = cur.nama;
+
+    if (patch.nama !== undefined) {
+      nextName = patch.nama.trim();
+      if (!nextName) return { error: t("Nama akun wajib diisi"), renamed: false };
+      if (accounts.some((a) => a.id !== id && a.nama.toLowerCase() === nextName.toLowerCase()))
+        return { error: t("Nama akun sudah dipakai"), renamed: false };
+      if (nextName !== cur.nama) {
+        sets.push("nama = ?");
+        vals.push(nextName);
+        renamed = true;
+      }
+    }
+    if (patch.tipe !== undefined && patch.tipe !== cur.tipe) {
+      sets.push("tipe = ?");
+      vals.push(patch.tipe);
+    }
+    if (patch.saldo_awal !== undefined && patch.saldo_awal !== cur.saldo_awal) {
+      sets.push("saldo_awal = ?");
+      vals.push(patch.saldo_awal);
+    }
+    if (sets.length === 0) return { error: null, renamed: false };
+
+    const stmts: SqlStatement[] = [{ sql: `UPDATE accounts SET ${sets.join(", ")} WHERE id = ?`, params: [...vals, id] }];
+    if (renamed) {
+      const o = cur.nama;
+      const n = nextName;
+      stmts.push(
+        { sql: "UPDATE expenses SET metode_pembayaran = ? WHERE metode_pembayaran = ?", params: [n, o] },
+        { sql: "UPDATE incomes SET akun = ? WHERE akun = ?", params: [n, o] },
+        { sql: "UPDATE transfers SET dari_akun = ? WHERE dari_akun = ?", params: [n, o] },
+        { sql: "UPDATE transfers SET ke_akun = ? WHERE ke_akun = ?", params: [n, o] },
+      );
+    }
+    const { error } = await db.transaction(stmts);
+    if (error) return { error: error.message, renamed: false };
+    await fetchAccounts();
+    return { error: null, renamed };
+  };
+
+  const deleteAccount = async (id: string) => {
+    if (accounts.length <= 1) return { error: t("Minimal harus ada satu sumber dana") };
+    const { error } = await db.from("accounts").delete().eq("id", id);
     if (error) return { error: error.message };
     await fetchAccounts();
     return { error: null };
   };
 
-  const deleteAccount = async (id: string) => {
-    await db.from("accounts").delete().eq("id", id);
-    await fetchAccounts();
-  };
-
-  // saldo = saldo awal + pemasukan(akun) − pengeluaran(metode_pembayaran) ± transfer
-  const { balances, total, unassigned } = useMemo(() => {
-    const bal: Record<string, number> = {};
-    for (const a of accounts) bal[a.nama] = a.saldo_awal ?? 0;
-    let untracked = 0;
-    const add = (name: string | null | undefined, v: number) => {
-      if (name && name in bal) bal[name] += v;
-      else untracked += v;
-    };
-    for (const i of incomes) add(i.akun, i.nominal);
-    for (const e of expenses) add(e.metode_pembayaran, -e.nominal);
-    for (const tr of transfers) {
-      if (tr.dari_akun in bal) bal[tr.dari_akun] -= tr.nominal;
-      if (tr.ke_akun in bal) bal[tr.ke_akun] += tr.nominal;
-    }
-    const sumAccounts = Object.values(bal).reduce((s, v) => s + v, 0);
-    return { balances: bal, total: sumAccounts + untracked, unassigned: untracked };
-  }, [accounts, incomes, expenses, transfers]);
-
-  return { accounts, loading, balances, total, unassigned, addAccount, updateAccount, deleteAccount };
+  return { accounts, loading, addAccount, updateAccount, deleteAccount, refetch: fetchAccounts };
 }

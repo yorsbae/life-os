@@ -6,7 +6,8 @@ import App from './App.tsx'
 // Jaring pengaman: error di luar React (atau saat start) tidak boleh berujung layar hitam kosong.
 function showFatal(msg: string) {
   const root = document.getElementById('root')
-  if (!root || root.childElementCount > 0) return
+  // Layar boot statis (#boot) tidak dihitung sebagai konten: kalau React belum menggantikannya, tampilkan galat.
+  if (!root || root.querySelector(':scope > :not(#boot)')) return
   root.innerHTML =
     '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;background:#151815;color:#e6eae5;font-family:sans-serif">' +
     '<p style="font-weight:600">Life OS gagal dimulai</p>' +

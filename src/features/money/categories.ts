@@ -1,6 +1,6 @@
 import {
   Utensils, Car, ShoppingBag, HeartPulse, Receipt, Gamepad2, MoreHorizontal,
-  Briefcase, Laptop, Gift, TrendingUp, Heart, Wallet, Landmark, Smartphone, type LucideIcon,
+  Briefcase, Laptop, Gift, TrendingUp, Heart, Wallet, Landmark, Smartphone, Users, type LucideIcon,
 } from "lucide-react";
 
 export interface CatMeta {
@@ -18,6 +18,7 @@ export const EXPENSE_CATS: Record<string, CatMeta> = {
   Kesehatan: { label: "Kesehatan", icon: HeartPulse, color: "#e57373" },
   Tagihan: { label: "Tagihan", icon: Receipt, color: "#e6c25e" },
   Hiburan: { label: "Hiburan", icon: Gamepad2, color: "#a98be8" },
+  Keluarga: { label: "Keluarga", icon: Users, color: "#e8836a" },
   Lainnya: { label: "Lainnya", icon: MoreHorizontal, color: "#8b8f93" },
 };
 
@@ -41,9 +42,11 @@ export const ACCOUNT_ICON: Record<string, LucideIcon> = {
   Tunai: Wallet,
   Bank: Landmark,
   "E-Wallet": Smartphone,
+  Investasi: TrendingUp,
 };
 export const ACCOUNT_TYPE_LABEL: Record<string, string> = {
   Tunai: "Tunai",
   Bank: "Bank",
   "E-Wallet": "E-Wallet",
+  Investasi: "Investasi",
 };

@@ -3,6 +3,7 @@ import { db } from "../../lib/db";
 import { useAuth } from "../../context/AuthContext";
 
 import { t } from "../../lib/i18n";
+import { toDateStr } from "../../utils/dates";
 export interface WeeklyReview {
   id: string;
   user_id: string;
@@ -13,12 +14,14 @@ export interface WeeklyReview {
 }
 
 // Dapatkan tanggal Senin dari minggu yang mengandung `date`
+// Memakai tanggal LOKAL: toISOString() menggeser ke UTC sehingga di WIB sebelum pukul 07.00
+// hasilnya mundur satu hari (Senin dini hari terbaca Minggu).
 function getMonday(date: Date) {
   const d = new Date(date);
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   d.setDate(diff);
-  return d.toISOString().split("T")[0];
+  return toDateStr(d);
 }
 
 export function useWeeklyReview(weekOf: Date = new Date()) {

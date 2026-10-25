@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
 import { t } from "../../lib/i18n";
@@ -8,10 +9,14 @@ import MetricsTab from "./MetricsTab";
 import RecoveryTab from "./RecoveryTab";
 
 type Tab = "ringkasan" | "latihan" | "metrik" | "pemulihan";
+const TABS: Tab[] = ["ringkasan", "latihan", "metrik", "pemulihan"];
 
 /** Halaman Body (desain #13): Ringkasan, Latihan, Metrik, Pemulihan. */
 export default function ExercisePage() {
-  const [tab, setTab] = useState<Tab>("ringkasan");
+  // ?tab=latihan membuka tab tertentu (dipakai tautan dari halaman Plan).
+  const [params] = useSearchParams();
+  const asked = params.get("tab") as Tab | null;
+  const [tab, setTab] = useState<Tab>(asked && TABS.includes(asked) ? asked : "ringkasan");
   return (
     <div>
       <PageHeader title={t("Body")} />

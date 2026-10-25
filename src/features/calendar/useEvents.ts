@@ -24,7 +24,9 @@ export function useEvents() {
     else {
       setEvents(data as CalendarEvent[]);
       // Jaga pengingat lokal tetap sesuai daftar event terbaru (diam-diam kalau gagal).
-      syncEventReminders(data as CalendarEvent[]).catch(() => {});
+      // Ditunda: jangan berebut jembatan native dengan pemuatan layar pertama.
+      const list = data as CalendarEvent[];
+      setTimeout(() => syncEventReminders(list).catch(() => {}), 4000);
     }
     setLoading(false);
   }, [user]);

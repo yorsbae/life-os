@@ -1,15 +1,17 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addDays, addMonths, endOfMonth, startOfMonth, startOfWeek } from "date-fns";
+import { addDays, addMonths, differenceInCalendarDays, endOfMonth, startOfMonth, startOfWeek } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Segmented from "../../components/ui/Segmented";
 import { Card, CheckCircle, EmptyState, Fab } from "../../components/ui/Controls";
-import { toDateStr } from "../../utils/dates";
+import { parseDateStr, toDateStr } from "../../utils/dates";
 import { fmtDate } from "../../utils/format";
 import { t, tx } from "../../lib/i18n";
 import { useTasks, formatRange, type Task } from "./useTasks";
 import TaskForm from "./TaskForm";
+import WorkoutRow from "./WorkoutRow";
+import { useWorkoutAgenda, type WorkoutItem } from "../exercise/useWorkoutAgenda";
 
 type Range = "hari" | "minggu" | "bulan";
 
@@ -40,14 +42,40 @@ export default function PlanPage() {
     return { from: toDateStr(startOfMonth(m)), to: toDateStr(endOfMonth(m)), heading: fmtDate(m, "MMMM yyyy") };
   }, [range, offset]);
 
+  const agenda = useWorkoutAgenda(from, to);
+  const { forDate, markDone } = agenda;
+  const [workoutError, setWorkoutError] = useState("");
+
   const visible = tasks.filter((x) => x.tanggal_mulai && x.tanggal_mulai >= from && x.tanggal_mulai <= to);
-  const doneCount = visible.filter((x) => x.status === "Selesai").length;
+
+  // Latihan terjadwal pada rentang yang tampil (program aktif atau jadwal mingguan). Hari istirahat
+  // hanya ditampilkan pada tampilan harian agar pekan/bulan tidak penuh baris kosong.
+  const workouts = useMemo(() => {
+    const m = new Map<string, WorkoutItem>();
+    const days = differenceInCalendarDays(parseDateStr(to), parseDateStr(from));
+    for (let i = 0; i <= days; i++) {
+      const d = toDateStr(addDays(parseDateStr(from), i));
+      const w = forDate(d);
+      if (w && (!w.rest || range === "hari")) m.set(d, w);
+    }
+    return m;
+  }, [from, to, range, forDate]);
+
+  const workoutList = [...workouts.values()].filter((w) => !w.rest);
+  const total = visible.length + workoutList.length;
+  const doneCount = visible.filter((x) => x.status === "Selesai").length + workoutList.filter((w) => w.done).length;
 
   const groups = useMemo(() => {
     const m = new Map<string, Task[]>();
     for (const x of visible) m.set(x.tanggal_mulai!, [...(m.get(x.tanggal_mulai!) ?? []), x]);
-    return [...m.entries()];
-  }, [visible]);
+    for (const d of workouts.keys()) if (!m.has(d)) m.set(d, []);
+    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [visible, workouts]);
+
+  const logWorkout = async (item: WorkoutItem) => {
+    const r = await markDone(item);
+    setWorkoutError(r.error ?? "");
+  };
 
   const row = (task: Task) => (
     <Card key={task.id} className="!py-3 flex items-center gap-3">
@@ -89,18 +117,23 @@ export default function PlanPage() {
             <ChevronRight size={18} />
           </button>
         </div>
-        {visible.length > 0 && (
-          <p className="text-xs text-gray-400 px-1 -mt-2 text-center">{t("{0} dari {1} selesai", [doneCount, visible.length])}</p>
+        {total > 0 && (
+          <p className="text-xs text-gray-400 px-1 -mt-2 text-center">{t("{0} dari {1} selesai", [doneCount, total])}</p>
         )}
+        {workoutError && <p className="text-xs text-red-400 break-words">{tx(workoutError)}</p>}
 
-        {visible.length === 0 ? (
+        {visible.length === 0 && workouts.size === 0 ? (
           <EmptyState title={t("Belum ada kegiatan")} hint={t("Tekan + untuk menambah.")} />
         ) : range === "hari" ? (
-          <div className="space-y-2">{visible.map(row)}</div>
+          <div className="space-y-2">
+            {[...workouts.values()].map((w) => <WorkoutRow key={w.key} item={w} onDone={logWorkout} />)}
+            {visible.map(row)}
+          </div>
         ) : (
           groups.map(([date, list]) => (
             <div key={date} className="space-y-2">
               <p className="text-xs text-gray-400 px-1">{fmtDate(date, "EEE, d MMM")}</p>
+              {workouts.get(date) && <WorkoutRow item={workouts.get(date)!} onDone={logWorkout} />}
               {list.map(row)}
             </div>
           ))
